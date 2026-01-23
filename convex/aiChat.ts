@@ -1,8 +1,6 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 
-const OPENROUTER_API_KEY = "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";
-
 const SYSTEM_PROMPT = `You are "AI Ma5zani" - a friendly, helpful AI assistant for ma5zani, an e-commerce fulfillment platform in Algeria.
 
 About ma5zani:
@@ -47,10 +45,15 @@ export const chat = action({
     ),
   },
   handler: async (_, args) => {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      throw new Error("OPENROUTER_API_KEY not configured");
+    }
+
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "Authorization": `Bearer ${apiKey}`,
         "Content-Type": "application/json",
         "HTTP-Referer": "https://ma5zani.dz",
         "X-Title": "ma5zani AI Assistant",
