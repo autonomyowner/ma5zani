@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useCart } from '@/lib/CartContext';
 
 interface StorefrontHeaderProps {
+  slug: string;
   boutiqueName: string;
   logoUrl: string | null;
   socialLinks?: {
@@ -15,6 +16,7 @@ interface StorefrontHeaderProps {
 }
 
 export default function StorefrontHeader({
+  slug,
   boutiqueName,
   logoUrl,
   socialLinks,
@@ -27,7 +29,7 @@ export default function StorefrontHeader({
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo & Name */}
-          <Link href="." className="flex items-center gap-3">
+          <Link href={`/${slug}`} className="flex items-center gap-3">
             {logoUrl && (
               <img
                 src={logoUrl}
