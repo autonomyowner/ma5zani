@@ -10,10 +10,13 @@
 
 import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
+import type * as categories from "../categories.js";
 import type * as orders from "../orders.js";
 import type * as products from "../products.js";
+import type * as publicOrders from "../publicOrders.js";
 import type * as sellers from "../sellers.js";
 import type * as stats from "../stats.js";
+import type * as storefronts from "../storefronts.js";
 
 import type {
   ApiFromModules,
@@ -24,10 +27,13 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   auth: typeof auth;
+  categories: typeof categories;
   orders: typeof orders;
   products: typeof products;
+  publicOrders: typeof publicOrders;
   sellers: typeof sellers;
   stats: typeof stats;
+  storefronts: typeof storefronts;
 }>;
 
 /**

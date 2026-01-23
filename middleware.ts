@@ -6,9 +6,37 @@ const isPublicRoute = createRouteMatcher([
   '/signup(.*)',
   '/api/webhooks(.*)',
   '/admin(.*)',
+  // Public storefront routes - match any slug that's not a reserved path
+  '/:slug',
+  '/:slug/checkout',
+  '/:slug/order-success/:orderId',
 ])
 
+// Reserved paths that should NOT be treated as storefront slugs
+const reservedPaths = [
+  'dashboard',
+  'login',
+  'signup',
+  'admin',
+  'api',
+  'onboarding',
+  '_next',
+]
+
 export default clerkMiddleware(async (auth, req) => {
+  const pathname = req.nextUrl.pathname
+
+  // Check if it's a reserved path
+  const firstSegment = pathname.split('/')[1]
+  if (reservedPaths.includes(firstSegment)) {
+    // If it's a dashboard route, require auth
+    if (firstSegment === 'dashboard' || firstSegment === 'onboarding') {
+      await auth.protect()
+    }
+    return
+  }
+
+  // Otherwise, it's either a public route or a storefront slug (public)
   if (!isPublicRoute(req)) {
     await auth.protect()
   }

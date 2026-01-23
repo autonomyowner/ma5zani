@@ -16,6 +16,20 @@ export const getProducts = query({
   },
 });
 
+export const getProduct = query({
+  args: { productId: v.id("products") },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.sellerId !== seller._id) {
+      return null;
+    }
+
+    return product;
+  },
+});
+
 export const createProduct = mutation({
   args: {
     name: v.string(),
@@ -23,6 +37,10 @@ export const createProduct = mutation({
     stock: v.number(),
     price: v.number(),
     description: v.optional(v.string()),
+    imageKeys: v.optional(v.array(v.string())),
+    categoryId: v.optional(v.id("categories")),
+    showOnStorefront: v.optional(v.boolean()),
+    salePrice: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const seller = await requireSeller(ctx);
@@ -36,6 +54,16 @@ export const createProduct = mutation({
       status = "low_stock";
     }
 
+    // Get the highest sort order for this seller
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_seller", (q) => q.eq("sellerId", seller._id))
+      .collect();
+
+    const maxSortOrder = products.length > 0
+      ? Math.max(...products.map((p) => p.sortOrder || 0))
+      : -1;
+
     const productId = await ctx.db.insert("products", {
       sellerId: seller._id,
       name: args.name,
@@ -44,6 +72,11 @@ export const createProduct = mutation({
       price: args.price,
       status,
       description: args.description,
+      imageKeys: args.imageKeys,
+      categoryId: args.categoryId,
+      showOnStorefront: args.showOnStorefront ?? false,
+      salePrice: args.salePrice,
+      sortOrder: maxSortOrder + 1,
       createdAt: now,
       updatedAt: now,
     });
@@ -60,6 +93,11 @@ export const updateProduct = mutation({
     stock: v.optional(v.number()),
     price: v.optional(v.number()),
     description: v.optional(v.string()),
+    imageKeys: v.optional(v.array(v.string())),
+    categoryId: v.optional(v.id("categories")),
+    showOnStorefront: v.optional(v.boolean()),
+    salePrice: v.optional(v.number()),
+    sortOrder: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const seller = await requireSeller(ctx);
@@ -74,6 +112,11 @@ export const updateProduct = mutation({
     if (args.sku !== undefined) updates.sku = args.sku;
     if (args.price !== undefined) updates.price = args.price;
     if (args.description !== undefined) updates.description = args.description;
+    if (args.imageKeys !== undefined) updates.imageKeys = args.imageKeys;
+    if (args.categoryId !== undefined) updates.categoryId = args.categoryId;
+    if (args.showOnStorefront !== undefined) updates.showOnStorefront = args.showOnStorefront;
+    if (args.salePrice !== undefined) updates.salePrice = args.salePrice;
+    if (args.sortOrder !== undefined) updates.sortOrder = args.sortOrder;
 
     if (args.stock !== undefined) {
       updates.stock = args.stock;
@@ -137,5 +180,46 @@ export const deleteProduct = mutation({
 
     await ctx.db.delete(args.productId);
     return args.productId;
+  },
+});
+
+export const updateStorefrontVisibility = mutation({
+  args: {
+    productId: v.id("products"),
+    showOnStorefront: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.sellerId !== seller._id) {
+      throw new Error("Product not found");
+    }
+
+    await ctx.db.patch(args.productId, {
+      showOnStorefront: args.showOnStorefront,
+      updatedAt: Date.now(),
+    });
+
+    return args.productId;
+  },
+});
+
+export const reorderProducts = mutation({
+  args: {
+    productIds: v.array(v.id("products")),
+  },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    for (let i = 0; i < args.productIds.length; i++) {
+      const product = await ctx.db.get(args.productIds[i]);
+      if (!product || product.sellerId !== seller._id) {
+        throw new Error("Product not found");
+      }
+      await ctx.db.patch(args.productIds[i], { sortOrder: i });
+    }
+
+    return true;
   },
 });

@@ -20,6 +20,7 @@ export default function Sidebar({ seller }: SidebarProps) {
     { label: t.dashboard.dashboardNav, href: '/dashboard' },
     { label: t.dashboard.ordersNav, href: '/dashboard/orders' },
     { label: t.dashboard.productsNav, href: '/dashboard/products' },
+    { label: t.dashboard.storefrontNav, href: '/dashboard/storefront' },
     { label: t.dashboard.inventoryNav, href: '/dashboard/inventory' },
     { label: t.dashboard.analyticsNav, href: '/dashboard/analytics' },
     { label: t.dashboard.settingsNav, href: '/dashboard/settings' },

@@ -31,6 +31,20 @@ export const getOrders = query({
   },
 });
 
+export const getOrder = query({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    const order = await ctx.db.get(args.orderId);
+    if (!order || order.sellerId !== seller._id) {
+      return null;
+    }
+
+    return order;
+  },
+});
+
 export const createOrder = mutation({
   args: {
     productId: v.id("products"),
@@ -67,6 +81,7 @@ export const createOrder = mutation({
       quantity: args.quantity,
       amount: product.price * args.quantity,
       status: "pending",
+      source: "dashboard",
       createdAt: now,
       updatedAt: now,
     });
@@ -135,5 +150,70 @@ export const updateOrderStatus = mutation({
     });
 
     return args.orderId;
+  },
+});
+
+export const submitToFulfillment = mutation({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    const order = await ctx.db.get(args.orderId);
+    if (!order || order.sellerId !== seller._id) {
+      throw new Error("Order not found");
+    }
+
+    if (order.fulfillmentStatus === "submitted_to_ma5zani") {
+      throw new Error("Order already submitted to fulfillment");
+    }
+
+    await ctx.db.patch(args.orderId, {
+      fulfillmentStatus: "submitted_to_ma5zani",
+      updatedAt: Date.now(),
+    });
+
+    return args.orderId;
+  },
+});
+
+export const updateFulfillmentStatus = mutation({
+  args: {
+    orderId: v.id("orders"),
+    fulfillmentStatus: v.union(
+      v.literal("pending_submission"),
+      v.literal("submitted_to_ma5zani"),
+      v.literal("accepted"),
+      v.literal("rejected")
+    ),
+  },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    const order = await ctx.db.get(args.orderId);
+    if (!order || order.sellerId !== seller._id) {
+      throw new Error("Order not found");
+    }
+
+    await ctx.db.patch(args.orderId, {
+      fulfillmentStatus: args.fulfillmentStatus,
+      updatedAt: Date.now(),
+    });
+
+    return args.orderId;
+  },
+});
+
+export const getStorefrontOrders = query({
+  args: {},
+  handler: async (ctx) => {
+    const seller = await requireSeller(ctx);
+
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_seller", (q) => q.eq("sellerId", seller._id))
+      .filter((q) => q.eq(q.field("source"), "storefront"))
+      .collect();
+
+    return orders;
   },
 });

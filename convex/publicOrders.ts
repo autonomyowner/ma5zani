@@ -1,0 +1,160 @@
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+
+export const getStorefrontProducts = query({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug.toLowerCase()))
+      .first();
+
+    if (!storefront || !storefront.isPublished) {
+      return null;
+    }
+
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_seller", (q) => q.eq("sellerId", storefront.sellerId))
+      .filter((q) => q.eq(q.field("showOnStorefront"), true))
+      .collect();
+
+    // Filter out-of-stock products if setting is off
+    const filteredProducts = storefront.settings.showOutOfStock
+      ? products
+      : products.filter((p) => p.status !== "out_of_stock");
+
+    // Sort by sortOrder
+    filteredProducts.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+
+    // Get categories
+    const categories = await ctx.db
+      .query("categories")
+      .withIndex("by_seller", (q) => q.eq("sellerId", storefront.sellerId))
+      .collect();
+
+    return {
+      products: filteredProducts,
+      categories: categories.sort((a, b) => a.sortOrder - b.sortOrder),
+    };
+  },
+});
+
+export const getPublicProduct = query({
+  args: { productId: v.id("products") },
+  handler: async (ctx, args) => {
+    const product = await ctx.db.get(args.productId);
+    if (!product || !product.showOnStorefront) {
+      return null;
+    }
+
+    return product;
+  },
+});
+
+export const createPublicOrder = mutation({
+  args: {
+    storefrontSlug: v.string(),
+    items: v.array(v.object({
+      productId: v.id("products"),
+      quantity: v.number(),
+    })),
+    customerName: v.string(),
+    customerPhone: v.string(),
+    wilaya: v.string(),
+    deliveryAddress: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_slug", (q) => q.eq("slug", args.storefrontSlug.toLowerCase()))
+      .first();
+
+    if (!storefront || !storefront.isPublished) {
+      throw new Error("Storefront not found");
+    }
+
+    const now = Date.now();
+    const orderIds: string[] = [];
+
+    for (const item of args.items) {
+      const product = await ctx.db.get(item.productId);
+      if (!product || product.sellerId !== storefront.sellerId) {
+        throw new Error(`Product not found: ${item.productId}`);
+      }
+
+      if (!product.showOnStorefront) {
+        throw new Error(`Product not available: ${product.name}`);
+      }
+
+      if (product.stock < item.quantity) {
+        throw new Error(`Insufficient stock for ${product.name}`);
+      }
+
+      // Calculate price (use sale price if available)
+      const unitPrice = product.salePrice ?? product.price;
+      const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+
+      const orderId = await ctx.db.insert("orders", {
+        sellerId: storefront.sellerId,
+        productId: item.productId,
+        orderNumber,
+        customerName: args.customerName,
+        customerPhone: args.customerPhone,
+        wilaya: args.wilaya,
+        deliveryAddress: args.deliveryAddress,
+        productName: product.name,
+        quantity: item.quantity,
+        amount: unitPrice * item.quantity,
+        status: "pending",
+        source: "storefront",
+        storefrontId: storefront._id,
+        fulfillmentStatus: storefront.settings.autoFulfillment
+          ? "submitted_to_ma5zani"
+          : "pending_submission",
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      orderIds.push(orderId);
+
+      // Update product stock
+      const newStock = product.stock - item.quantity;
+      let newStatus: "active" | "low_stock" | "out_of_stock" = "active";
+      if (newStock === 0) {
+        newStatus = "out_of_stock";
+      } else if (newStock <= 10) {
+        newStatus = "low_stock";
+      }
+
+      await ctx.db.patch(item.productId, {
+        stock: newStock,
+        status: newStatus,
+        updatedAt: now,
+      });
+    }
+
+    return { orderIds, orderNumber: `ORD-${Date.now().toString(36).toUpperCase()}` };
+  },
+});
+
+export const getPublicOrder = query({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order || order.source !== "storefront") {
+      return null;
+    }
+
+    return {
+      orderNumber: order.orderNumber,
+      productName: order.productName,
+      quantity: order.quantity,
+      amount: order.amount,
+      status: order.status,
+      customerName: order.customerName,
+      wilaya: order.wilaya,
+      createdAt: order.createdAt,
+    };
+  },
+});
