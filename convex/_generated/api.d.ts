@@ -9,9 +9,9 @@
  */
 
 import type * as admin from "../admin.js";
-import type * as aiChat from "../aiChat.js";
 import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
+import type * as chat from "../chat.js";
 import type * as orders from "../orders.js";
 import type * as products from "../products.js";
 import type * as publicOrders from "../publicOrders.js";
@@ -27,9 +27,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
-  aiChat: typeof aiChat;
   auth: typeof auth;
   categories: typeof categories;
+  chat: typeof chat;
   orders: typeof orders;
   products: typeof products;
   publicOrders: typeof publicOrders;

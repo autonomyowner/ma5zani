@@ -1,91 +1,113 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { useAction } from 'convex/react'
+import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { useLanguage } from '@/lib/LanguageContext'
+import { Id } from '@/convex/_generated/dataModel'
 
-interface Message {
-  role: 'user' | 'assistant'
-  content: string
+function generateSessionId() {
+  return 'chat_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36)
 }
 
-export function AiChat() {
+export function SupportChat() {
   const { language, dir } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [sessionId, setSessionId] = useState<string | null>(null)
+  const [chatId, setChatId] = useState<Id<"chats"> | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const chat = useAction(api.aiChat.chat)
+  const getOrCreateChat = useMutation(api.chat.getOrCreateChat)
+  const sendMessage = useMutation(api.chat.sendMessage)
+  const existingChat = useQuery(
+    api.chat.getChatBySession,
+    sessionId ? { sessionId } : 'skip'
+  )
+  const messages = useQuery(
+    api.chat.getMessages,
+    chatId ? { chatId } : 'skip'
+  )
 
   const t = {
     ar: {
-      title: 'AI مخزني',
-      placeholder: 'اكتب سؤالك هنا...',
+      title: 'دعم مخزني',
+      placeholder: 'اكتب رسالتك هنا...',
       send: 'إرسال',
-      greeting: 'مرحبا! أنا مساعدك الذكي من مخزني. كيف نقدر نساعدك اليوم؟',
-      thinking: 'جاري التفكير...',
+      greeting: 'مرحبا! كيف يمكننا مساعدتك اليوم؟ فريقنا سيرد عليك في أقرب وقت.',
+      waiting: 'في انتظار الرد...',
+      online: 'متصل',
     },
     en: {
-      title: 'AI Ma5zani',
-      placeholder: 'Type your question...',
+      title: 'Ma5zani Support',
+      placeholder: 'Type your message...',
       send: 'Send',
-      greeting: "Hey there! I'm your AI assistant from ma5zani. How can I help you today?",
-      thinking: 'Thinking...',
+      greeting: "Hello! How can we help you today? Our team will respond shortly.",
+      waiting: 'Waiting for reply...',
+      online: 'Online',
     },
   }
 
   const texts = t[language]
 
+  // Initialize session ID
+  useEffect(() => {
+    const stored = localStorage.getItem('ma5zani-chat-session')
+    if (stored) {
+      setSessionId(stored)
+    } else {
+      const newSession = generateSessionId()
+      localStorage.setItem('ma5zani-chat-session', newSession)
+      setSessionId(newSession)
+    }
+  }, [])
+
+  // Get existing chat if exists
+  useEffect(() => {
+    if (existingChat) {
+      setChatId(existingChat._id)
+    }
+  }, [existingChat])
+
+  // Scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  // Focus input when opened
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus()
     }
   }, [isOpen])
 
-  // Initialize with greeting when opened
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      setMessages([{ role: 'assistant', content: texts.greeting }])
-    }
-  }, [isOpen, messages.length, texts.greeting])
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim() || isLoading) return
+    if (!input.trim() || !sessionId) return
 
-    const userMessage: Message = { role: 'user', content: input.trim() }
-    setMessages(prev => [...prev, userMessage])
+    const messageContent = input.trim()
     setInput('')
-    setIsLoading(true)
 
     try {
-      const response = await chat({
-        messages: [...messages, userMessage].map(m => ({
-          role: m.role,
-          content: m.content,
-        })),
+      // Create chat if doesn't exist
+      let currentChatId = chatId
+      if (!currentChatId) {
+        currentChatId = await getOrCreateChat({ sessionId })
+        setChatId(currentChatId)
+      }
+
+      // Send message
+      await sendMessage({
+        chatId: currentChatId,
+        content: messageContent,
       })
-      setMessages(prev => [...prev, { role: 'assistant', content: response }])
-    } catch {
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', content: language === 'ar'
-          ? 'عذراً، حدث خطأ. حاول مرة أخرى.'
-          : 'Sorry, something went wrong. Please try again.'
-        },
-      ])
-    } finally {
-      setIsLoading(false)
+    } catch (error) {
+      console.error('Failed to send message:', error)
     }
   }
+
+  const hasMessages = messages && messages.length > 0
 
   return (
     <>
@@ -93,7 +115,7 @@ export function AiChat() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-6 ${dir === 'rtl' ? 'left-6' : 'right-6'} z-50 w-14 h-14 rounded-full bg-[#0054A6] hover:bg-[#00AEEF] text-white shadow-lg transition-all duration-300 flex items-center justify-center`}
-        aria-label="Open AI Chat"
+        aria-label="Open Support Chat"
       >
         {isOpen ? (
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,22 +136,37 @@ export function AiChat() {
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-[#0054A6] to-[#00AEEF] p-4 text-white">
-            <h3 className="font-semibold text-lg">{texts.title}</h3>
-            <p className="text-sm text-white/80">
-              {language === 'ar' ? 'مساعدك الذكي' : 'Your smart assistant'}
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-semibold text-lg">{texts.title}</h3>
+                <div className="flex items-center gap-2 text-sm text-white/80">
+                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                  {texts.online}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Messages */}
           <div className="h-80 overflow-y-auto p-4 space-y-4 bg-slate-50">
-            {messages.map((msg, i) => (
+            {/* Welcome message */}
+            {!hasMessages && (
+              <div className="flex justify-start">
+                <div className="max-w-[80%] px-4 py-2.5 rounded-2xl text-sm bg-white text-slate-800 shadow-sm border border-slate-100 rounded-bl-sm">
+                  {texts.greeting}
+                </div>
+              </div>
+            )}
+
+            {/* Chat messages */}
+            {messages?.map((msg) => (
               <div
-                key={i}
-                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                key={msg._id}
+                className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
                   className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm ${
-                    msg.role === 'user'
+                    msg.sender === 'user'
                       ? 'bg-[#0054A6] text-white rounded-br-sm'
                       : 'bg-white text-slate-800 shadow-sm border border-slate-100 rounded-bl-sm'
                   }`}
@@ -138,17 +175,16 @@ export function AiChat() {
                 </div>
               </div>
             ))}
-            {isLoading && (
+
+            {/* Waiting indicator when user has sent but no admin reply yet */}
+            {hasMessages && messages[messages.length - 1]?.sender === 'user' && (
               <div className="flex justify-start">
-                <div className="bg-white text-slate-500 px-4 py-2.5 rounded-2xl rounded-bl-sm shadow-sm border border-slate-100 text-sm">
-                  <span className="inline-flex gap-1">
-                    <span className="animate-bounce">.</span>
-                    <span className="animate-bounce" style={{ animationDelay: '0.1s' }}>.</span>
-                    <span className="animate-bounce" style={{ animationDelay: '0.2s' }}>.</span>
-                  </span>
+                <div className="px-4 py-2 text-xs text-slate-400 italic">
+                  {texts.waiting}
                 </div>
               </div>
             )}
+
             <div ref={messagesEndRef} />
           </div>
 
@@ -162,11 +198,10 @@ export function AiChat() {
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={texts.placeholder}
                 className="flex-1 px-4 py-2.5 rounded-full border border-slate-200 focus:border-[#00AEEF] focus:outline-none text-sm"
-                disabled={isLoading}
               />
               <button
                 type="submit"
-                disabled={isLoading || !input.trim()}
+                disabled={!input.trim()}
                 className="px-5 py-2.5 bg-[#F7941D] hover:bg-[#D35400] disabled:bg-slate-300 text-white rounded-full text-sm font-medium transition-colors"
               >
                 {texts.send}

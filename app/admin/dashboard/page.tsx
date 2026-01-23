@@ -72,6 +72,11 @@ export default function AdminDashboard() {
                 All Products
               </Link>
             </li>
+            <li>
+              <Link href="/admin/chats" className="block px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-700 font-medium">
+                Support Chats
+              </Link>
+            </li>
           </ul>
         </nav>
 

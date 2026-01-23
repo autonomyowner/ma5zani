@@ -109,4 +109,26 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_seller", ["sellerId"]),
+
+  // Support Chat System
+  chats: defineTable({
+    recipientId: v.optional(v.string()), // clerkId if logged in, null for anonymous
+    recipientName: v.optional(v.string()), // name provided or from seller
+    recipientEmail: v.optional(v.string()),
+    sessionId: v.string(), // unique session ID for anonymous users
+    status: v.union(v.literal("open"), v.literal("closed")),
+    lastMessageAt: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_session", ["sessionId"])
+    .index("by_status", ["status"])
+    .index("by_recipient", ["recipientId"]),
+
+  chatMessages: defineTable({
+    chatId: v.id("chats"),
+    sender: v.union(v.literal("user"), v.literal("admin")),
+    content: v.string(),
+    createdAt: v.number(),
+  })
+    .index("by_chat", ["chatId"]),
 });
