@@ -41,14 +41,58 @@ export const getStorefrontProducts = query({
 });
 
 export const getPublicProduct = query({
-  args: { productId: v.id("products") },
+  args: {
+    slug: v.string(),
+    productId: v.id("products"),
+  },
   handler: async (ctx, args) => {
-    const product = await ctx.db.get(args.productId);
-    if (!product || !product.showOnStorefront) {
+    // Get storefront by slug
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug.toLowerCase()))
+      .first();
+
+    if (!storefront || !storefront.isPublished) {
       return null;
     }
 
-    return product;
+    // Get product
+    const product = await ctx.db.get(args.productId);
+    if (!product || product.sellerId !== storefront.sellerId || !product.showOnStorefront) {
+      return null;
+    }
+
+    // Get category if exists
+    let category = null;
+    if (product.categoryId) {
+      category = await ctx.db.get(product.categoryId);
+    }
+
+    // Get related products (same category or same seller, excluding current)
+    let relatedProducts = await ctx.db
+      .query("products")
+      .withIndex("by_seller", (q) => q.eq("sellerId", storefront.sellerId))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("showOnStorefront"), true),
+          q.neq(q.field("_id"), args.productId)
+        )
+      )
+      .take(4);
+
+    // Prioritize same category
+    if (product.categoryId) {
+      const sameCategory = relatedProducts.filter(p => p.categoryId === product.categoryId);
+      const otherCategory = relatedProducts.filter(p => p.categoryId !== product.categoryId);
+      relatedProducts = [...sameCategory, ...otherCategory].slice(0, 4);
+    }
+
+    return {
+      product,
+      category,
+      relatedProducts,
+      storefront,
+    };
   },
 });
 

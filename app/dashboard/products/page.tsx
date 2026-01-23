@@ -7,11 +7,13 @@ import { useUser } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
 import { useLanguage } from '@/lib/LanguageContext'
+import { getR2PublicUrl } from '@/lib/r2'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Card from '@/components/ui/Card'
+import ImageUpload from '@/components/ui/ImageUpload'
 
 export default function ProductsPage() {
   const router = useRouter()
@@ -32,6 +34,7 @@ export default function ProductsPage() {
     stock: '',
     price: '',
     description: '',
+    imageKeys: [] as string[],
   })
 
   if (!isLoaded || seller === undefined) {
@@ -48,7 +51,7 @@ export default function ProductsPage() {
   }
 
   const resetForm = () => {
-    setFormData({ name: '', sku: '', stock: '', price: '', description: '' })
+    setFormData({ name: '', sku: '', stock: '', price: '', description: '', imageKeys: [] })
     setEditingProduct(null)
     setShowAddModal(false)
   }
@@ -66,6 +69,7 @@ export default function ProductsPage() {
           stock: parseInt(formData.stock),
           price: parseFloat(formData.price),
           description: formData.description || undefined,
+          imageKeys: formData.imageKeys.length > 0 ? formData.imageKeys : undefined,
         })
       } else {
         await createProduct({
@@ -74,6 +78,7 @@ export default function ProductsPage() {
           stock: parseInt(formData.stock),
           price: parseFloat(formData.price),
           description: formData.description || undefined,
+          imageKeys: formData.imageKeys.length > 0 ? formData.imageKeys : undefined,
         })
       }
       resetForm()
@@ -90,6 +95,7 @@ export default function ProductsPage() {
       stock: product.stock.toString(),
       price: product.price.toString(),
       description: product.description || '',
+      imageKeys: product.imageKeys || [],
     })
     setEditingProduct(product._id)
     setShowAddModal(true)
@@ -151,42 +157,62 @@ export default function ProductsPage() {
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               {products?.map((product) => (
-                <Card key={product._id} className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-bold text-slate-900" style={{ fontFamily: 'var(--font-outfit)' }}>
+                <Card key={product._id} className="overflow-hidden">
+                  {/* Product Image */}
+                  <div className="aspect-square bg-slate-100 relative">
+                    {product.imageKeys && product.imageKeys.length > 0 ? (
+                      <img
+                        src={getR2PublicUrl(product.imageKeys[0])}
+                        alt={product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-slate-300">
+                        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                    {product.imageKeys && product.imageKeys.length > 1 && (
+                      <span className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                        +{product.imageKeys.length - 1}
+                      </span>
+                    )}
+                    <div className="absolute top-2 right-2">
+                      <Badge variant={getStatusVariant(product.status)}>
+                        {getStatusLabel(product.status)}
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div className="p-4">
+                    <div className="mb-3">
+                      <h3 className="font-bold text-slate-900 truncate" style={{ fontFamily: 'var(--font-outfit)' }}>
                         {product.name}
                       </h3>
                       <p className="text-sm text-slate-500">{t.dashboard.sku}: {product.sku}</p>
                     </div>
-                    <Badge variant={getStatusVariant(product.status)}>
-                      {getStatusLabel(product.status)}
-                    </Badge>
-                  </div>
 
-                  {product.description && (
-                    <p className="text-sm text-slate-600 mb-4 line-clamp-2">{product.description}</p>
-                  )}
-
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <p className="text-2xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-                        {product.price.toLocaleString()} <span className="text-sm font-normal text-slate-500">{t.dashboard.dzd}</span>
-                      </p>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <p className="text-xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
+                          {product.price.toLocaleString()} <span className="text-xs font-normal text-slate-500">{t.dashboard.dzd}</span>
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-slate-900">{product.stock}</p>
+                        <p className="text-xs text-slate-500">{t.dashboard.inStock}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-slate-900">{product.stock}</p>
-                      <p className="text-xs text-slate-500">{t.dashboard.inStock}</p>
-                    </div>
-                  </div>
 
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" className="flex-1" onClick={() => handleEdit(product)}>
-                      {t.dashboard.edit}
-                    </Button>
-                    <Button variant="ghost" size="sm" className="text-red-600 hover:bg-red-50" onClick={() => handleDelete(product._id)}>
-                      {t.dashboard.delete}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" className="flex-1" onClick={() => handleEdit(product)}>
+                        {t.dashboard.edit}
+                      </Button>
+                      <Button variant="ghost" size="sm" className="text-red-600 hover:bg-red-50" onClick={() => handleDelete(product._id)}>
+                        {t.dashboard.delete}
+                      </Button>
+                    </div>
                   </div>
                 </Card>
               ))}
@@ -204,6 +230,19 @@ export default function ProductsPage() {
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Product Images */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-900 mb-2">
+                      {t.dashboard.productImages || 'Product Images'}
+                    </label>
+                    <ImageUpload
+                      value={formData.imageKeys}
+                      onChange={(keys) => setFormData({ ...formData, imageKeys: keys })}
+                      maxImages={5}
+                      folder="products"
+                    />
+                  </div>
+
                   <Input
                     id="name"
                     label={t.dashboard.productName}
