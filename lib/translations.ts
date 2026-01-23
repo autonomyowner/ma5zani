@@ -8,6 +8,7 @@ export const translations = {
       testimonials: 'آراء العملاء',
       login: 'تسجيل الدخول',
       getStarted: 'ابدأ الآن',
+      dashboard: 'لوحة التحكم',
     },
     // Hero
     hero: {
@@ -231,6 +232,7 @@ export const translations = {
       testimonials: 'Testimonials',
       login: 'Log In',
       getStarted: 'Get Started',
+      dashboard: 'Dashboard',
     },
     // Hero
     hero: {

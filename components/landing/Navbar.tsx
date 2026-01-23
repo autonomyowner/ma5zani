@@ -6,10 +6,12 @@ import Button from '@/components/ui/Button'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import { useLanguage } from '@/lib/LanguageContext'
 import { useState } from 'react'
+import { useUser, UserButton } from '@clerk/nextjs'
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { t, dir } = useLanguage()
+  const { isSignedIn, isLoaded } = useUser()
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100">
@@ -51,12 +53,25 @@ export default function Navbar() {
           {/* CTA Buttons + Language Toggle */}
           <div className="hidden md:flex items-center gap-4">
             <LanguageToggle />
-            <Link href="/login">
-              <Button variant="ghost" size="sm">{t.nav.login}</Button>
-            </Link>
-            <Link href="/signup">
-              <Button variant="primary" size="sm">{t.nav.getStarted}</Button>
-            </Link>
+            {!isLoaded ? (
+              <div className="w-20 h-9 bg-slate-100 rounded-lg animate-pulse" />
+            ) : isSignedIn ? (
+              <>
+                <Link href="/dashboard">
+                  <Button variant="primary" size="sm">{t.nav.dashboard || 'Dashboard'}</Button>
+                </Link>
+                <UserButton afterSignOutUrl="/" />
+              </>
+            ) : (
+              <>
+                <Link href="/login">
+                  <Button variant="ghost" size="sm">{t.nav.login}</Button>
+                </Link>
+                <Link href="/signup">
+                  <Button variant="primary" size="sm">{t.nav.getStarted}</Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -93,12 +108,25 @@ export default function Navbar() {
                 {t.nav.testimonials}
               </Link>
               <div className="flex flex-col gap-2 pt-4 border-t border-slate-100">
-                <Link href="/login">
-                  <Button variant="ghost" size="md" className="w-full">{t.nav.login}</Button>
-                </Link>
-                <Link href="/signup">
-                  <Button variant="primary" size="md" className="w-full">{t.nav.getStarted}</Button>
-                </Link>
+                {isSignedIn ? (
+                  <>
+                    <Link href="/dashboard">
+                      <Button variant="primary" size="md" className="w-full">{t.nav.dashboard || 'Dashboard'}</Button>
+                    </Link>
+                    <div className="flex justify-center py-2">
+                      <UserButton afterSignOutUrl="/" />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login">
+                      <Button variant="ghost" size="md" className="w-full">{t.nav.login}</Button>
+                    </Link>
+                    <Link href="/signup">
+                      <Button variant="primary" size="md" className="w-full">{t.nav.getStarted}</Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>
