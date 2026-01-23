@@ -284,6 +284,7 @@ export const translations = {
       active: 'نشط',
       lowStock: 'مخزون منخفض',
       outOfStock: 'نفد المخزون',
+      productImages: 'صور المنتج',
       // Inventory
       inventory: 'المخزون',
       trackStock: 'تتبع وإدارة مستويات المخزون',
@@ -625,6 +626,7 @@ export const translations = {
       active: 'Active',
       lowStock: 'Low Stock',
       outOfStock: 'Out of Stock',
+      productImages: 'Product Images',
       // Inventory
       inventory: 'Inventory',
       trackStock: 'Track and manage stock levels',

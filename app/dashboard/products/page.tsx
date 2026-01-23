@@ -233,7 +233,7 @@ export default function ProductsPage() {
                   {/* Product Images */}
                   <div>
                     <label className="block text-sm font-medium text-slate-900 mb-2">
-                      {t.dashboard.productImages || 'Product Images'}
+                      {t.dashboard.productImages}
                     </label>
                     <ImageUpload
                       value={formData.imageKeys}
