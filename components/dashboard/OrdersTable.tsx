@@ -1,7 +1,9 @@
 'use client'
 
 import Badge from '@/components/ui/Badge'
-import { Order } from '@/lib/mock-data'
+import { Doc } from '@/convex/_generated/dataModel'
+
+type Order = Doc<'orders'>
 
 interface OrdersTableProps {
   orders: Order[]
@@ -18,6 +20,8 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
         return 'warning'
       case 'pending':
         return 'default'
+      case 'cancelled':
+        return 'error'
       default:
         return 'default'
     }
@@ -41,54 +45,60 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
         </a>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead>
-            <tr className="bg-slate-50">
-              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Order ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Customer
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Wilaya
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Product
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Amount
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                Status
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {orders.map((order) => (
-              <tr key={order.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-6 py-4">
-                  <span className="font-medium text-[#0054A6]">{order.id}</span>
-                </td>
-                <td className="px-6 py-4 text-slate-900">{order.customerName}</td>
-                <td className="px-6 py-4 text-slate-600">{order.wilaya}</td>
-                <td className="px-6 py-4 text-slate-600">{order.product}</td>
-                <td className="px-6 py-4">
-                  <span className="font-medium text-slate-900">
-                    {order.amount.toLocaleString()} DZD
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <Badge variant={getStatusVariant(order.status)}>
-                    {formatStatus(order.status)}
-                  </Badge>
-                </td>
+      {orders.length === 0 ? (
+        <div className="p-8 text-center text-slate-500">
+          No orders yet. Create your first order to get started.
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-slate-50">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Order ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Customer
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Wilaya
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Product
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Amount
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Status
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {orders.map((order) => (
+                <tr key={order._id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-6 py-4">
+                    <span className="font-medium text-[#0054A6]">{order.orderNumber}</span>
+                  </td>
+                  <td className="px-6 py-4 text-slate-900">{order.customerName}</td>
+                  <td className="px-6 py-4 text-slate-600">{order.wilaya}</td>
+                  <td className="px-6 py-4 text-slate-600">{order.productName}</td>
+                  <td className="px-6 py-4">
+                    <span className="font-medium text-slate-900">
+                      {order.amount.toLocaleString()} DZD
+                    </span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <Badge variant={getStatusVariant(order.status)}>
+                      {formatStatus(order.status)}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }

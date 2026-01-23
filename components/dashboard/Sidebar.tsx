@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { SignOutButton } from '@clerk/nextjs'
+import { Doc } from '@/convex/_generated/dataModel'
 
 const navItems = [
   { label: 'Dashboard', href: '/dashboard' },
@@ -13,8 +15,18 @@ const navItems = [
   { label: 'Settings', href: '/dashboard/settings' },
 ]
 
-export default function Sidebar() {
+interface SidebarProps {
+  seller: Doc<'sellers'> | null | undefined
+}
+
+export default function Sidebar({ seller }: SidebarProps) {
   const pathname = usePathname()
+
+  const planLabels: Record<string, string> = {
+    basic: 'Basic Plan',
+    plus: 'Plus Plan',
+    gros: 'Gros Plan',
+  }
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200 z-40">
@@ -64,16 +76,17 @@ export default function Sidebar() {
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-100">
         <div className="px-4 py-3">
           <p className="font-medium text-slate-900" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
-            Ahmed Benali
+            {seller?.name || 'Loading...'}
           </p>
-          <p className="text-sm text-slate-500">Plus Plan</p>
+          <p className="text-sm text-slate-500">
+            {seller ? planLabels[seller.plan] : '...'}
+          </p>
         </div>
-        <Link
-          href="/"
-          className="block px-4 py-3 text-slate-600 hover:text-red-600 font-medium transition-colors"
-        >
-          Sign Out
-        </Link>
+        <SignOutButton>
+          <button className="w-full text-left px-4 py-3 text-slate-600 hover:text-red-600 font-medium transition-colors">
+            Sign Out
+          </button>
+        </SignOutButton>
       </div>
     </aside>
   )

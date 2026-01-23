@@ -1,8 +1,9 @@
 'use client'
 
-import Card from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
-import { Product } from '@/lib/mock-data'
+import { Doc } from '@/convex/_generated/dataModel'
+
+type Product = Doc<'products'>
 
 interface ProductsListProps {
   products: Product[]
@@ -40,36 +41,42 @@ export default function ProductsList({ products }: ProductsListProps) {
         </a>
       </div>
 
-      <div className="p-6">
-        <div className="grid md:grid-cols-2 gap-4">
-          {products.slice(0, 6).map((product) => (
-            <div
-              key={product.id}
-              className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-slate-200 transition-colors"
-            >
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-slate-900 truncate">{product.name}</h3>
-                <p className="text-sm text-slate-500">SKU: {product.sku}</p>
-              </div>
-
-              <div className="flex items-center gap-4 ml-4">
-                <div className="text-right">
-                  <p
-                    className="font-bold text-slate-900"
-                    style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
-                  >
-                    {product.stock}
-                  </p>
-                  <p className="text-xs text-slate-500">in stock</p>
-                </div>
-                <Badge variant={getStatusVariant(product.status)}>
-                  {formatStatus(product.status)}
-                </Badge>
-              </div>
-            </div>
-          ))}
+      {products.length === 0 ? (
+        <div className="p-8 text-center text-slate-500">
+          No products yet. Add your first product to get started.
         </div>
-      </div>
+      ) : (
+        <div className="p-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            {products.slice(0, 6).map((product) => (
+              <div
+                key={product._id}
+                className="flex items-center justify-between p-4 rounded-xl border border-slate-100 hover:border-slate-200 transition-colors"
+              >
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-slate-900 truncate">{product.name}</h3>
+                  <p className="text-sm text-slate-500">SKU: {product.sku}</p>
+                </div>
+
+                <div className="flex items-center gap-4 ml-4">
+                  <div className="text-right">
+                    <p
+                      className="font-bold text-slate-900"
+                      style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
+                    >
+                      {product.stock}
+                    </p>
+                    <p className="text-xs text-slate-500">in stock</p>
+                  </div>
+                  <Badge variant={getStatusVariant(product.status)}>
+                    {formatStatus(product.status)}
+                  </Badge>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

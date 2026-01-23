@@ -2,9 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
-import Card from '@/components/ui/Card'
+import { SignIn } from '@clerk/nextjs'
 
 export default function LoginPage() {
   return (
@@ -36,55 +34,19 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <Card variant="elevated" className="shadow-xl">
-          <div className="text-center mb-8">
-            <h1
-              className="text-2xl font-bold text-[#0054A6] mb-2"
-              style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
-            >
-              Welcome Back
-            </h1>
-            <p className="text-slate-600">
-              Sign in to your seller dashboard
-            </p>
-          </div>
-
-          <form className="space-y-6">
-            <Input
-              id="email"
-              type="email"
-              label="Email Address"
-              placeholder="you@example.com"
-            />
-
-            <div>
-              <Input
-                id="password"
-                type="password"
-                label="Password"
-                placeholder="Enter your password"
-              />
-              <div className="mt-2 text-right">
-                <Link href="#" className="text-sm text-[#0054A6] hover:text-[#00AEEF] transition-colors">
-                  Forgot password?
-                </Link>
-              </div>
-            </div>
-
-            <Button type="submit" variant="primary" className="w-full">
-              Sign In
-            </Button>
-          </form>
-
-          <div className="mt-8 pt-6 border-t border-slate-100 text-center">
-            <p className="text-slate-600">
-              Don't have an account?{' '}
-              <Link href="/signup" className="text-[#0054A6] hover:text-[#00AEEF] font-medium transition-colors">
-                Sign up
-              </Link>
-            </p>
-          </div>
-        </Card>
+        <div className="flex justify-center">
+          <SignIn
+            appearance={{
+              elements: {
+                rootBox: 'w-full',
+                card: 'shadow-xl rounded-2xl border border-slate-100',
+              },
+            }}
+            routing="path"
+            path="/login"
+            signUpUrl="/signup"
+          />
+        </div>
 
         <p className="mt-8 text-center text-sm text-slate-500">
           <Link href="/" className="hover:text-[#0054A6] transition-colors">

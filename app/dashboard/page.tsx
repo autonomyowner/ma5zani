@@ -1,13 +1,53 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
+import { useQuery } from 'convex/react'
+import { useUser, UserButton } from '@clerk/nextjs'
+import { api } from '@/convex/_generated/api'
 import Sidebar from '@/components/dashboard/Sidebar'
 import StatsCards from '@/components/dashboard/StatsCards'
 import OrdersTable from '@/components/dashboard/OrdersTable'
 import ProductsList from '@/components/dashboard/ProductsList'
-import { mockStats, mockOrders, mockProducts } from '@/lib/mock-data'
 
 export default function DashboardPage() {
+  const router = useRouter()
+  const { user, isLoaded } = useUser()
+  const seller = useQuery(api.sellers.getCurrentSellerProfile)
+  const stats = useQuery(api.stats.getDashboardStats)
+  const orders = useQuery(api.orders.getOrders, {})
+  const products = useQuery(api.products.getProducts)
+
+  // Show loading state
+  if (!isLoaded || seller === undefined) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-pulse text-slate-400">Loading...</div>
+      </div>
+    )
+  }
+
+  // Redirect to onboarding if no seller profile
+  if (seller === null && user) {
+    router.push('/onboarding')
+    return null
+  }
+
+  const displayStats = stats || {
+    ordersToday: 0,
+    pendingOrders: 0,
+    monthlyRevenue: 0,
+    totalProducts: 0,
+  }
+
+  const planLabels: Record<string, string> = {
+    basic: 'Basic Plan',
+    plus: 'Plus Plan',
+    gros: 'Gros Plan',
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <Sidebar />
+      <Sidebar seller={seller} />
 
       {/* Main Content */}
       <main className="ml-64 min-h-screen">
@@ -20,20 +60,25 @@ export default function DashboardPage() {
             >
               Dashboard
             </h1>
-            <p className="text-slate-500 text-sm">Welcome back, Ahmed</p>
+            <p className="text-slate-500 text-sm">
+              Welcome back, {seller?.name || user?.firstName || 'Seller'}
+            </p>
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="px-4 py-2 bg-[#22B14C]/10 text-[#22B14C] rounded-lg text-sm font-medium">
-              Plus Plan Active
-            </span>
+            {seller && (
+              <span className="px-4 py-2 bg-[#22B14C]/10 text-[#22B14C] rounded-lg text-sm font-medium">
+                {planLabels[seller.plan] || 'Active'}
+              </span>
+            )}
+            <UserButton afterSignOutUrl="/" />
           </div>
         </header>
 
         {/* Dashboard Content */}
         <div className="p-8 space-y-8">
           {/* Stats */}
-          <StatsCards stats={mockStats} />
+          <StatsCards stats={displayStats} />
 
           {/* Quick Actions */}
           <div className="grid md:grid-cols-3 gap-4">
@@ -67,10 +112,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Orders Table */}
-          <OrdersTable orders={mockOrders} />
+          <OrdersTable orders={orders || []} />
 
           {/* Products List */}
-          <ProductsList products={mockProducts} />
+          <ProductsList products={products || []} />
         </div>
       </main>
     </div>

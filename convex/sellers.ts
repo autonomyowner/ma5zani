@@ -1,0 +1,82 @@
+import { query, mutation } from "./_generated/server";
+import { v } from "convex/values";
+import { getCurrentSeller } from "./auth";
+
+export const getCurrentSellerProfile = query({
+  args: {},
+  handler: async (ctx) => {
+    return await getCurrentSeller(ctx);
+  },
+});
+
+export const upsertSeller = mutation({
+  args: {
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    plan: v.union(v.literal("basic"), v.literal("plus"), v.literal("gros")),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Unauthorized");
+    }
+
+    const existingSeller = await ctx.db
+      .query("sellers")
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
+      .unique();
+
+    const now = Date.now();
+
+    if (existingSeller) {
+      await ctx.db.patch(existingSeller._id, {
+        name: args.name,
+        phone: args.phone,
+        plan: args.plan,
+        updatedAt: now,
+      });
+      return existingSeller._id;
+    }
+
+    const sellerId = await ctx.db.insert("sellers", {
+      clerkId: identity.subject,
+      email: args.email,
+      name: args.name,
+      phone: args.phone,
+      plan: args.plan,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return sellerId;
+  },
+});
+
+export const updateSellerProfile = mutation({
+  args: {
+    name: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    businessAddress: v.optional(v.object({
+      street: v.string(),
+      wilaya: v.string(),
+      postalCode: v.string(),
+    })),
+    plan: v.optional(v.union(v.literal("basic"), v.literal("plus"), v.literal("gros"))),
+  },
+  handler: async (ctx, args) => {
+    const seller = await getCurrentSeller(ctx);
+    if (!seller) {
+      throw new Error("Seller not found");
+    }
+
+    const updates: Record<string, unknown> = { updatedAt: Date.now() };
+    if (args.name !== undefined) updates.name = args.name;
+    if (args.phone !== undefined) updates.phone = args.phone;
+    if (args.businessAddress !== undefined) updates.businessAddress = args.businessAddress;
+    if (args.plan !== undefined) updates.plan = args.plan;
+
+    await ctx.db.patch(seller._id, updates);
+    return seller._id;
+  },
+});

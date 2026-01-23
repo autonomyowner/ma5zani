@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Outfit, Plus_Jakarta_Sans, Cairo } from 'next/font/google'
 import './globals.css'
-import { LanguageProvider } from '@/lib/LanguageContext'
+import { Providers } from './providers'
 
 const outfit = Outfit({
   subsets: ['latin'],
@@ -34,9 +34,9 @@ export default function RootLayout({
   return (
     <html lang="ar" dir="rtl" className={`${outfit.variable} ${plusJakartaSans.variable} ${cairo.variable}`}>
       <body style={{ fontFamily: 'var(--font-cairo), var(--font-plus-jakarta), sans-serif' }}>
-        <LanguageProvider>
+        <Providers>
           {children}
-        </LanguageProvider>
+        </Providers>
       </body>
     </html>
   )
