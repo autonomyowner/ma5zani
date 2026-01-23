@@ -2,6 +2,7 @@
 
 import Badge from '@/components/ui/Badge'
 import { Doc } from '@/convex/_generated/dataModel'
+import { useLanguage } from '@/lib/LanguageContext'
 
 type Order = Doc<'orders'>
 
@@ -10,25 +11,28 @@ interface OrdersTableProps {
 }
 
 export default function OrdersTable({ orders }: OrdersTableProps) {
+  const { t } = useLanguage()
+
   const getStatusVariant = (status: Order['status']) => {
     switch (status) {
-      case 'delivered':
-        return 'success'
-      case 'shipped':
-        return 'info'
-      case 'processing':
-        return 'warning'
-      case 'pending':
-        return 'default'
-      case 'cancelled':
-        return 'error'
-      default:
-        return 'default'
+      case 'delivered': return 'success'
+      case 'shipped': return 'info'
+      case 'processing': return 'warning'
+      case 'pending': return 'default'
+      case 'cancelled': return 'error'
+      default: return 'default'
     }
   }
 
-  const formatStatus = (status: Order['status']) => {
-    return status.charAt(0).toUpperCase() + status.slice(1)
+  const getStatusLabel = (status: Order['status']) => {
+    const labels: Record<string, string> = {
+      pending: t.dashboard.pending,
+      processing: t.dashboard.processing,
+      shipped: t.dashboard.shipped,
+      delivered: t.dashboard.delivered,
+      cancelled: t.dashboard.cancelled,
+    }
+    return labels[status] || status
   }
 
   return (
@@ -38,16 +42,16 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
           className="text-lg font-bold text-[#0054A6]"
           style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
         >
-          Recent Orders
+          {t.dashboard.recentOrders}
         </h2>
         <a href="/dashboard/orders" className="text-sm text-[#0054A6] hover:text-[#00AEEF] font-medium">
-          View All
+          {t.dashboard.viewAll}
         </a>
       </div>
 
       {orders.length === 0 ? (
         <div className="p-8 text-center text-slate-500">
-          No orders yet. Create your first order to get started.
+          {t.dashboard.noOrders}. {t.dashboard.createFirstOrder}
         </div>
       ) : (
         <div className="overflow-x-auto">
@@ -55,22 +59,22 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
             <thead>
               <tr className="bg-slate-50">
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Order ID
+                  {t.dashboard.orderId}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Customer
+                  {t.dashboard.customer}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Wilaya
+                  {t.dashboard.wilaya}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Product
+                  {t.dashboard.product}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Amount
+                  {t.dashboard.amount}
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                  Status
+                  {t.dashboard.status}
                 </th>
               </tr>
             </thead>
@@ -85,12 +89,12 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                   <td className="px-6 py-4 text-slate-600">{order.productName}</td>
                   <td className="px-6 py-4">
                     <span className="font-medium text-slate-900">
-                      {order.amount.toLocaleString()} DZD
+                      {order.amount.toLocaleString()} {t.dashboard.dzd}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <Badge variant={getStatusVariant(order.status)}>
-                      {formatStatus(order.status)}
+                      {getStatusLabel(order.status)}
                     </Badge>
                   </td>
                 </tr>

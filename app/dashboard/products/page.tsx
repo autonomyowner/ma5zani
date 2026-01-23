@@ -6,6 +6,7 @@ import { useQuery, useMutation } from 'convex/react'
 import { useUser } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
+import { useLanguage } from '@/lib/LanguageContext'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
@@ -15,6 +16,7 @@ import Card from '@/components/ui/Card'
 export default function ProductsPage() {
   const router = useRouter()
   const { user, isLoaded } = useUser()
+  const { t } = useLanguage()
   const seller = useQuery(api.sellers.getCurrentSellerProfile)
   const products = useQuery(api.products.getProducts)
   const createProduct = useMutation(api.products.createProduct)
@@ -35,7 +37,7 @@ export default function ProductsPage() {
   if (!isLoaded || seller === undefined) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-pulse text-slate-400">Loading...</div>
+        <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
       </div>
     )
   }
@@ -112,6 +114,15 @@ export default function ProductsPage() {
     }
   }
 
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      active: t.dashboard.active,
+      low_stock: t.dashboard.lowStock,
+      out_of_stock: t.dashboard.outOfStock,
+    }
+    return labels[status] || status
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Sidebar seller={seller} />
@@ -120,22 +131,21 @@ export default function ProductsPage() {
         <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8">
           <div>
             <h1 className="text-2xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-              Products
+              {t.dashboard.products}
             </h1>
-            <p className="text-slate-500 text-sm">Manage your product catalog</p>
+            <p className="text-slate-500 text-sm">{t.dashboard.manageProducts}</p>
           </div>
           <Button variant="primary" onClick={() => setShowAddModal(true)}>
-            + Add Product
+            {t.dashboard.addProduct}
           </Button>
         </header>
 
         <div className="p-8">
-          {/* Products Grid */}
           {products?.length === 0 ? (
             <Card className="p-12 text-center">
-              <p className="text-slate-500 mb-4">No products yet</p>
+              <p className="text-slate-500 mb-4">{t.dashboard.noProducts}</p>
               <Button variant="primary" onClick={() => setShowAddModal(true)}>
-                Add Your First Product
+                {t.dashboard.addFirstProduct}
               </Button>
             </Card>
           ) : (
@@ -147,10 +157,10 @@ export default function ProductsPage() {
                       <h3 className="font-bold text-slate-900" style={{ fontFamily: 'var(--font-outfit)' }}>
                         {product.name}
                       </h3>
-                      <p className="text-sm text-slate-500">SKU: {product.sku}</p>
+                      <p className="text-sm text-slate-500">{t.dashboard.sku}: {product.sku}</p>
                     </div>
                     <Badge variant={getStatusVariant(product.status)}>
-                      {product.status.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                      {getStatusLabel(product.status)}
                     </Badge>
                   </div>
 
@@ -161,21 +171,21 @@ export default function ProductsPage() {
                   <div className="flex items-center justify-between mb-4">
                     <div>
                       <p className="text-2xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-                        {product.price.toLocaleString()} <span className="text-sm font-normal text-slate-500">DZD</span>
+                        {product.price.toLocaleString()} <span className="text-sm font-normal text-slate-500">{t.dashboard.dzd}</span>
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="text-2xl font-bold text-slate-900">{product.stock}</p>
-                      <p className="text-xs text-slate-500">in stock</p>
+                      <p className="text-xs text-slate-500">{t.dashboard.inStock}</p>
                     </div>
                   </div>
 
                   <div className="flex gap-2">
                     <Button variant="ghost" size="sm" className="flex-1" onClick={() => handleEdit(product)}>
-                      Edit
+                      {t.dashboard.edit}
                     </Button>
                     <Button variant="ghost" size="sm" className="text-red-600 hover:bg-red-50" onClick={() => handleDelete(product._id)}>
-                      Delete
+                      {t.dashboard.delete}
                     </Button>
                   </div>
                 </Card>
@@ -190,13 +200,13 @@ export default function ProductsPage() {
             <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <h2 className="text-xl font-bold text-[#0054A6] mb-6" style={{ fontFamily: 'var(--font-outfit)' }}>
-                  {editingProduct ? 'Edit Product' : 'Add New Product'}
+                  {editingProduct ? t.dashboard.editProduct : t.dashboard.addNewProduct}
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <Input
                     id="name"
-                    label="Product Name"
+                    label={t.dashboard.productName}
                     placeholder="e.g., Wireless Earbuds"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -204,7 +214,7 @@ export default function ProductsPage() {
                   />
                   <Input
                     id="sku"
-                    label="SKU"
+                    label={t.dashboard.sku}
                     placeholder="e.g., WE-001"
                     value={formData.sku}
                     onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
@@ -214,7 +224,7 @@ export default function ProductsPage() {
                     <Input
                       id="stock"
                       type="number"
-                      label="Stock Quantity"
+                      label={t.dashboard.stockQuantity}
                       placeholder="0"
                       value={formData.stock}
                       onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
@@ -223,7 +233,7 @@ export default function ProductsPage() {
                     <Input
                       id="price"
                       type="number"
-                      label="Price (DZD)"
+                      label={`${t.dashboard.price} (${t.dashboard.dzd})`}
                       placeholder="0"
                       value={formData.price}
                       onChange={(e) => setFormData({ ...formData, price: e.target.value })}
@@ -232,12 +242,12 @@ export default function ProductsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-900 mb-2">
-                      Description (Optional)
+                      {t.dashboard.description} ({t.dashboard.optional})
                     </label>
                     <textarea
                       className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-[#00AEEF] focus:outline-none resize-none"
                       rows={3}
-                      placeholder="Product description..."
+                      placeholder="..."
                       value={formData.description}
                       onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     />
@@ -245,10 +255,10 @@ export default function ProductsPage() {
 
                   <div className="flex gap-3 pt-4">
                     <Button type="button" variant="ghost" className="flex-1" onClick={resetForm}>
-                      Cancel
+                      {t.dashboard.cancel}
                     </Button>
                     <Button type="submit" variant="primary" className="flex-1" disabled={isSubmitting}>
-                      {isSubmitting ? 'Saving...' : editingProduct ? 'Update Product' : 'Add Product'}
+                      {isSubmitting ? t.dashboard.saving : editingProduct ? t.dashboard.update : t.dashboard.save}
                     </Button>
                   </div>
                 </form>

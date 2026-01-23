@@ -2,6 +2,7 @@
 
 import Badge from '@/components/ui/Badge'
 import { Doc } from '@/convex/_generated/dataModel'
+import { useLanguage } from '@/lib/LanguageContext'
 
 type Product = Doc<'products'>
 
@@ -10,21 +11,24 @@ interface ProductsListProps {
 }
 
 export default function ProductsList({ products }: ProductsListProps) {
+  const { t } = useLanguage()
+
   const getStatusVariant = (status: Product['status']) => {
     switch (status) {
-      case 'active':
-        return 'success'
-      case 'low_stock':
-        return 'warning'
-      case 'out_of_stock':
-        return 'error'
-      default:
-        return 'default'
+      case 'active': return 'success'
+      case 'low_stock': return 'warning'
+      case 'out_of_stock': return 'error'
+      default: return 'default'
     }
   }
 
-  const formatStatus = (status: Product['status']) => {
-    return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+  const getStatusLabel = (status: Product['status']) => {
+    const labels: Record<string, string> = {
+      active: t.dashboard.active,
+      low_stock: t.dashboard.lowStock,
+      out_of_stock: t.dashboard.outOfStock,
+    }
+    return labels[status] || status
   }
 
   return (
@@ -34,16 +38,16 @@ export default function ProductsList({ products }: ProductsListProps) {
           className="text-lg font-bold text-[#0054A6]"
           style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
         >
-          Products Inventory
+          {t.dashboard.products}
         </h2>
         <a href="/dashboard/products" className="text-sm text-[#0054A6] hover:text-[#00AEEF] font-medium">
-          Manage Products
+          {t.dashboard.manageProducts}
         </a>
       </div>
 
       {products.length === 0 ? (
         <div className="p-8 text-center text-slate-500">
-          No products yet. Add your first product to get started.
+          {t.dashboard.noProducts}. {t.dashboard.addFirstProduct}
         </div>
       ) : (
         <div className="p-6">
@@ -55,7 +59,7 @@ export default function ProductsList({ products }: ProductsListProps) {
               >
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-slate-900 truncate">{product.name}</h3>
-                  <p className="text-sm text-slate-500">SKU: {product.sku}</p>
+                  <p className="text-sm text-slate-500">{t.dashboard.sku}: {product.sku}</p>
                 </div>
 
                 <div className="flex items-center gap-4 ml-4">
@@ -66,10 +70,10 @@ export default function ProductsList({ products }: ProductsListProps) {
                     >
                       {product.stock}
                     </p>
-                    <p className="text-xs text-slate-500">in stock</p>
+                    <p className="text-xs text-slate-500">{t.dashboard.inStock}</p>
                   </div>
                   <Badge variant={getStatusVariant(product.status)}>
-                    {formatStatus(product.status)}
+                    {getStatusLabel(product.status)}
                   </Badge>
                 </div>
               </div>

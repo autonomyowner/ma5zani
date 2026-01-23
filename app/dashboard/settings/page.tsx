@@ -5,20 +5,16 @@ import { useRouter } from 'next/navigation'
 import { useQuery, useMutation } from 'convex/react'
 import { useUser, UserProfile } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
+import { useLanguage } from '@/lib/LanguageContext'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 
-const plans = [
-  { id: 'basic' as const, name: 'Basic', price: '2,500' },
-  { id: 'plus' as const, name: 'Plus', price: '6,500' },
-  { id: 'gros' as const, name: 'Gros', price: '15,000' },
-]
-
 export default function SettingsPage() {
   const router = useRouter()
   const { user, isLoaded } = useUser()
+  const { t } = useLanguage()
   const seller = useQuery(api.sellers.getCurrentSellerProfile)
   const updateProfile = useMutation(api.sellers.updateSellerProfile)
 
@@ -29,10 +25,16 @@ export default function SettingsPage() {
     phone: '',
   })
 
+  const plans = [
+    { id: 'basic' as const, name: t.dashboard.basicPlan, price: '2,500' },
+    { id: 'plus' as const, name: t.dashboard.plusPlan, price: '6,500' },
+    { id: 'gros' as const, name: t.dashboard.grosPlan, price: '15,000' },
+  ]
+
   if (!isLoaded || seller === undefined) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-pulse text-slate-400">Loading...</div>
+        <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
       </div>
     )
   }
@@ -83,9 +85,9 @@ export default function SettingsPage() {
         <header className="h-20 bg-white border-b border-slate-200 flex items-center px-8">
           <div>
             <h1 className="text-2xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-              Settings
+              {t.dashboard.settings}
             </h1>
-            <p className="text-slate-500 text-sm">Manage your account and preferences</p>
+            <p className="text-slate-500 text-sm">{t.dashboard.manageAccount}</p>
           </div>
         </header>
 
@@ -94,11 +96,11 @@ export default function SettingsPage() {
           <Card className="p-6 mb-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-                Business Profile
+                {t.dashboard.businessProfile}
               </h2>
               {!isEditing && (
                 <Button variant="ghost" size="sm" onClick={handleEdit}>
-                  Edit
+                  {t.dashboard.edit}
                 </Button>
               )}
             </div>
@@ -107,39 +109,39 @@ export default function SettingsPage() {
               <div className="space-y-4">
                 <Input
                   id="name"
-                  label="Business Name"
+                  label={t.dashboard.businessName}
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 />
                 <Input
                   id="phone"
-                  label="Phone Number"
+                  label={t.dashboard.phoneNumber}
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="+213 555 123 456"
                 />
                 <div className="flex gap-3 pt-4">
                   <Button variant="ghost" onClick={() => setIsEditing(false)}>
-                    Cancel
+                    {t.dashboard.cancel}
                   </Button>
                   <Button variant="primary" onClick={handleSave} disabled={isSaving}>
-                    {isSaving ? 'Saving...' : 'Save Changes'}
+                    {isSaving ? t.dashboard.saving : t.dashboard.saveChanges}
                   </Button>
                 </div>
               </div>
             ) : (
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm text-slate-500">Business Name</p>
+                  <p className="text-sm text-slate-500">{t.dashboard.businessName}</p>
                   <p className="font-medium text-slate-900">{seller?.name || '-'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Email</p>
+                  <p className="text-sm text-slate-500">{t.dashboard.email}</p>
                   <p className="font-medium text-slate-900">{seller?.email || '-'}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-500">Phone</p>
-                  <p className="font-medium text-slate-900">{seller?.phone || 'Not set'}</p>
+                  <p className="text-sm text-slate-500">{t.dashboard.phoneNumber}</p>
+                  <p className="font-medium text-slate-900">{seller?.phone || t.dashboard.notSet}</p>
                 </div>
               </div>
             )}
@@ -148,7 +150,7 @@ export default function SettingsPage() {
           {/* Plan Section */}
           <Card className="p-6 mb-8">
             <h2 className="text-lg font-bold text-[#0054A6] mb-6" style={{ fontFamily: 'var(--font-outfit)' }}>
-              Subscription Plan
+              {t.dashboard.subscriptionPlan}
             </h2>
 
             <div className="grid md:grid-cols-3 gap-4">
@@ -166,12 +168,12 @@ export default function SettingsPage() {
                     <h3 className="font-bold text-slate-900">{plan.name}</h3>
                     {seller?.plan === plan.id && (
                       <span className="text-xs bg-[#22B14C] text-white px-2 py-0.5 rounded-full">
-                        Current
+                        {t.dashboard.current}
                       </span>
                     )}
                   </div>
                   <p className="text-xl font-bold text-[#0054A6]">
-                    {plan.price} <span className="text-sm font-normal text-slate-500">DZD/mo</span>
+                    {plan.price} <span className="text-sm font-normal text-slate-500">{t.dashboard.dzd}/mo</span>
                   </p>
                 </button>
               ))}
@@ -181,10 +183,10 @@ export default function SettingsPage() {
           {/* Clerk Profile Management */}
           <Card className="p-6">
             <h2 className="text-lg font-bold text-[#0054A6] mb-6" style={{ fontFamily: 'var(--font-outfit)' }}>
-              Account Security
+              {t.dashboard.accountSecurity}
             </h2>
             <p className="text-slate-600 mb-4">
-              Manage your email, password, and security settings.
+              {t.dashboard.securityDescription}
             </p>
             <UserProfile
               appearance={{

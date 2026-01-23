@@ -4,12 +4,14 @@ import { useRouter } from 'next/navigation'
 import { useQuery } from 'convex/react'
 import { useUser } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
+import { useLanguage } from '@/lib/LanguageContext'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Card from '@/components/ui/Card'
 
 export default function AnalyticsPage() {
   const router = useRouter()
   const { user, isLoaded } = useUser()
+  const { t } = useLanguage()
   const seller = useQuery(api.sellers.getCurrentSellerProfile)
   const stats = useQuery(api.stats.getDashboardStats)
   const orders = useQuery(api.orders.getOrders, {})
@@ -18,7 +20,7 @@ export default function AnalyticsPage() {
   if (!isLoaded || seller === undefined) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-pulse text-slate-400">Loading...</div>
+        <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
       </div>
     )
   }
@@ -67,6 +69,14 @@ export default function AnalyticsPage() {
     cancelled: cancelledOrders,
   }
 
+  const statusLabels: Record<string, string> = {
+    pending: t.dashboard.pending,
+    processing: t.dashboard.processing,
+    shipped: t.dashboard.shipped,
+    delivered: t.dashboard.delivered,
+    cancelled: t.dashboard.cancelled,
+  }
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Sidebar seller={seller} />
@@ -75,9 +85,9 @@ export default function AnalyticsPage() {
         <header className="h-20 bg-white border-b border-slate-200 flex items-center px-8">
           <div>
             <h1 className="text-2xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-              Analytics
+              {t.dashboard.analytics}
             </h1>
-            <p className="text-slate-500 text-sm">Track your business performance</p>
+            <p className="text-slate-500 text-sm">{t.dashboard.trackPerformance}</p>
           </div>
         </header>
 
@@ -85,32 +95,32 @@ export default function AnalyticsPage() {
           {/* Key Metrics */}
           <div className="grid md:grid-cols-4 gap-6 mb-8">
             <Card className="p-6">
-              <p className="text-sm text-slate-500 mb-1">Total Revenue</p>
+              <p className="text-sm text-slate-500 mb-1">{t.dashboard.totalRevenue}</p>
               <p className="text-3xl font-bold text-[#22B14C]" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {totalRevenue.toLocaleString()}
               </p>
-              <p className="text-sm text-slate-500">DZD</p>
+              <p className="text-sm text-slate-500">{t.dashboard.dzd}</p>
             </Card>
             <Card className="p-6">
-              <p className="text-sm text-slate-500 mb-1">Avg Order Value</p>
+              <p className="text-sm text-slate-500 mb-1">{t.dashboard.avgOrderValue}</p>
               <p className="text-3xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {avgOrderValue.toLocaleString()}
               </p>
-              <p className="text-sm text-slate-500">DZD</p>
+              <p className="text-sm text-slate-500">{t.dashboard.dzd}</p>
             </Card>
             <Card className="p-6">
-              <p className="text-sm text-slate-500 mb-1">Delivery Rate</p>
+              <p className="text-sm text-slate-500 mb-1">{t.dashboard.deliveryRate}</p>
               <p className="text-3xl font-bold text-[#22B14C]" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {deliveryRate}%
               </p>
-              <p className="text-sm text-slate-500">{deliveredOrders} of {totalOrders} orders</p>
+              <p className="text-sm text-slate-500">{deliveredOrders} {t.dashboard.of} {totalOrders}</p>
             </Card>
             <Card className="p-6">
-              <p className="text-sm text-slate-500 mb-1">Cancel Rate</p>
+              <p className="text-sm text-slate-500 mb-1">{t.dashboard.cancelRate}</p>
               <p className="text-3xl font-bold text-red-500" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {cancelRate}%
               </p>
-              <p className="text-sm text-slate-500">{cancelledOrders} cancelled</p>
+              <p className="text-sm text-slate-500">{cancelledOrders} {t.dashboard.cancelled}</p>
             </Card>
           </div>
 
@@ -118,10 +128,10 @@ export default function AnalyticsPage() {
             {/* Order Status Breakdown */}
             <Card className="p-6">
               <h3 className="text-lg font-bold text-[#0054A6] mb-4" style={{ fontFamily: 'var(--font-outfit)' }}>
-                Orders by Status
+                {t.dashboard.ordersByStatus}
               </h3>
               {totalOrders === 0 ? (
-                <p className="text-slate-500 text-center py-8">No orders yet</p>
+                <p className="text-slate-500 text-center py-8">{t.dashboard.noOrderData}</p>
               ) : (
                 <div className="space-y-4">
                   {Object.entries(ordersByStatus).map(([status, count]) => {
@@ -136,7 +146,7 @@ export default function AnalyticsPage() {
                     return (
                       <div key={status}>
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="capitalize text-slate-600">{status}</span>
+                          <span className="text-slate-600">{statusLabels[status]}</span>
                           <span className="font-medium">{count} ({percentage}%)</span>
                         </div>
                         <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -155,10 +165,10 @@ export default function AnalyticsPage() {
             {/* Top Products */}
             <Card className="p-6">
               <h3 className="text-lg font-bold text-[#0054A6] mb-4" style={{ fontFamily: 'var(--font-outfit)' }}>
-                Top Products
+                {t.dashboard.topProducts}
               </h3>
               {topProducts.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">No sales data yet</p>
+                <p className="text-slate-500 text-center py-8">{t.dashboard.noSalesData}</p>
               ) : (
                 <div className="space-y-3">
                   {topProducts.map(([name, quantity], index) => (
@@ -169,7 +179,7 @@ export default function AnalyticsPage() {
                         </span>
                         <span className="font-medium text-slate-900">{name}</span>
                       </div>
-                      <span className="text-[#0054A6] font-bold">{quantity} sold</span>
+                      <span className="text-[#0054A6] font-bold">{quantity} {t.dashboard.sold}</span>
                     </div>
                   ))}
                 </div>
@@ -179,10 +189,10 @@ export default function AnalyticsPage() {
             {/* Top Wilayas */}
             <Card className="p-6">
               <h3 className="text-lg font-bold text-[#0054A6] mb-4" style={{ fontFamily: 'var(--font-outfit)' }}>
-                Top Wilayas
+                {t.dashboard.topWilayas}
               </h3>
               {topWilayas.length === 0 ? (
-                <p className="text-slate-500 text-center py-8">No order data yet</p>
+                <p className="text-slate-500 text-center py-8">{t.dashboard.noOrderData}</p>
               ) : (
                 <div className="space-y-3">
                   {topWilayas.map(([wilaya, count], index) => (
@@ -193,7 +203,7 @@ export default function AnalyticsPage() {
                         </span>
                         <span className="font-medium text-slate-900">{wilaya}</span>
                       </div>
-                      <span className="text-[#0054A6] font-bold">{count} orders</span>
+                      <span className="text-[#0054A6] font-bold">{count} {t.dashboard.ordersCount}</span>
                     </div>
                   ))}
                 </div>
@@ -203,23 +213,23 @@ export default function AnalyticsPage() {
             {/* Quick Stats */}
             <Card className="p-6">
               <h3 className="text-lg font-bold text-[#0054A6] mb-4" style={{ fontFamily: 'var(--font-outfit)' }}>
-                Quick Stats
+                {t.dashboard.quickStats}
               </h3>
               <div className="space-y-4">
                 <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                  <span className="text-slate-600">Orders Today</span>
+                  <span className="text-slate-600">{t.dashboard.ordersToday}</span>
                   <span className="text-xl font-bold text-[#0054A6]">{stats?.ordersToday || 0}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                  <span className="text-slate-600">Pending Orders</span>
+                  <span className="text-slate-600">{t.dashboard.pendingOrders}</span>
                   <span className="text-xl font-bold text-[#F7941D]">{stats?.pendingOrders || 0}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                  <span className="text-slate-600">Monthly Revenue</span>
-                  <span className="text-xl font-bold text-[#22B14C]">{(stats?.monthlyRevenue || 0).toLocaleString()} DZD</span>
+                  <span className="text-slate-600">{t.dashboard.monthlyRevenue}</span>
+                  <span className="text-xl font-bold text-[#22B14C]">{(stats?.monthlyRevenue || 0).toLocaleString()} {t.dashboard.dzd}</span>
                 </div>
                 <div className="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
-                  <span className="text-slate-600">Total Products</span>
+                  <span className="text-slate-600">{t.dashboard.totalProducts}</span>
                   <span className="text-xl font-bold text-slate-900">{products?.length || 0}</span>
                 </div>
               </div>

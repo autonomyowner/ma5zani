@@ -5,15 +5,8 @@ import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { SignOutButton } from '@clerk/nextjs'
 import { Doc } from '@/convex/_generated/dataModel'
-
-const navItems = [
-  { label: 'Dashboard', href: '/dashboard' },
-  { label: 'Orders', href: '/dashboard/orders' },
-  { label: 'Products', href: '/dashboard/products' },
-  { label: 'Inventory', href: '/dashboard/inventory' },
-  { label: 'Analytics', href: '/dashboard/analytics' },
-  { label: 'Settings', href: '/dashboard/settings' },
-]
+import { useLanguage } from '@/lib/LanguageContext'
+import LanguageToggle from '@/components/ui/LanguageToggle'
 
 interface SidebarProps {
   seller: Doc<'sellers'> | null | undefined
@@ -21,11 +14,21 @@ interface SidebarProps {
 
 export default function Sidebar({ seller }: SidebarProps) {
   const pathname = usePathname()
+  const { t } = useLanguage()
+
+  const navItems = [
+    { label: t.dashboard.dashboardNav, href: '/dashboard' },
+    { label: t.dashboard.ordersNav, href: '/dashboard/orders' },
+    { label: t.dashboard.productsNav, href: '/dashboard/products' },
+    { label: t.dashboard.inventoryNav, href: '/dashboard/inventory' },
+    { label: t.dashboard.analyticsNav, href: '/dashboard/analytics' },
+    { label: t.dashboard.settingsNav, href: '/dashboard/settings' },
+  ]
 
   const planLabels: Record<string, string> = {
-    basic: 'Basic Plan',
-    plus: 'Plus Plan',
-    gros: 'Gros Plan',
+    basic: t.dashboard.basicPlan,
+    plus: t.dashboard.plusPlan,
+    gros: t.dashboard.grosPlan,
   }
 
   return (
@@ -74,9 +77,12 @@ export default function Sidebar({ seller }: SidebarProps) {
 
       {/* Bottom Section */}
       <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-100">
+        <div className="flex items-center justify-between mb-3 px-4">
+          <LanguageToggle />
+        </div>
         <div className="px-4 py-3">
           <p className="font-medium text-slate-900" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
-            {seller?.name || 'Loading...'}
+            {seller?.name || t.dashboard.loading}
           </p>
           <p className="text-sm text-slate-500">
             {seller ? planLabels[seller.plan] : '...'}
@@ -84,7 +90,7 @@ export default function Sidebar({ seller }: SidebarProps) {
         </div>
         <SignOutButton>
           <button className="w-full text-left px-4 py-3 text-slate-600 hover:text-red-600 font-medium transition-colors">
-            Sign Out
+            {t.dashboard.signOut}
           </button>
         </SignOutButton>
       </div>

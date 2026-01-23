@@ -6,6 +6,7 @@ import { useQuery, useMutation } from 'convex/react'
 import { useUser } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
+import { useLanguage } from '@/lib/LanguageContext'
 import Sidebar from '@/components/dashboard/Sidebar'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
@@ -14,6 +15,7 @@ import Card from '@/components/ui/Card'
 export default function InventoryPage() {
   const router = useRouter()
   const { user, isLoaded } = useUser()
+  const { t } = useLanguage()
   const seller = useQuery(api.sellers.getCurrentSellerProfile)
   const products = useQuery(api.products.getProducts)
   const updateStock = useMutation(api.products.updateStock)
@@ -24,7 +26,7 @@ export default function InventoryPage() {
   if (!isLoaded || seller === undefined) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-pulse text-slate-400">Loading...</div>
+        <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
       </div>
     )
   }
@@ -55,6 +57,15 @@ export default function InventoryPage() {
     }
   }
 
+  const getStatusLabel = (status: string) => {
+    const labels: Record<string, string> = {
+      active: t.dashboard.active,
+      low_stock: t.dashboard.lowStock,
+      out_of_stock: t.dashboard.outOfStock,
+    }
+    return labels[status] || status
+  }
+
   const lowStockProducts = products?.filter(p => p.status === 'low_stock') || []
   const outOfStockProducts = products?.filter(p => p.status === 'out_of_stock') || []
   const totalStock = products?.reduce((sum, p) => sum + p.stock, 0) || 0
@@ -67,9 +78,9 @@ export default function InventoryPage() {
         <header className="h-20 bg-white border-b border-slate-200 flex items-center px-8">
           <div>
             <h1 className="text-2xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-              Inventory
+              {t.dashboard.inventory}
             </h1>
-            <p className="text-slate-500 text-sm">Track and manage stock levels</p>
+            <p className="text-slate-500 text-sm">{t.dashboard.trackStock}</p>
           </div>
         </header>
 
@@ -77,25 +88,25 @@ export default function InventoryPage() {
           {/* Summary Cards */}
           <div className="grid md:grid-cols-4 gap-6 mb-8">
             <Card className="p-6">
-              <p className="text-sm text-slate-500 mb-1">Total Products</p>
+              <p className="text-sm text-slate-500 mb-1">{t.dashboard.totalProducts}</p>
               <p className="text-3xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {products?.length || 0}
               </p>
             </Card>
             <Card className="p-6">
-              <p className="text-sm text-slate-500 mb-1">Total Stock</p>
+              <p className="text-sm text-slate-500 mb-1">{t.dashboard.totalStock}</p>
               <p className="text-3xl font-bold text-slate-900" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {totalStock.toLocaleString()}
               </p>
             </Card>
             <Card className="p-6 border-l-4 border-l-[#F7941D]">
-              <p className="text-sm text-slate-500 mb-1">Low Stock</p>
+              <p className="text-sm text-slate-500 mb-1">{t.dashboard.lowStock}</p>
               <p className="text-3xl font-bold text-[#F7941D]" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {lowStockProducts.length}
               </p>
             </Card>
             <Card className="p-6 border-l-4 border-l-red-500">
-              <p className="text-sm text-slate-500 mb-1">Out of Stock</p>
+              <p className="text-sm text-slate-500 mb-1">{t.dashboard.outOfStock}</p>
               <p className="text-3xl font-bold text-red-500" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {outOfStockProducts.length}
               </p>
@@ -108,7 +119,7 @@ export default function InventoryPage() {
               {outOfStockProducts.length > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                   <p className="font-medium text-red-800">
-                    {outOfStockProducts.length} product(s) out of stock
+                    {outOfStockProducts.length} {t.dashboard.productsOutOfStock}
                   </p>
                   <p className="text-sm text-red-600">
                     {outOfStockProducts.map(p => p.name).join(', ')}
@@ -118,7 +129,7 @@ export default function InventoryPage() {
               {lowStockProducts.length > 0 && (
                 <div className="bg-[#F7941D]/10 border border-[#F7941D]/30 rounded-xl p-4">
                   <p className="font-medium text-[#D35400]">
-                    {lowStockProducts.length} product(s) running low
+                    {lowStockProducts.length} {t.dashboard.productsRunningLow}
                   </p>
                   <p className="text-sm text-[#D35400]/80">
                     {lowStockProducts.map(p => `${p.name} (${p.stock})`).join(', ')}
@@ -132,15 +143,15 @@ export default function InventoryPage() {
           <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100">
               <h2 className="text-lg font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-                Stock Levels
+                {t.dashboard.stockLevels}
               </h2>
             </div>
 
             {products?.length === 0 ? (
               <div className="p-12 text-center">
-                <p className="text-slate-500">No products in inventory</p>
+                <p className="text-slate-500">{t.dashboard.noProducts}</p>
                 <Button variant="primary" className="mt-4" onClick={() => router.push('/dashboard/products')}>
-                  Add Products
+                  {t.dashboard.addProduct}
                 </Button>
               </div>
             ) : (
@@ -148,11 +159,11 @@ export default function InventoryPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-slate-50">
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Product</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">SKU</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Current Stock</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">Update Stock</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{t.dashboard.product}</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{t.dashboard.sku}</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{t.dashboard.currentStock}</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{t.dashboard.status}</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{t.dashboard.updateStock}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -169,7 +180,7 @@ export default function InventoryPage() {
                         </td>
                         <td className="px-6 py-4">
                           <Badge variant={getStatusVariant(product.status)}>
-                            {product.status.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                            {getStatusLabel(product.status)}
                           </Badge>
                         </td>
                         <td className="px-6 py-4">
