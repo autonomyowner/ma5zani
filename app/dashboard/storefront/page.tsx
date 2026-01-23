@@ -8,7 +8,7 @@ import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
 import { getR2PublicUrl } from '@/lib/r2';
-import Sidebar from '@/components/dashboard/Sidebar';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import SlugInput from '@/components/ui/SlugInput';
@@ -177,34 +177,24 @@ export default function StorefrontPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Sidebar seller={seller} />
-
-      <main className="ml-64 min-h-screen">
-        <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8">
-          <div>
-            <h1 className="text-2xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-              {isRTL ? 'متجرك الإلكتروني' : 'Your Online Store'}
-            </h1>
-            <p className="text-slate-500 text-sm">
-              {isRTL
-                ? 'أنشئ صفحة متجرك الخاصة وشارك الرابط مع عملائك'
-                : 'Create your store page and share the link with customers'}
-            </p>
-          </div>
-          {storefront && storefront.isPublished && (
-            <a
-              href={`/${storefront.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2 bg-[#22B14C] text-white rounded-xl font-medium hover:opacity-90"
-            >
-              {isRTL ? 'عرض المتجر' : 'View Store'}
-            </a>
-          )}
-        </header>
-
-        <div className="p-8 max-w-4xl space-y-8">
+    <DashboardLayout
+      seller={seller}
+      title={isRTL ? 'متجرك الإلكتروني' : 'Your Online Store'}
+      subtitle={isRTL ? 'أنشئ صفحة متجرك الخاصة وشارك الرابط مع عملائك' : 'Create your store page and share the link with customers'}
+      headerActions={
+        storefront && storefront.isPublished ? (
+          <a
+            href={`/${storefront.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 lg:px-4 py-1.5 lg:py-2 bg-[#22B14C] text-white rounded-xl font-medium hover:opacity-90 text-xs lg:text-sm"
+          >
+            {isRTL ? 'عرض المتجر' : 'View Store'}
+          </a>
+        ) : undefined
+      }
+    >
+      <div className="max-w-4xl space-y-4 lg:space-y-8">
           {/* Step 1: Basic Info */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6">
         <div className="flex items-center gap-3 mb-6">
@@ -490,8 +480,7 @@ export default function StorefrontPage() {
           </div>
         </div>
       )}
-        </div>
-      </main>
-    </div>
+      </div>
+    </DashboardLayout>
   );
 }

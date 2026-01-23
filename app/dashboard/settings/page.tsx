@@ -6,7 +6,7 @@ import { useQuery, useMutation } from 'convex/react'
 import { useUser, UserProfile } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
 import { useLanguage } from '@/lib/LanguageContext'
-import Sidebar from '@/components/dashboard/Sidebar'
+import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -78,32 +78,24 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Sidebar seller={seller} />
-
-      <main className="ml-64 min-h-screen">
-        <header className="h-20 bg-white border-b border-slate-200 flex items-center px-8">
-          <div>
-            <h1 className="text-2xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-              {t.dashboard.settings}
-            </h1>
-            <p className="text-slate-500 text-sm">{t.dashboard.manageAccount}</p>
+    <DashboardLayout
+      seller={seller}
+      title={t.dashboard.settings}
+      subtitle={t.dashboard.manageAccount}
+    >
+      <div className="max-w-4xl space-y-4 lg:space-y-8">
+        {/* Profile Section */}
+        <Card className="p-4 lg:p-6">
+          <div className="flex items-center justify-between mb-4 lg:mb-6">
+            <h2 className="text-base lg:text-lg font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
+              {t.dashboard.businessProfile}
+            </h2>
+            {!isEditing && (
+              <Button variant="ghost" size="sm" onClick={handleEdit}>
+                {t.dashboard.edit}
+              </Button>
+            )}
           </div>
-        </header>
-
-        <div className="p-8 max-w-4xl">
-          {/* Profile Section */}
-          <Card className="p-6 mb-8">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-                {t.dashboard.businessProfile}
-              </h2>
-              {!isEditing && (
-                <Button variant="ghost" size="sm" onClick={handleEdit}>
-                  {t.dashboard.edit}
-                </Button>
-              )}
-            </div>
 
             {isEditing ? (
               <div className="space-y-4">
@@ -147,58 +139,57 @@ export default function SettingsPage() {
             )}
           </Card>
 
-          {/* Plan Section */}
-          <Card className="p-6 mb-8">
-            <h2 className="text-lg font-bold text-[#0054A6] mb-6" style={{ fontFamily: 'var(--font-outfit)' }}>
-              {t.dashboard.subscriptionPlan}
-            </h2>
+        {/* Plan Section */}
+        <Card className="p-4 lg:p-6">
+          <h2 className="text-base lg:text-lg font-bold text-[#0054A6] mb-4 lg:mb-6" style={{ fontFamily: 'var(--font-outfit)' }}>
+            {t.dashboard.subscriptionPlan}
+          </h2>
 
-            <div className="grid md:grid-cols-3 gap-4">
-              {plans.map((plan) => (
-                <button
-                  key={plan.id}
-                  onClick={() => handlePlanChange(plan.id)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all ${
-                    seller?.plan === plan.id
-                      ? 'border-[#0054A6] bg-[#0054A6]/5'
-                      : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-bold text-slate-900">{plan.name}</h3>
-                    {seller?.plan === plan.id && (
-                      <span className="text-xs bg-[#22B14C] text-white px-2 py-0.5 rounded-full">
-                        {t.dashboard.current}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xl font-bold text-[#0054A6]">
-                    {plan.price} <span className="text-sm font-normal text-slate-500">{t.dashboard.dzd}/mo</span>
-                  </p>
-                </button>
-              ))}
-            </div>
-          </Card>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
+            {plans.map((plan) => (
+              <button
+                key={plan.id}
+                onClick={() => handlePlanChange(plan.id)}
+                className={`p-3 lg:p-4 rounded-xl border-2 text-left transition-all ${
+                  seller?.plan === plan.id
+                    ? 'border-[#0054A6] bg-[#0054A6]/5'
+                    : 'border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-bold text-slate-900 text-sm lg:text-base">{plan.name}</h3>
+                  {seller?.plan === plan.id && (
+                    <span className="text-[10px] lg:text-xs bg-[#22B14C] text-white px-2 py-0.5 rounded-full">
+                      {t.dashboard.current}
+                    </span>
+                  )}
+                </div>
+                <p className="text-lg lg:text-xl font-bold text-[#0054A6]">
+                  {plan.price} <span className="text-xs lg:text-sm font-normal text-slate-500">{t.dashboard.dzd}/mo</span>
+                </p>
+              </button>
+            ))}
+          </div>
+        </Card>
 
-          {/* Clerk Profile Management */}
-          <Card className="p-6">
-            <h2 className="text-lg font-bold text-[#0054A6] mb-6" style={{ fontFamily: 'var(--font-outfit)' }}>
-              {t.dashboard.accountSecurity}
-            </h2>
-            <p className="text-slate-600 mb-4">
-              {t.dashboard.securityDescription}
-            </p>
-            <UserProfile
-              appearance={{
-                elements: {
-                  rootBox: 'w-full',
-                  card: 'shadow-none border border-slate-200 rounded-xl',
-                }
-              }}
-            />
-          </Card>
-        </div>
-      </main>
-    </div>
+        {/* Clerk Profile Management */}
+        <Card className="p-4 lg:p-6">
+          <h2 className="text-base lg:text-lg font-bold text-[#0054A6] mb-4 lg:mb-6" style={{ fontFamily: 'var(--font-outfit)' }}>
+            {t.dashboard.accountSecurity}
+          </h2>
+          <p className="text-slate-600 mb-4 text-sm lg:text-base">
+            {t.dashboard.securityDescription}
+          </p>
+          <UserProfile
+            appearance={{
+              elements: {
+                rootBox: 'w-full',
+                card: 'shadow-none border border-slate-200 rounded-xl',
+              }
+            }}
+          />
+        </Card>
+      </div>
+    </DashboardLayout>
   )
 }

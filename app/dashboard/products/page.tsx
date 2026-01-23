@@ -8,7 +8,7 @@ import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
 import { useLanguage } from '@/lib/LanguageContext'
 import { getR2PublicUrl } from '@/lib/r2'
-import Sidebar from '@/components/dashboard/Sidebar'
+import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -146,32 +146,26 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Sidebar seller={seller} />
-
-      <main className="ml-64 min-h-screen">
-        <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8">
-          <div>
-            <h1 className="text-2xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
-              {t.dashboard.products}
-            </h1>
-            <p className="text-slate-500 text-sm">{t.dashboard.manageProducts}</p>
-          </div>
-          <Button variant="primary" onClick={() => setShowAddModal(true)}>
-            {t.dashboard.addProduct}
-          </Button>
-        </header>
-
-        <div className="p-8">
-          {products?.length === 0 ? (
-            <Card className="p-12 text-center">
-              <p className="text-slate-500 mb-4">{t.dashboard.noProducts}</p>
-              <Button variant="primary" onClick={() => setShowAddModal(true)}>
-                {t.dashboard.addFirstProduct}
-              </Button>
-            </Card>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <DashboardLayout
+      seller={seller}
+      title={t.dashboard.products}
+      subtitle={t.dashboard.manageProducts}
+      headerActions={
+        <Button variant="primary" size="sm" onClick={() => setShowAddModal(true)} className="text-xs lg:text-sm">
+          {t.dashboard.addProduct}
+        </Button>
+      }
+    >
+      <div>
+        {products?.length === 0 ? (
+          <Card className="p-8 lg:p-12 text-center">
+            <p className="text-slate-500 mb-4">{t.dashboard.noProducts}</p>
+            <Button variant="primary" onClick={() => setShowAddModal(true)}>
+              {t.dashboard.addFirstProduct}
+            </Button>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
               {products?.map((product) => (
                 <Card key={product._id} className="overflow-hidden">
                   {/* Product Image */}
@@ -231,97 +225,96 @@ export default function ProductsPage() {
                     </div>
                   </div>
                 </Card>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Add/Edit Modal */}
-        {showAddModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
-              <div className="p-6">
-                <h2 className="text-xl font-bold text-[#0054A6] mb-6" style={{ fontFamily: 'var(--font-outfit)' }}>
-                  {editingProduct ? t.dashboard.editProduct : t.dashboard.addNewProduct}
-                </h2>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Product Images */}
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">
-                      {t.dashboard.productImages}
-                    </label>
-                    <ImageUpload
-                      value={formData.imageKeys}
-                      onChange={(keys) => setFormData({ ...formData, imageKeys: keys })}
-                      maxImages={5}
-                      folder="products"
-                    />
-                  </div>
-
-                  <Input
-                    id="name"
-                    label={t.dashboard.productName}
-                    placeholder="e.g., Wireless Earbuds"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                  <Input
-                    id="sku"
-                    label={t.dashboard.sku}
-                    placeholder="e.g., WE-001"
-                    value={formData.sku}
-                    onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
-                    required
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <Input
-                      id="stock"
-                      type="number"
-                      label={t.dashboard.stockQuantity}
-                      placeholder="0"
-                      value={formData.stock}
-                      onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                      required
-                    />
-                    <Input
-                      id="price"
-                      type="number"
-                      label={`${t.dashboard.price} (${t.dashboard.dzd})`}
-                      placeholder="0"
-                      value={formData.price}
-                      onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-slate-900 mb-2">
-                      {t.dashboard.description} ({t.dashboard.optional})
-                    </label>
-                    <textarea
-                      className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-[#00AEEF] focus:outline-none resize-none"
-                      rows={3}
-                      placeholder="..."
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="flex gap-3 pt-4">
-                    <Button type="button" variant="ghost" className="flex-1" onClick={resetForm}>
-                      {t.dashboard.cancel}
-                    </Button>
-                    <Button type="submit" variant="primary" className="flex-1" disabled={isSubmitting}>
-                      {isSubmitting ? t.dashboard.saving : editingProduct ? t.dashboard.update : t.dashboard.save}
-                    </Button>
-                  </div>
-                </form>
-              </div>
-            </Card>
+            ))}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+
+      {/* Add/Edit Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="p-4 lg:p-6">
+              <h2 className="text-lg lg:text-xl font-bold text-[#0054A6] mb-4 lg:mb-6" style={{ fontFamily: 'var(--font-outfit)' }}>
+                {editingProduct ? t.dashboard.editProduct : t.dashboard.addNewProduct}
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Product Images */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-900 mb-2">
+                    {t.dashboard.productImages}
+                  </label>
+                  <ImageUpload
+                    value={formData.imageKeys}
+                    onChange={(keys) => setFormData({ ...formData, imageKeys: keys })}
+                    maxImages={5}
+                    folder="products"
+                  />
+                </div>
+
+                <Input
+                  id="name"
+                  label={t.dashboard.productName}
+                  placeholder="e.g., Wireless Earbuds"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+                <Input
+                  id="sku"
+                  label={t.dashboard.sku}
+                  placeholder="e.g., WE-001"
+                  value={formData.sku}
+                  onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
+                  required
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    id="stock"
+                    type="number"
+                    label={t.dashboard.stockQuantity}
+                    placeholder="0"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                    required
+                  />
+                  <Input
+                    id="price"
+                    type="number"
+                    label={`${t.dashboard.price} (${t.dashboard.dzd})`}
+                    placeholder="0"
+                    value={formData.price}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-900 mb-2">
+                    {t.dashboard.description} ({t.dashboard.optional})
+                  </label>
+                  <textarea
+                    className="w-full px-4 py-3 rounded-xl border-2 border-slate-200 focus:border-[#00AEEF] focus:outline-none resize-none text-sm lg:text-base"
+                    rows={3}
+                    placeholder="..."
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button type="button" variant="ghost" className="flex-1" onClick={resetForm}>
+                    {t.dashboard.cancel}
+                  </Button>
+                  <Button type="submit" variant="primary" className="flex-1" disabled={isSubmitting}>
+                    {isSubmitting ? t.dashboard.saving : editingProduct ? t.dashboard.update : t.dashboard.save}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Card>
+        </div>
+      )}
+    </DashboardLayout>
   )
 }

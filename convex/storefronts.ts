@@ -1,11 +1,16 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSeller } from "./auth";
+import { requireSeller, getCurrentSeller } from "./auth";
 
 export const getMyStorefront = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    // Use getCurrentSeller instead of requireSeller to avoid throwing
+    // This prevents client-side crashes when seller isn't found
+    const seller = await getCurrentSeller(ctx);
+    if (!seller) {
+      return null;
+    }
 
     const storefront = await ctx.db
       .query("storefronts")
