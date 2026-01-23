@@ -164,6 +164,7 @@ export const getAdminStats = query({
     const sellers = await ctx.db.query("sellers").collect();
     const orders = await ctx.db.query("orders").collect();
     const products = await ctx.db.query("products").collect();
+    const storefronts = await ctx.db.query("storefronts").collect();
 
     const totalRevenue = orders
       .filter((o) => o.status === "delivered")
@@ -179,13 +180,43 @@ export const getAdminStats = query({
       gros: sellers.filter((s) => s.plan === "gros").length,
     };
 
+    const publishedStorefronts = storefronts.filter((s) => s.isPublished).length;
+
     return {
       totalSellers: sellers.length,
       totalOrders: orders.length,
       totalProducts: products.length,
+      totalStorefronts: storefronts.length,
+      publishedStorefronts,
       totalRevenue,
       pendingOrders,
       planCounts,
     };
+  },
+});
+
+// Get all storefronts with seller info
+export const getAllStorefronts = query({
+  args: { password: v.string() },
+  handler: async (ctx, args) => {
+    if (args.password !== ADMIN_PASSWORD) {
+      throw new Error("Unauthorized");
+    }
+
+    const storefronts = await ctx.db.query("storefronts").collect();
+
+    // Get seller info for each storefront
+    const storefrontsWithSeller = await Promise.all(
+      storefronts.map(async (storefront) => {
+        const seller = await ctx.db.get(storefront.sellerId);
+        return {
+          ...storefront,
+          sellerName: seller?.name || "Unknown",
+          sellerEmail: seller?.email || "Unknown",
+        };
+      })
+    );
+
+    return storefrontsWithSeller;
   },
 });

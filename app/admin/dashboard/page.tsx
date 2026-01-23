@@ -63,6 +63,11 @@ export default function AdminDashboard() {
               </Link>
             </li>
             <li>
+              <Link href="/admin/storefronts" className="block px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-700 font-medium">
+                Storefronts
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/orders" className="block px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-700 font-medium">
                 All Orders
               </Link>
@@ -103,12 +108,19 @@ export default function AdminDashboard() {
 
         <div className="p-8">
           {/* Stats Grid */}
-          <div className="grid md:grid-cols-4 gap-6 mb-8">
+          <div className="grid md:grid-cols-5 gap-6 mb-8">
             <Card className="p-6 bg-slate-800 border-slate-700">
               <p className="text-sm text-slate-400 mb-1">Total Sellers</p>
               <p className="text-3xl font-bold text-white" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {stats?.totalSellers || 0}
               </p>
+            </Card>
+            <Card className="p-6 bg-slate-800 border-slate-700">
+              <p className="text-sm text-slate-400 mb-1">Storefronts</p>
+              <p className="text-3xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
+                {stats?.totalStorefronts || 0}
+              </p>
+              <p className="text-sm text-slate-400">{stats?.publishedStorefronts || 0} published</p>
             </Card>
             <Card className="p-6 bg-slate-800 border-slate-700">
               <p className="text-sm text-slate-400 mb-1">Total Orders</p>
@@ -161,6 +173,11 @@ export default function AdminDashboard() {
                 <Link href="/admin/sellers">
                   <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700">
                     Manage Sellers
+                  </Button>
+                </Link>
+                <Link href="/admin/storefronts">
+                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700">
+                    View Storefronts ({stats?.publishedStorefronts || 0} live)
                   </Button>
                 </Link>
                 <Link href="/admin/orders">

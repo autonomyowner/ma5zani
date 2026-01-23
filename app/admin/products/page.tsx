@@ -90,6 +90,11 @@ export default function AdminProductsPage() {
               </Link>
             </li>
             <li>
+              <Link href="/admin/storefronts" className="block px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-700 font-medium">
+                Storefronts
+              </Link>
+            </li>
+            <li>
               <Link href="/admin/orders" className="block px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-700 font-medium">
                 All Orders
               </Link>
@@ -97,6 +102,11 @@ export default function AdminProductsPage() {
             <li>
               <Link href="/admin/products" className="block px-4 py-3 rounded-xl bg-[#0054A6] text-white font-medium">
                 All Products
+              </Link>
+            </li>
+            <li>
+              <Link href="/admin/chats" className="block px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-700 font-medium">
+                Support Chats
               </Link>
             </li>
           </ul>
