@@ -69,6 +69,8 @@ export default function AdminChats() {
     )
   }
 
+  const isLoading = chats === undefined
+
   return (
     <div className="min-h-screen bg-slate-900">
       {/* Sidebar */}
@@ -136,12 +138,17 @@ export default function AdminChats() {
         <div className="flex h-[calc(100vh-80px)]">
           {/* Chat List */}
           <div className="w-80 border-r border-slate-700 overflow-y-auto bg-slate-800/50">
-            {chats?.length === 0 && (
+            {isLoading && (
+              <div className="p-6 text-center text-slate-400">
+                <div className="animate-pulse">Loading chats...</div>
+              </div>
+            )}
+            {!isLoading && chats?.length === 0 && (
               <div className="p-6 text-center text-slate-400">
                 No chats yet
               </div>
             )}
-            {chats?.map((chat) => (
+            {chats && chats.map((chat) => (
               <button
                 key={chat._id}
                 onClick={() => setSelectedChatId(chat._id)}
