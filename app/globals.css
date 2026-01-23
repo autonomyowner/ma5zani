@@ -1,0 +1,105 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --deep-blue: #0054A6;
+  --bright-blue: #00AEEF;
+  --orange: #F7941D;
+  --dark-orange: #D35400;
+  --brown: #B8864C;
+  --green: #22B14C;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-cairo), var(--font-plus-jakarta), system-ui, sans-serif;
+  color: #0F172A;
+  background-color: #FFFFFF;
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-outfit), var(--font-cairo), system-ui, sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* RTL Support */
+[dir="rtl"] body {
+  font-family: var(--font-cairo), var(--font-plus-jakarta), system-ui, sans-serif;
+}
+
+[dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6 {
+  font-family: var(--font-cairo), var(--font-outfit), system-ui, sans-serif;
+}
+
+/* LTR Support */
+[dir="ltr"] body {
+  font-family: var(--font-plus-jakarta), system-ui, sans-serif;
+}
+
+[dir="ltr"] h1, [dir="ltr"] h2, [dir="ltr"] h3, [dir="ltr"] h4, [dir="ltr"] h5, [dir="ltr"] h6 {
+  font-family: var(--font-outfit), system-ui, sans-serif;
+}
+
+/* Animation utilities */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Stagger animations */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+
+/* Focus styles */
+input:focus, button:focus, a:focus {
+  outline: 2px solid var(--bright-blue);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(0, 174, 239, 0.2);
+  color: var(--deep-blue);
+}

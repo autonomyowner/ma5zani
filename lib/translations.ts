@@ -1,0 +1,451 @@
+export const translations = {
+  ar: {
+    // Navbar
+    nav: {
+      features: 'المميزات',
+      howItWorks: 'كيف يعمل',
+      pricing: 'الأسعار',
+      testimonials: 'آراء العملاء',
+      login: 'تسجيل الدخول',
+      getStarted: 'ابدأ الآن',
+    },
+    // Hero
+    hero: {
+      tagline: 'حلول التوصيل للتجارة الإلكترونية في الجزائر',
+      title1: 'خزّنها.',
+      title2: 'وصّلها.',
+      title3: 'وسّعها.',
+      description: 'الحل الذكي للتخزين والتوصيل الذي يدير مخزونك وتغليفك وتوصيلك عبر جميع الولايات الـ 58. أنت تبيع، نحن نوصل.',
+      startTrial: 'ابدأ تجربة مجانية',
+      seeHow: 'شاهد كيف يعمل',
+      activeSellers: 'بائع نشط',
+      wilayasCovered: 'ولاية مغطاة',
+    },
+    // Stats
+    stats: {
+      warehouses: 'موقع مستودع',
+      ordersDaily: 'طلب يومياً',
+      deliveryRate: 'نسبة نجاح التوصيل',
+    },
+    // Features
+    features: {
+      sectionTag: 'لماذا تختار مخزني',
+      sectionTitle: 'كل ما تحتاجه للنمو',
+      sectionDesc: 'ركز على البيع بينما نتولى نحن اللوجستيات. منصتنا توفر كل الأدوات التي تحتاجها لتجارة إلكترونية ناجحة.',
+      items: [
+        {
+          number: '01',
+          title: 'تخزين على مستوى الوطن',
+          description: 'خزّن منتجاتك في مستودعاتنا الموزعة استراتيجياً عبر الجزائر. قلل أوقات التوصيل والتكاليف.',
+        },
+        {
+          number: '02',
+          title: 'مخزون ذكي',
+          description: 'تتبع المخزون في الوقت الفعلي، تنبيهات انخفاض المخزون، واقتراحات إعادة الطلب التلقائية.',
+        },
+        {
+          number: '03',
+          title: 'توصيل سريع',
+          description: 'خيارات التوصيل في نفس اليوم واليوم التالي للمدن الكبرى. توصيل قياسي 3-5 أيام لجميع الولايات.',
+        },
+        {
+          number: '04',
+          title: 'تغليف احترافي',
+          description: 'خيارات تغليف بعلامتك التجارية مع معالجة دقيقة. منتجاتك تصل بحالة ممتازة.',
+        },
+        {
+          number: '05',
+          title: 'الدفع عند الاستلام',
+          description: 'دعم الدفع عند الاستلام - الطريقة المفضلة للمتسوقين الجزائريين. تحويل سريع لحسابك.',
+        },
+        {
+          number: '06',
+          title: 'لوحة تحليلات',
+          description: 'تتبع المبيعات ومعدلات التوصيل والمنتجات الشائعة ورؤى العملاء. قرارات مبنية على البيانات.',
+        },
+      ],
+    },
+    // How It Works
+    howItWorks: {
+      sectionTag: 'عملية بسيطة',
+      sectionTitle: 'كيف يعمل',
+      sectionDesc: 'ابدأ في دقائق. بدون إعداد معقد، بدون رسوم خفية.',
+      steps: [
+        {
+          number: '1',
+          title: 'أرسل منتجاتك',
+          description: 'أرسل مخزونك إلى أقرب مستودع لنا. نستلم ونفحص ونخزن كل شيء بأمان.',
+        },
+        {
+          number: '2',
+          title: 'أضف وبِع',
+          description: 'أضف المنتجات لمتجرك. اربطها بمنصتك الحالية أو استخدم لوحة تحكم البائع.',
+        },
+        {
+          number: '3',
+          title: 'نحن نغلف ونشحن',
+          description: 'عند وصول طلب، نختار ونغلف ونرسل خلال ساعات. معالجة احترافية مضمونة.',
+        },
+        {
+          number: '4',
+          title: 'تتبع واستلم أموالك',
+          description: 'تتبع في الوقت الفعلي لك ولعملائك. تحويل سريع بعد تأكيد التوصيل.',
+        },
+      ],
+    },
+    // Pricing
+    pricing: {
+      sectionTag: 'أسعار شفافة',
+      sectionTitle: 'اختر خطتك',
+      sectionDesc: 'جميع الأسعار بالدينار الجزائري. بدون رسوم خفية. ألغِ في أي وقت.',
+      mostPopular: 'الأكثر شعبية',
+      getStarted: 'ابدأ الآن',
+      plans: [
+        {
+          name: 'أساسي',
+          price: '2,500',
+          period: '/شهر',
+          description: 'مثالي للبائعين الصغار في البداية',
+          features: [
+            'حتى 50 منتج',
+            'موقع مستودع واحد',
+            'توصيل قياسي (3-5 أيام)',
+            'صور منتجات أساسية',
+            'دعم بالبريد الإلكتروني',
+          ],
+        },
+        {
+          name: 'بلس',
+          price: '6,500',
+          period: '/شهر',
+          description: 'للأعمال النامية بحجم أعلى',
+          features: [
+            'حتى 200 منتج',
+            '3 مواقع مستودعات',
+            'توصيل سريع (1-2 يوم)',
+            'صور منتجات احترافية',
+            'دعم هاتفي + بريد إلكتروني',
+            'تحليلات الطلبات',
+          ],
+        },
+        {
+          name: 'جملة',
+          price: '15,000',
+          period: '/شهر',
+          description: 'مستوى مؤسسي للبائعين الكبار',
+          features: [
+            'منتجات غير محدودة',
+            'جميع مواقع المستودعات',
+            'توصيل في نفس اليوم (المدن الكبرى)',
+            'صور + فيديو احترافي',
+            'دعم أولوية 24/7',
+            'تحليلات متقدمة',
+            'مدير حساب مخصص',
+          ],
+        },
+      ],
+    },
+    // Testimonials
+    testimonials: {
+      sectionTag: 'قصص نجاح',
+      sectionTitle: 'موثوق من البائعين',
+      sectionDesc: 'انضم لمئات البائعين الجزائريين الذين وسّعوا أعمالهم مع مخزني.',
+      items: [
+        {
+          quote: 'مخزني غيّر عملي. انتقلت من شحن 10 طلبات يومياً إلى 100+ بدون توظيف أحد. المستودع في وهران يعني توصيل أسرع لعملائي.',
+          name: 'كريم ب.',
+          business: 'بائع إلكترونيات، وهران',
+          metric: '10 أضعاف الطلبات',
+        },
+        {
+          quote: 'تحصيل الدفع عند الاستلام والتحويل السريع غيّر اللعبة. كنت أنتظر أسابيع للدفع. الآن أركز على التوريد بينما مخزني يتولى الباقي.',
+          name: 'سارة م.',
+          business: 'بوتيك أزياء، الجزائر العاصمة',
+          metric: 'تحويل خلال 48 ساعة',
+        },
+        {
+          quote: 'التغليف الاحترافي جعل علامتي تبدو فاخرة. شكاوى العملاء انخفضت لصفر تقريباً. لوحة التحليلات تساعدني على فهم ما يباع وأين.',
+          name: 'يوسف ك.',
+          business: 'متجر مستلزمات المنزل، قسنطينة',
+          metric: '95% رضا',
+        },
+      ],
+    },
+    // CTA
+    cta: {
+      title: 'مستعد لتوسيع عملك؟',
+      description: 'انضم لأكثر من 500 بائع جزائري يثقون بمخزني للتوصيل. ابدأ تجربتك المجانية اليوم - بدون بطاقة ائتمان.',
+      startTrial: 'ابدأ تجربة مجانية',
+      viewPricing: 'عرض الأسعار',
+      trialInfo: 'تجربة 14 يوم مجانية — بدون رسوم إعداد — ألغِ في أي وقت',
+    },
+    // Footer
+    footer: {
+      description: 'الحل الذكي للتوصيل لبائعي التجارة الإلكترونية الجزائريين. خزّن، وصّل، ووسّع بسهولة.',
+      email: 'البريد الإلكتروني:',
+      phone: 'الهاتف:',
+      product: 'المنتج',
+      company: 'الشركة',
+      support: 'الدعم',
+      legal: 'قانوني',
+      productLinks: {
+        features: 'المميزات',
+        pricing: 'الأسعار',
+        howItWorks: 'كيف يعمل',
+        testimonials: 'آراء العملاء',
+      },
+      companyLinks: {
+        about: 'من نحن',
+        careers: 'وظائف',
+        blog: 'المدونة',
+        contact: 'اتصل بنا',
+      },
+      supportLinks: {
+        helpCenter: 'مركز المساعدة',
+        sellerGuide: 'دليل البائع',
+        apiDocs: 'وثائق API',
+        status: 'الحالة',
+      },
+      legalLinks: {
+        privacy: 'سياسة الخصوصية',
+        terms: 'شروط الخدمة',
+        cookies: 'سياسة الكوكيز',
+      },
+      deliverTo: 'نوصل إلى',
+      moreWilayas: '+ 46 ولاية أخرى',
+      copyright: '2024 مخزني. جميع الحقوق محفوظة.',
+      madeIn: 'صُنع بإخلاص في الجزائر',
+    },
+    // Language toggle
+    langToggle: {
+      ar: 'عربي',
+      en: 'EN',
+    },
+  },
+  en: {
+    // Navbar
+    nav: {
+      features: 'Features',
+      howItWorks: 'How It Works',
+      pricing: 'Pricing',
+      testimonials: 'Testimonials',
+      login: 'Log In',
+      getStarted: 'Get Started',
+    },
+    // Hero
+    hero: {
+      tagline: 'E-commerce Fulfillment for Algeria',
+      title1: 'Store it.',
+      title2: 'Ship it.',
+      title3: 'Scale it.',
+      description: 'The smart fulfillment solution that handles your inventory, packing, and delivery across all 58 wilayas. You sell, we ship.',
+      startTrial: 'Start Free Trial',
+      seeHow: 'See How It Works',
+      activeSellers: 'Active Sellers',
+      wilayasCovered: 'Wilayas Covered',
+    },
+    // Stats
+    stats: {
+      warehouses: 'Warehouse Locations',
+      ordersDaily: 'Orders Processed Daily',
+      deliveryRate: 'Delivery Success Rate',
+    },
+    // Features
+    features: {
+      sectionTag: 'Why Choose ma5zani',
+      sectionTitle: 'Everything you need to scale',
+      sectionDesc: 'Focus on selling while we handle the logistics. Our platform provides all the tools you need for successful e-commerce.',
+      items: [
+        {
+          number: '01',
+          title: 'Nationwide Warehousing',
+          description: 'Store your products in our strategically located warehouses across Algeria. Reduce delivery times and costs.',
+        },
+        {
+          number: '02',
+          title: 'Smart Inventory',
+          description: 'Real-time stock tracking, low-stock alerts, and automatic reorder suggestions to never miss a sale.',
+        },
+        {
+          number: '03',
+          title: 'Express Delivery',
+          description: 'Same-day and next-day delivery options to major cities. Standard 3-5 day delivery to all 58 wilayas.',
+        },
+        {
+          number: '04',
+          title: 'Professional Packing',
+          description: 'Branded packaging options with careful handling. Your products arrive in perfect condition.',
+        },
+        {
+          number: '05',
+          title: 'Cash on Delivery',
+          description: 'Support for COD payments - the preferred method for Algerian shoppers. Quick settlement to your account.',
+        },
+        {
+          number: '06',
+          title: 'Analytics Dashboard',
+          description: 'Track sales, delivery rates, popular products, and customer insights. Data-driven decisions made easy.',
+        },
+      ],
+    },
+    // How It Works
+    howItWorks: {
+      sectionTag: 'Simple Process',
+      sectionTitle: 'How It Works',
+      sectionDesc: 'Get started in minutes. No complex setup, no hidden fees.',
+      steps: [
+        {
+          number: '1',
+          title: 'Send Your Products',
+          description: 'Ship your inventory to our nearest warehouse. We receive, inspect, and store everything safely.',
+        },
+        {
+          number: '2',
+          title: 'List & Sell',
+          description: 'Add products to your store. Sync with your existing platform or use our seller dashboard.',
+        },
+        {
+          number: '3',
+          title: 'We Pack & Ship',
+          description: 'When an order comes in, we pick, pack, and dispatch within hours. Professional handling guaranteed.',
+        },
+        {
+          number: '4',
+          title: 'Track & Get Paid',
+          description: 'Real-time tracking for you and your customers. Fast settlement once delivery is confirmed.',
+        },
+      ],
+    },
+    // Pricing
+    pricing: {
+      sectionTag: 'Transparent Pricing',
+      sectionTitle: 'Choose Your Plan',
+      sectionDesc: 'All prices in DZD. No hidden fees. Cancel anytime.',
+      mostPopular: 'Most Popular',
+      getStarted: 'Get Started',
+      plans: [
+        {
+          name: 'Basic',
+          price: '2,500',
+          period: '/month',
+          description: 'Perfect for small sellers just getting started',
+          features: [
+            'Up to 50 products',
+            '1 warehouse location',
+            'Standard delivery (3-5 days)',
+            'Basic product photos',
+            'Email support',
+          ],
+        },
+        {
+          name: 'Plus',
+          price: '6,500',
+          period: '/month',
+          description: 'For growing businesses with higher volume',
+          features: [
+            'Up to 200 products',
+            '3 warehouse locations',
+            'Express delivery (1-2 days)',
+            'Professional product photos',
+            'Phone + email support',
+            'Order analytics',
+          ],
+        },
+        {
+          name: 'Gros',
+          price: '15,000',
+          period: '/month',
+          description: 'Enterprise-level for high-volume sellers',
+          features: [
+            'Unlimited products',
+            'All warehouse locations',
+            'Same-day delivery (major cities)',
+            'Professional photos + video',
+            'Priority support 24/7',
+            'Advanced analytics',
+            'Dedicated account manager',
+          ],
+        },
+      ],
+    },
+    // Testimonials
+    testimonials: {
+      sectionTag: 'Success Stories',
+      sectionTitle: 'Trusted by Sellers',
+      sectionDesc: 'Join hundreds of Algerian sellers who scaled their business with ma5zani.',
+      items: [
+        {
+          quote: "ma5zani transformed my business. I went from shipping 10 orders a day to 100+ without hiring anyone. The warehouse in Oran means my customers get their products faster.",
+          name: 'Karim B.',
+          business: 'Electronics Seller, Oran',
+          metric: '10x more orders',
+        },
+        {
+          quote: "The COD collection and quick settlement is a game-changer. I used to wait weeks to get paid. Now I focus on sourcing products while ma5zani handles everything else.",
+          name: 'Sarah M.',
+          business: 'Fashion Boutique, Algiers',
+          metric: '48h settlement',
+        },
+        {
+          quote: "Professional packaging made my brand look premium. Customer complaints dropped to almost zero. The analytics dashboard helps me understand what's selling and where.",
+          name: 'Youcef K.',
+          business: 'Home Goods Store, Constantine',
+          metric: '95% satisfaction',
+        },
+      ],
+    },
+    // CTA
+    cta: {
+      title: 'Ready to Scale Your Business?',
+      description: 'Join 500+ Algerian sellers who trust ma5zani with their fulfillment. Start your free trial today - no credit card required.',
+      startTrial: 'Start Free Trial',
+      viewPricing: 'View Pricing',
+      trialInfo: '14-day free trial — No setup fees — Cancel anytime',
+    },
+    // Footer
+    footer: {
+      description: 'The smart fulfillment solution for Algerian e-commerce sellers. Store, ship, and scale with ease.',
+      email: 'Email:',
+      phone: 'Phone:',
+      product: 'Product',
+      company: 'Company',
+      support: 'Support',
+      legal: 'Legal',
+      productLinks: {
+        features: 'Features',
+        pricing: 'Pricing',
+        howItWorks: 'How It Works',
+        testimonials: 'Testimonials',
+      },
+      companyLinks: {
+        about: 'About Us',
+        careers: 'Careers',
+        blog: 'Blog',
+        contact: 'Contact',
+      },
+      supportLinks: {
+        helpCenter: 'Help Center',
+        sellerGuide: 'Seller Guide',
+        apiDocs: 'API Docs',
+        status: 'Status',
+      },
+      legalLinks: {
+        privacy: 'Privacy Policy',
+        terms: 'Terms of Service',
+        cookies: 'Cookie Policy',
+      },
+      deliverTo: 'We Deliver To',
+      moreWilayas: '+ 46 more wilayas',
+      copyright: '2024 ma5zani. All rights reserved.',
+      madeIn: 'Made with dedication in Algeria',
+    },
+    // Language toggle
+    langToggle: {
+      ar: 'AR',
+      en: 'English',
+    },
+  },
+}
+
+export type Language = 'ar' | 'en'
+export type Translations = typeof translations.ar

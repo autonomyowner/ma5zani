@@ -1,0 +1,101 @@
+'use client'
+
+import Link from 'next/link'
+import Image from 'next/image'
+import Button from '@/components/ui/Button'
+import { useLanguage } from '@/lib/LanguageContext'
+
+export default function Hero() {
+  const { t, dir, language } = useLanguage()
+
+  return (
+    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+      {/* Background Decorations */}
+      <div className="absolute inset-0 -z-10">
+        {/* Large circle */}
+        <div className={`absolute -top-40 w-[600px] h-[600px] rounded-full bg-[#00AEEF]/5 ${dir === 'rtl' ? '-left-40' : '-right-40'}`} />
+        {/* Small circle */}
+        <div className={`absolute top-1/2 w-[300px] h-[300px] rounded-full bg-[#F7941D]/5 ${dir === 'rtl' ? '-right-20' : '-left-20'}`} />
+        {/* Grid pattern */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 opacity-[0.03]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, #0054A6 1px, transparent 1px),
+              linear-gradient(to bottom, #0054A6 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px'
+          }}
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-20">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Text Content */}
+          <div className={`space-y-8 ${dir === 'rtl' ? 'lg:order-1' : ''}`}>
+            <div className="space-y-4">
+              <p
+                className="text-[#F7941D] font-semibold tracking-wide uppercase opacity-0 animate-fade-in-up"
+                style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}
+              >
+                {t.hero.tagline}
+              </p>
+              <h1
+                className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#0054A6] leading-tight opacity-0 animate-fade-in-up stagger-1"
+                style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}
+              >
+                {t.hero.title1}
+                <br />
+                <span className="text-[#00AEEF]">{t.hero.title2}</span>
+                <br />
+                {t.hero.title3}
+              </h1>
+              <p className={`text-xl text-slate-600 opacity-0 animate-fade-in-up stagger-2 ${dir === 'rtl' ? 'max-w-xl' : 'max-w-lg'}`}>
+                {t.hero.description}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-4 opacity-0 animate-fade-in-up stagger-3">
+              <Link href="/signup">
+                <Button variant="primary" size="lg">
+                  {t.hero.startTrial}
+                </Button>
+              </Link>
+              <Link href="#how-it-works">
+                <Button variant="outline" size="lg">
+                  {t.hero.seeHow}
+                </Button>
+              </Link>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="flex items-center gap-6 pt-4 opacity-0 animate-fade-in-up stagger-4">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-[#22B14C]" style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}>500+</span>
+                <span className="text-slate-600 text-sm">{t.hero.activeSellers}</span>
+              </div>
+              <div className="w-px h-8 bg-slate-200" />
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold text-[#22B14C]" style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}>58</span>
+                <span className="text-slate-600 text-sm">{t.hero.wilayasCovered}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Hero Image */}
+          <div className={`relative hidden lg:flex items-center justify-center ${dir === 'rtl' ? 'lg:order-2' : ''}`}>
+            <div className="relative w-full max-w-lg animate-float">
+              <Image
+                src="/hero.png"
+                alt="ma5zani - E-commerce Fulfillment"
+                width={600}
+                height={500}
+                className="w-full h-auto drop-shadow-2xl"
+                priority
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
