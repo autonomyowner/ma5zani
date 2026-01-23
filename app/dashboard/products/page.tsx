@@ -58,32 +58,48 @@ export default function ProductsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate required fields
+    if (!formData.name.trim() || !formData.sku.trim() || !formData.stock || !formData.price) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    const stockNum = parseInt(formData.stock)
+    const priceNum = parseFloat(formData.price)
+
+    if (isNaN(stockNum) || isNaN(priceNum)) {
+      alert('Please enter valid numbers for stock and price')
+      return
+    }
+
     setIsSubmitting(true)
 
     try {
       if (editingProduct) {
         await updateProduct({
           productId: editingProduct,
-          name: formData.name,
-          sku: formData.sku,
-          stock: parseInt(formData.stock),
-          price: parseFloat(formData.price),
-          description: formData.description || undefined,
+          name: formData.name.trim(),
+          sku: formData.sku.trim(),
+          stock: stockNum,
+          price: priceNum,
+          description: formData.description?.trim() || undefined,
           imageKeys: formData.imageKeys.length > 0 ? formData.imageKeys : undefined,
         })
       } else {
         await createProduct({
-          name: formData.name,
-          sku: formData.sku,
-          stock: parseInt(formData.stock),
-          price: parseFloat(formData.price),
-          description: formData.description || undefined,
+          name: formData.name.trim(),
+          sku: formData.sku.trim(),
+          stock: stockNum,
+          price: priceNum,
+          description: formData.description?.trim() || undefined,
           imageKeys: formData.imageKeys.length > 0 ? formData.imageKeys : undefined,
         })
       }
       resetForm()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to save product:', error)
+      alert(error?.message || 'Failed to save product. Please try again.')
     }
     setIsSubmitting(false)
   }
