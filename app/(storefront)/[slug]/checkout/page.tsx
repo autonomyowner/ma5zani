@@ -35,7 +35,11 @@ export default function CheckoutPage() {
 
   return (
     <StorefrontLayout storefront={storefront}>
-      <CheckoutForm slug={slug} accentColor={storefront.theme.accentColor} />
+      <CheckoutForm
+        slug={slug}
+        accentColor={storefront.theme.accentColor}
+        metaPixelId={storefront.metaPixelId}
+      />
     </StorefrontLayout>
   );
 }

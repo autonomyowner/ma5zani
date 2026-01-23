@@ -1,7 +1,8 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 import { Doc } from '@/convex/_generated/dataModel';
 import { getR2PublicUrl } from '@/lib/r2';
 import StorefrontHeader from './StorefrontHeader';
@@ -14,6 +15,15 @@ interface StorefrontLayoutProps {
 
 export default function StorefrontLayout({ storefront, children }: StorefrontLayoutProps) {
   const logoUrl = storefront.logoKey ? getR2PublicUrl(storefront.logoKey) : null;
+  const metaPixelId = storefront.metaPixelId;
+
+  // Initialize Meta Pixel when component mounts
+  useEffect(() => {
+    if (metaPixelId && typeof window !== 'undefined' && (window as unknown as { fbq?: unknown }).fbq) {
+      // Track PageView when storefront loads
+      (window as unknown as { fbq: (action: string, event: string) => void }).fbq('track', 'PageView');
+    }
+  }, [metaPixelId]);
 
   return (
     <div
@@ -23,6 +33,38 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
         '--accent-color': storefront.theme.accentColor,
       } as React.CSSProperties}
     >
+      {/* Meta Pixel Script */}
+      {metaPixelId && (
+        <>
+          <Script
+            id="meta-pixel"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                !function(f,b,e,v,n,t,s)
+                {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '${metaPixelId}');
+                fbq('track', 'PageView');
+              `,
+            }}
+          />
+          <noscript>
+            <img
+              height="1"
+              width="1"
+              style={{ display: 'none' }}
+              src={`https://www.facebook.com/tr?id=${metaPixelId}&ev=PageView&noscript=1`}
+              alt=""
+            />
+          </noscript>
+        </>
+      )}
       <StorefrontHeader
         slug={storefront.slug}
         boutiqueName={storefront.boutiqueName}

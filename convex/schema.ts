@@ -92,6 +92,8 @@ export default defineSchema({
       autoFulfillment: v.boolean(),
       showOutOfStock: v.boolean(),
     }),
+    // Tracking & Analytics
+    metaPixelId: v.optional(v.string()),
     isPublished: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),

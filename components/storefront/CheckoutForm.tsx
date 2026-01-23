@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
@@ -11,9 +11,21 @@ import WilayaSelect from './WilayaSelect';
 interface CheckoutFormProps {
   slug: string;
   accentColor: string;
+  metaPixelId?: string;
 }
 
-export default function CheckoutForm({ slug, accentColor }: CheckoutFormProps) {
+// Helper to track Meta Pixel events
+const trackPixelEvent = (eventName: string, data?: Record<string, unknown>) => {
+  if (typeof window !== 'undefined' && (window as unknown as { fbq?: unknown }).fbq) {
+    (window as unknown as { fbq: (action: string, event: string, data?: Record<string, unknown>) => void }).fbq(
+      'track',
+      eventName,
+      data
+    );
+  }
+};
+
+export default function CheckoutForm({ slug, accentColor, metaPixelId }: CheckoutFormProps) {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
   const createOrder = useMutation(api.publicOrders.createPublicOrder);
@@ -24,6 +36,20 @@ export default function CheckoutForm({ slug, accentColor }: CheckoutFormProps) {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Track InitiateCheckout when checkout page loads
+  useEffect(() => {
+    if (metaPixelId && items.length > 0) {
+      trackPixelEvent('InitiateCheckout', {
+        value: totalPrice,
+        currency: 'DZD',
+        content_ids: items.map((item) => item.productId),
+        content_type: 'product',
+        num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [metaPixelId]); // Only run once when checkout page loads
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,6 +78,17 @@ export default function CheckoutForm({ slug, accentColor }: CheckoutFormProps) {
         wilaya,
         deliveryAddress,
       });
+
+      // Track Meta Pixel Purchase event
+      if (metaPixelId) {
+        trackPixelEvent('Purchase', {
+          value: totalPrice,
+          currency: 'DZD',
+          content_ids: items.map((item) => item.productId),
+          content_type: 'product',
+          num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+        });
+      }
 
       clearCart();
       router.push(`/${slug}/order-success/${result.orderIds[0]}`);

@@ -146,6 +146,7 @@ export const updateStorefront = mutation({
       autoFulfillment: v.boolean(),
       showOutOfStock: v.boolean(),
     })),
+    metaPixelId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const seller = await requireSeller(ctx);
@@ -167,6 +168,7 @@ export const updateStorefront = mutation({
     if (args.theme !== undefined) updates.theme = args.theme;
     if (args.socialLinks !== undefined) updates.socialLinks = args.socialLinks;
     if (args.settings !== undefined) updates.settings = args.settings;
+    if (args.metaPixelId !== undefined) updates.metaPixelId = args.metaPixelId;
 
     await ctx.db.patch(storefront._id, updates);
     return storefront._id;

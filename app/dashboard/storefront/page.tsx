@@ -34,8 +34,10 @@ export default function StorefrontPage() {
   const [primaryColor, setPrimaryColor] = useState('#0054A6');
   const [accentColor, setAccentColor] = useState('#F7941D');
   const [logoKey, setLogoKey] = useState('');
+  const [metaPixelId, setMetaPixelId] = useState('');
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [savingPixel, setSavingPixel] = useState(false);
 
   // Initialize form when storefront loads
   useEffect(() => {
@@ -46,6 +48,7 @@ export default function StorefrontPage() {
       setPrimaryColor(storefront.theme.primaryColor);
       setAccentColor(storefront.theme.accentColor);
       setLogoKey(storefront.logoKey || '');
+      setMetaPixelId(storefront.metaPixelId || '');
     }
   }, [storefront]);
 
@@ -138,6 +141,22 @@ export default function StorefrontPage() {
     } catch (error) {
       console.error('Publish error:', error);
       alert(error instanceof Error ? error.message : 'Failed to publish');
+    }
+  };
+
+  const handleSavePixel = async () => {
+    if (!storefront) return;
+
+    setSavingPixel(true);
+    try {
+      await updateStorefront({
+        metaPixelId: metaPixelId.trim() || undefined,
+      });
+    } catch (error) {
+      console.error('Save pixel error:', error);
+      alert(isRTL ? 'فشل حفظ البكسل' : 'Failed to save pixel');
+    } finally {
+      setSavingPixel(false);
     }
   };
 
@@ -416,6 +435,59 @@ export default function StorefrontPage() {
                 : 'Add at least one product to your store before publishing'}
             </p>
           )}
+        </div>
+      )}
+
+      {/* Step 4: Settings (Meta Pixel) */}
+      {storefront && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold">4</div>
+            <h2 className="text-lg font-semibold text-slate-900">
+              {isRTL ? 'الإعدادات' : 'Settings'}
+            </h2>
+          </div>
+
+          {/* Meta Pixel Section */}
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                {isRTL ? 'Meta Pixel ID' : 'Meta Pixel ID'}
+              </label>
+              <p className="text-xs text-slate-500 mb-2">
+                {isRTL
+                  ? 'أضف معرف البكسل الخاص بك من Meta لتتبع التحويلات والإعلانات'
+                  : 'Add your Meta Pixel ID to track conversions and ads performance'}
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  value={metaPixelId}
+                  onChange={(e) => setMetaPixelId(e.target.value)}
+                  placeholder={isRTL ? 'مثال: 123456789012345' : 'e.g., 123456789012345'}
+                  className="flex-1"
+                />
+                <Button onClick={handleSavePixel} disabled={savingPixel} variant="secondary">
+                  {savingPixel ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : (isRTL ? 'حفظ' : 'Save')}
+                </Button>
+              </div>
+              {storefront.metaPixelId && (
+                <p className="text-xs text-green-600 mt-2">
+                  {isRTL ? 'البكسل مفعّل' : 'Pixel is active'}
+                </p>
+              )}
+            </div>
+
+            {/* Help text */}
+            <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-600">
+              <p className="font-medium mb-2">{isRTL ? 'كيفية الحصول على Meta Pixel ID:' : 'How to get your Meta Pixel ID:'}</p>
+              <ol className={`list-decimal ${isRTL ? 'mr-4' : 'ml-4'} space-y-1`}>
+                <li>{isRTL ? 'اذهب إلى Meta Events Manager' : 'Go to Meta Events Manager'}</li>
+                <li>{isRTL ? 'انقر على "Connect Data Sources"' : 'Click on "Connect Data Sources"'}</li>
+                <li>{isRTL ? 'اختر "Web" ثم "Meta Pixel"' : 'Select "Web" then "Meta Pixel"'}</li>
+                <li>{isRTL ? 'انسخ Pixel ID (رقم مكون من 15-16 رقم)' : 'Copy the Pixel ID (15-16 digit number)'}</li>
+              </ol>
+            </div>
+          </div>
         </div>
       )}
         </div>
