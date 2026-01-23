@@ -1,19 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
+import { useUser } from '@clerk/nextjs';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
 import { getR2PublicUrl } from '@/lib/r2';
+import Sidebar from '@/components/dashboard/Sidebar';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import SlugInput from '@/components/ui/SlugInput';
 
 export default function StorefrontPage() {
-  const { language } = useLanguage();
+  const router = useRouter();
+  const { user, isLoaded } = useUser();
+  const { language, t } = useLanguage();
   const isRTL = language === 'ar';
 
+  const seller = useQuery(api.sellers.getCurrentSellerProfile);
   const storefront = useQuery(api.storefronts.getMyStorefront);
   const products = useQuery(api.products.getProducts);
   const createStorefront = useMutation(api.storefronts.createStorefront);
@@ -138,30 +144,49 @@ export default function StorefrontPage() {
   const storefrontProducts = products?.filter(p => p.showOnStorefront) || [];
   const availableProducts = products?.filter(p => !p.showOnStorefront) || [];
 
-  if (storefront === undefined || products === undefined) {
+  if (!isLoaded || seller === undefined || storefront === undefined || products === undefined) {
     return (
-      <div className="animate-pulse space-y-4">
-        <div className="h-8 bg-slate-200 rounded w-1/3"></div>
-        <div className="h-64 bg-slate-200 rounded-xl"></div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
       </div>
     );
   }
 
-  return (
-    <div className="space-y-8 max-w-4xl">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'var(--font-outfit)' }}>
-          {isRTL ? 'متجرك الإلكتروني' : 'Your Online Store'}
-        </h1>
-        <p className="text-slate-500 mt-1">
-          {isRTL
-            ? 'أنشئ صفحة متجرك الخاصة وشارك الرابط مع عملائك'
-            : 'Create your store page and share the link with customers'}
-        </p>
-      </div>
+  if (seller === null && user) {
+    router.push('/onboarding');
+    return null;
+  }
 
-      {/* Step 1: Basic Info */}
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <Sidebar seller={seller} />
+
+      <main className="ml-64 min-h-screen">
+        <header className="h-20 bg-white border-b border-slate-200 flex items-center justify-between px-8">
+          <div>
+            <h1 className="text-2xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
+              {isRTL ? 'متجرك الإلكتروني' : 'Your Online Store'}
+            </h1>
+            <p className="text-slate-500 text-sm">
+              {isRTL
+                ? 'أنشئ صفحة متجرك الخاصة وشارك الرابط مع عملائك'
+                : 'Create your store page and share the link with customers'}
+            </p>
+          </div>
+          {storefront && storefront.isPublished && (
+            <a
+              href={`/${storefront.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 bg-[#22B14C] text-white rounded-xl font-medium hover:opacity-90"
+            >
+              {isRTL ? 'عرض المتجر' : 'View Store'}
+            </a>
+          )}
+        </header>
+
+        <div className="p-8 max-w-4xl space-y-8">
+          {/* Step 1: Basic Info */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-8 h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold">1</div>
@@ -393,6 +418,8 @@ export default function StorefrontPage() {
           )}
         </div>
       )}
+        </div>
+      </main>
     </div>
   );
 }
