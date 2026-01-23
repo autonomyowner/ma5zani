@@ -77,7 +77,10 @@ export default function DashboardPage() {
           <StatsCards stats={displayStats} />
 
           <div className="grid md:grid-cols-3 gap-4">
-            <button className="p-4 bg-white rounded-xl border-2 border-dashed border-slate-200 hover:border-[#0054A6] hover:bg-[#0054A6]/5 transition-all text-left">
+            <button
+              onClick={() => router.push('/dashboard/products')}
+              className="p-4 bg-white rounded-xl border-2 border-dashed border-slate-200 hover:border-[#0054A6] hover:bg-[#0054A6]/5 transition-all text-left"
+            >
               <span
                 className="text-lg font-bold text-[#0054A6] block"
                 style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
@@ -86,7 +89,10 @@ export default function DashboardPage() {
               </span>
               <span className="text-sm text-slate-500">{t.dashboard.uploadInventory}</span>
             </button>
-            <button className="p-4 bg-white rounded-xl border-2 border-dashed border-slate-200 hover:border-[#F7941D] hover:bg-[#F7941D]/5 transition-all text-left">
+            <button
+              onClick={() => router.push('/dashboard/orders')}
+              className="p-4 bg-white rounded-xl border-2 border-dashed border-slate-200 hover:border-[#F7941D] hover:bg-[#F7941D]/5 transition-all text-left"
+            >
               <span
                 className="text-lg font-bold text-[#F7941D] block"
                 style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
@@ -95,7 +101,10 @@ export default function DashboardPage() {
               </span>
               <span className="text-sm text-slate-500">{t.dashboard.manualEntry}</span>
             </button>
-            <button className="p-4 bg-white rounded-xl border-2 border-dashed border-slate-200 hover:border-[#00AEEF] hover:bg-[#00AEEF]/5 transition-all text-left">
+            <button
+              onClick={() => router.push('/dashboard/analytics')}
+              className="p-4 bg-white rounded-xl border-2 border-dashed border-slate-200 hover:border-[#00AEEF] hover:bg-[#00AEEF]/5 transition-all text-left"
+            >
               <span
                 className="text-lg font-bold text-[#00AEEF] block"
                 style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
