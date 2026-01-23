@@ -1,5 +1,6 @@
 'use client'
 
+// Human support chat - v2
 import { useState, useRef, useEffect } from 'react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
