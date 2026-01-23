@@ -299,9 +299,13 @@ export default function StorefrontPage() {
               <div key={product._id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 border border-slate-100">
                 <button
                   onClick={() => handleToggleProduct(product._id, product.showOnStorefront || false)}
-                  className={`w-12 h-6 rounded-full transition-colors relative ${product.showOnStorefront ? 'bg-green-500' : 'bg-slate-300'}`}
+                  className="w-12 h-6 rounded-full transition-colors relative"
+                  style={{ backgroundColor: product.showOnStorefront ? '#22c55e' : '#cbd5e1' }}
                 >
-                  <span className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${product.showOnStorefront ? 'right-1' : 'left-1'}`} />
+                  <span
+                    className="absolute top-1 w-4 h-4 bg-white rounded-full transition-transform"
+                    style={{ right: product.showOnStorefront ? '4px' : 'auto', left: product.showOnStorefront ? 'auto' : '4px' }}
+                  />
                 </button>
 
                 <div className="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
