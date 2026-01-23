@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
 import { getR2PublicUrl } from '@/lib/r2';
 import Button from '@/components/ui/Button';
@@ -112,11 +113,16 @@ export default function StorefrontPage() {
     }
   };
 
-  const handleToggleProduct = async (productId: string, currentValue: boolean) => {
-    await updateProduct({
-      productId: productId as any,
-      showOnStorefront: !currentValue,
-    });
+  const handleToggleProduct = async (productId: Id<'products'>, currentValue: boolean) => {
+    try {
+      await updateProduct({
+        productId,
+        showOnStorefront: !currentValue,
+      });
+    } catch (error) {
+      console.error('Toggle error:', error);
+      alert('Failed to update product visibility');
+    }
   };
 
   const handlePublish = async () => {
