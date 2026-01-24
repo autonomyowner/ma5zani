@@ -75,7 +75,7 @@ export default function Hero() {
               </div>
               <div className="w-px h-8 bg-slate-200" />
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-[#22B14C]" style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}>58</span>
+                <span className="text-2xl font-bold text-[#22B14C]" style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}>69</span>
                 <span className="text-slate-600 text-sm">{t.hero.wilayasCovered}</span>
               </div>
             </div>
