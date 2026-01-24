@@ -390,7 +390,7 @@ export default function StorefrontPage() {
                   rel="noopener noreferrer"
                   className="text-xs sm:text-sm text-[#0054A6] hover:underline break-all"
                 >
-                  ma5zani.vercel.app/{storefront.slug}
+                  ma5zani.com/{storefront.slug}
                 </a>
               )}
             </div>
