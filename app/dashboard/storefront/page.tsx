@@ -196,17 +196,17 @@ export default function StorefrontPage() {
     >
       <div className="max-w-4xl space-y-4 lg:space-y-8">
           {/* Step 1: Basic Info */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-8 h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold">1</div>
-          <h2 className="text-lg font-semibold text-slate-900">
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6">
+        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">1</div>
+          <h2 className="text-base sm:text-lg font-semibold text-slate-900">
             {isRTL ? 'معلومات المتجر' : 'Store Info'}
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Left: Form */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 {isRTL ? 'اسم المتجر' : 'Store Name'} *
@@ -240,72 +240,72 @@ export default function StorefrontPage() {
           </div>
 
           {/* Right: Logo & Colors */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
                 {isRTL ? 'شعار المتجر' : 'Store Logo'}
               </label>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 {logoKey ? (
-                  <div className="relative">
-                    <img src={getR2PublicUrl(logoKey)} alt="Logo" className="w-16 h-16 object-cover rounded-xl border" />
-                    <button onClick={() => setLogoKey('')} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full text-xs">×</button>
+                  <div className="relative flex-shrink-0">
+                    <img src={getR2PublicUrl(logoKey)} alt="Logo" className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-xl border" />
+                    <button onClick={() => setLogoKey('')} className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white rounded-full text-xs">×</button>
                   </div>
                 ) : (
-                  <div className="w-16 h-16 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs flex-shrink-0">
                     {isRTL ? 'شعار' : 'Logo'}
                   </div>
                 )}
                 <div>
                   <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-upload" disabled={uploading} />
-                  <label htmlFor="logo-upload" className="inline-block px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium cursor-pointer hover:bg-slate-200">
-                    {uploading ? (isRTL ? 'جاري الرفع...' : 'Uploading...') : (isRTL ? 'رفع صورة' : 'Upload')}
+                  <label htmlFor="logo-upload" className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-slate-100 text-slate-700 rounded-lg text-xs sm:text-sm font-medium cursor-pointer hover:bg-slate-200">
+                    {uploading ? (isRTL ? 'جاري...' : 'Uploading...') : (isRTL ? 'رفع' : 'Upload')}
                   </label>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  {isRTL ? 'اللون الرئيسي' : 'Primary Color'}
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-1">
+                  {isRTL ? 'اللون الرئيسي' : 'Primary'}
                 </label>
                 <div className="flex items-center gap-2">
-                  <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-10 h-10 rounded border cursor-pointer" />
-                  <input type="text" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono" />
+                  <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-8 h-8 sm:w-10 sm:h-10 rounded border cursor-pointer flex-shrink-0" />
+                  <input type="text" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-full min-w-0 px-2 sm:px-3 py-1.5 sm:py-2 border border-slate-200 rounded-lg text-xs sm:text-sm font-mono" />
                 </div>
               </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-slate-700 mb-1">
-                  {isRTL ? 'لون الأزرار' : 'Button Color'}
+              <div>
+                <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-1">
+                  {isRTL ? 'لون الأزرار' : 'Buttons'}
                 </label>
                 <div className="flex items-center gap-2">
-                  <input type="color" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="w-10 h-10 rounded border cursor-pointer" />
-                  <input type="text" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono" />
+                  <input type="color" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="w-8 h-8 sm:w-10 sm:h-10 rounded border cursor-pointer flex-shrink-0" />
+                  <input type="text" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="w-full min-w-0 px-2 sm:px-3 py-1.5 sm:py-2 border border-slate-200 rounded-lg text-xs sm:text-sm font-mono" />
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-slate-100">
-          <Button onClick={handleSave} disabled={saving}>
-            {saving ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : (isRTL ? 'حفظ' : 'Save')}
+        <div className="mt-4 sm:mt-6 pt-4 border-t border-slate-100">
+          <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
+            {saving ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : (isRTL ? 'حفظ التغييرات' : 'Save Changes')}
           </Button>
         </div>
       </div>
 
       {/* Step 2: Products */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold">2</div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              {isRTL ? 'اختر المنتجات' : 'Choose Products'}
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6">
+        <div className="flex items-center justify-between gap-2 mb-4 sm:mb-6">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">2</div>
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">
+              {isRTL ? 'اختر المنتجات' : 'Products'}
             </h2>
           </div>
-          <a href="/dashboard/products" className="text-sm text-[#0054A6] hover:underline">
-            {isRTL ? '+ إضافة منتج جديد' : '+ Add new product'}
+          <a href="/dashboard/products" className="text-xs sm:text-sm text-[#0054A6] hover:underline whitespace-nowrap">
+            {isRTL ? '+ إضافة' : '+ Add'}
           </a>
         </div>
 
@@ -330,34 +330,34 @@ export default function StorefrontPage() {
             )}
 
             {products?.map((product) => (
-              <div key={product._id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-slate-50 border border-slate-100">
+              <div key={product._id} className="flex items-center gap-2 sm:gap-4 p-2 sm:p-3 rounded-xl hover:bg-slate-50 border border-slate-100">
                 <button
                   onClick={() => handleToggleProduct(product._id, product.showOnStorefront || false)}
-                  className="w-12 h-6 rounded-full transition-colors relative"
+                  className="w-10 h-5 sm:w-12 sm:h-6 rounded-full transition-colors relative flex-shrink-0"
                   style={{ backgroundColor: product.showOnStorefront ? '#22c55e' : '#cbd5e1' }}
                 >
                   <span
-                    className="absolute top-1 w-4 h-4 bg-white rounded-full transition-transform"
-                    style={{ right: product.showOnStorefront ? '4px' : 'auto', left: product.showOnStorefront ? 'auto' : '4px' }}
+                    className="absolute top-0.5 sm:top-1 w-4 h-4 bg-white rounded-full transition-transform"
+                    style={{ right: product.showOnStorefront ? '2px' : 'auto', left: product.showOnStorefront ? 'auto' : '2px' }}
                   />
                 </button>
 
-                <div className="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
                   {product.imageKeys && product.imageKeys.length > 0 ? (
                     <img src={getR2PublicUrl(product.imageKeys[0])} alt={product.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-[10px] sm:text-xs">
                       {isRTL ? 'صورة' : 'IMG'}
                     </div>
                   )}
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-slate-900 truncate">{product.name}</h3>
-                  <p className="text-sm text-slate-500">{product.price.toLocaleString()} {isRTL ? 'دج' : 'DZD'}</p>
+                  <h3 className="font-medium text-slate-900 truncate text-sm sm:text-base">{product.name}</h3>
+                  <p className="text-xs sm:text-sm text-slate-500">{product.price.toLocaleString()} {isRTL ? 'دج' : 'DZD'}</p>
                 </div>
 
-                <span className={`text-xs px-2 py-1 rounded-full ${product.showOnStorefront ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                <span className={`hidden sm:inline text-xs px-2 py-1 rounded-full flex-shrink-0 ${product.showOnStorefront ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
                   {product.showOnStorefront ? (isRTL ? 'ظاهر' : 'Visible') : (isRTL ? 'مخفي' : 'Hidden')}
                 </span>
               </div>
@@ -368,40 +368,40 @@ export default function StorefrontPage() {
 
       {/* Step 3: Publish */}
       {storefront && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold">3</div>
-            <h2 className="text-lg font-semibold text-slate-900">
-              {isRTL ? 'نشر المتجر' : 'Publish Store'}
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">3</div>
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">
+              {isRTL ? 'نشر المتجر' : 'Publish'}
             </h2>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="space-y-4">
             <div>
-              <p className="text-slate-600">
+              <p className="text-sm sm:text-base text-slate-600">
                 {storefront.isPublished
-                  ? (isRTL ? 'متجرك منشور ومتاح للعملاء' : 'Your store is live and accessible')
-                  : (isRTL ? 'متجرك غير منشور بعد' : 'Your store is not published yet')}
+                  ? (isRTL ? 'متجرك منشور ومتاح للعملاء' : 'Your store is live')
+                  : (isRTL ? 'متجرك غير منشور بعد' : 'Not published yet')}
               </p>
               {storefront.isPublished && (
                 <a
                   href={`/${storefront.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-[#0054A6] hover:underline"
+                  className="text-xs sm:text-sm text-[#0054A6] hover:underline break-all"
                 >
                   ma5zani.vercel.app/{storefront.slug}
                 </a>
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {storefront.isPublished && (
                 <a
                   href={`/${storefront.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50"
+                  className="px-3 sm:px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 text-sm"
                 >
                   {isRTL ? 'معاينة' : 'Preview'}
                 </a>
@@ -413,7 +413,7 @@ export default function StorefrontPage() {
               >
                 {storefront.isPublished
                   ? (isRTL ? 'إلغاء النشر' : 'Unpublish')
-                  : (isRTL ? 'نشر المتجر' : 'Publish Store')}
+                  : (isRTL ? 'نشر' : 'Publish')}
               </Button>
             </div>
           </div>
@@ -430,10 +430,10 @@ export default function StorefrontPage() {
 
       {/* Step 4: Settings (Meta Pixel) */}
       {storefront && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-8 h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold">4</div>
-            <h2 className="text-lg font-semibold text-slate-900">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">4</div>
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">
               {isRTL ? 'الإعدادات' : 'Settings'}
             </h2>
           </div>
@@ -442,41 +442,45 @@ export default function StorefrontPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                {isRTL ? 'Meta Pixel ID' : 'Meta Pixel ID'}
+                Meta Pixel ID
               </label>
               <p className="text-xs text-slate-500 mb-2">
                 {isRTL
-                  ? 'أضف معرف البكسل الخاص بك من Meta لتتبع التحويلات والإعلانات'
-                  : 'Add your Meta Pixel ID to track conversions and ads performance'}
+                  ? 'أضف معرف البكسل لتتبع التحويلات'
+                  : 'Add your Pixel ID to track conversions'}
               </p>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   value={metaPixelId}
                   onChange={(e) => setMetaPixelId(e.target.value)}
-                  placeholder={isRTL ? 'مثال: 123456789012345' : 'e.g., 123456789012345'}
+                  placeholder={isRTL ? '123456789012345' : '123456789012345'}
                   className="flex-1"
                 />
-                <Button onClick={handleSavePixel} disabled={savingPixel} variant="secondary">
-                  {savingPixel ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : (isRTL ? 'حفظ' : 'Save')}
+                <Button onClick={handleSavePixel} disabled={savingPixel} variant="secondary" className="w-full sm:w-auto">
+                  {savingPixel ? (isRTL ? 'جاري...' : 'Saving...') : (isRTL ? 'حفظ' : 'Save')}
                 </Button>
               </div>
               {storefront.metaPixelId && (
                 <p className="text-xs text-green-600 mt-2">
-                  {isRTL ? 'البكسل مفعّل' : 'Pixel is active'}
+                  {isRTL ? 'البكسل مفعّل' : 'Pixel active'}
                 </p>
               )}
             </div>
 
-            {/* Help text */}
-            <div className="bg-slate-50 rounded-xl p-4 text-sm text-slate-600">
-              <p className="font-medium mb-2">{isRTL ? 'كيفية الحصول على Meta Pixel ID:' : 'How to get your Meta Pixel ID:'}</p>
-              <ol className={`list-decimal ${isRTL ? 'mr-4' : 'ml-4'} space-y-1`}>
-                <li>{isRTL ? 'اذهب إلى Meta Events Manager' : 'Go to Meta Events Manager'}</li>
-                <li>{isRTL ? 'انقر على "Connect Data Sources"' : 'Click on "Connect Data Sources"'}</li>
-                <li>{isRTL ? 'اختر "Web" ثم "Meta Pixel"' : 'Select "Web" then "Meta Pixel"'}</li>
-                <li>{isRTL ? 'انسخ Pixel ID (رقم مكون من 15-16 رقم)' : 'Copy the Pixel ID (15-16 digit number)'}</li>
-              </ol>
-            </div>
+            {/* Help text - collapsible on mobile */}
+            <details className="bg-slate-50 rounded-xl">
+              <summary className="p-3 sm:p-4 text-sm font-medium text-slate-600 cursor-pointer">
+                {isRTL ? 'كيفية الحصول على Pixel ID' : 'How to get your Pixel ID'}
+              </summary>
+              <div className="px-3 sm:px-4 pb-3 sm:pb-4 text-xs sm:text-sm text-slate-600">
+                <ol className={`list-decimal ${isRTL ? 'mr-4' : 'ml-4'} space-y-1`}>
+                  <li>{isRTL ? 'اذهب إلى Meta Events Manager' : 'Go to Meta Events Manager'}</li>
+                  <li>{isRTL ? 'انقر على "Connect Data Sources"' : 'Click "Connect Data Sources"'}</li>
+                  <li>{isRTL ? 'اختر "Web" ثم "Meta Pixel"' : 'Select "Web" → "Meta Pixel"'}</li>
+                  <li>{isRTL ? 'انسخ Pixel ID' : 'Copy the Pixel ID'}</li>
+                </ol>
+              </div>
+            </details>
           </div>
         </div>
       )}
