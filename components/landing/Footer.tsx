@@ -67,7 +67,7 @@ export default function Footer() {
                 <span className="text-white font-medium">{t.footer.email}</span> contact@ma5zani.dz
               </p>
               <p className="text-slate-400">
-                <span className="text-white font-medium">{t.footer.phone}</span> +213 555 123 456
+                <span className="text-white font-medium">{t.footer.phone}</span> <span dir="ltr">+213 658 39 96 44</span>
               </p>
             </div>
           </div>
