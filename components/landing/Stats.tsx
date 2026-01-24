@@ -7,7 +7,7 @@ export default function Stats() {
 
   const stats = [
     { number: '12', label: t.stats.warehouses, suffix: '' },
-    { number: '50', label: t.stats.ordersDaily, suffix: 'K+' },
+    { number: '7/7', label: t.stats.availability, suffix: '24h' },
     { number: '99.2', label: t.stats.deliveryRate, suffix: '%' },
   ]
 

@@ -25,7 +25,7 @@ export const translations = {
     // Stats
     stats: {
       warehouses: 'موقع مستودع',
-      ordersDaily: 'طلب يومياً',
+      availability: 'متوفرون دائماً',
       deliveryRate: 'نسبة نجاح التوصيل',
     },
     // Features
@@ -367,7 +367,7 @@ export const translations = {
     // Stats
     stats: {
       warehouses: 'Warehouse Locations',
-      ordersDaily: 'Orders Processed Daily',
+      availability: 'Always Available',
       deliveryRate: 'Delivery Success Rate',
     },
     // Features
