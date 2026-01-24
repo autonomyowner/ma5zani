@@ -24,7 +24,7 @@ export const translations = {
     },
     // Stats
     stats: {
-      warehouses: 'موقع مستودع',
+      freeReturns: 'رسوم الإرجاع',
       availability: 'متوفرون دائماً',
       deliveryRate: 'نسبة نجاح التوصيل',
     },
@@ -366,7 +366,7 @@ export const translations = {
     },
     // Stats
     stats: {
-      warehouses: 'Warehouse Locations',
+      freeReturns: 'Return Fees',
       availability: 'Always Available',
       deliveryRate: 'Delivery Success Rate',
     },

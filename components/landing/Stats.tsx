@@ -6,7 +6,7 @@ export default function Stats() {
   const { t } = useLanguage()
 
   const stats = [
-    { number: '12', label: t.stats.warehouses, suffix: '' },
+    { number: '0', label: t.stats.freeReturns, suffix: 'DZD' },
     { number: '7/7', label: t.stats.availability, suffix: '24h' },
     { number: '99.2', label: t.stats.deliveryRate, suffix: '%' },
   ]
