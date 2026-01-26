@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { Doc } from '@/convex/_generated/dataModel';
 import { useCart } from '@/lib/CartContext';
 import { getR2PublicUrl } from '@/lib/r2';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface ProductCardProps {
   product: Doc<'products'>;
@@ -15,6 +16,8 @@ export default function ProductCard({ product, accentColor }: ProductCardProps) 
   const params = useParams();
   const slug = params.slug as string;
   const { addItem, getItemQuantity } = useCart();
+  const { language } = useLanguage();
+  const isRTL = language === 'ar';
   const quantity = getItemQuantity(product._id);
 
   const images = product.imageKeys && product.imageKeys.length > 0 ? product.imageKeys : [];
@@ -40,7 +43,7 @@ export default function ProductCard({ product, accentColor }: ProductCardProps) 
 
   return (
     <Link href={`/${slug}/product/${product._id}`} className="block">
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden group hover:shadow-lg transition-shadow">
+      <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 overflow-hidden group hover:shadow-lg transition-shadow">
         {/* Image */}
         <div className="aspect-square bg-slate-100 relative overflow-hidden">
           {imageUrl ? (
@@ -51,7 +54,7 @@ export default function ProductCard({ product, accentColor }: ProductCardProps) 
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-slate-300">
-              <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 sm:w-16 sm:h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
@@ -59,7 +62,7 @@ export default function ProductCard({ product, accentColor }: ProductCardProps) 
 
           {/* Multiple Images Indicator */}
           {images.length > 1 && (
-            <span className="absolute bottom-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-lg">
+            <span className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 bg-black/60 text-white text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md sm:rounded-lg">
               +{images.length - 1}
             </span>
           )}
@@ -67,37 +70,37 @@ export default function ProductCard({ product, accentColor }: ProductCardProps) 
           {/* Sale Badge */}
           {isOnSale && !isOutOfStock && (
             <span
-              className="absolute top-3 left-3 px-2 py-1 text-xs font-semibold text-white rounded-lg"
+              className="absolute top-2 left-2 sm:top-3 sm:left-3 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-semibold text-white rounded-md sm:rounded-lg"
               style={{ backgroundColor: accentColor }}
             >
-              Sale
+              {isRTL ? 'تخفيض' : 'Sale'}
             </span>
           )}
 
           {/* Out of Stock Badge */}
           {isOutOfStock && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span className="px-4 py-2 bg-white text-slate-900 font-semibold rounded-lg">
-                Out of Stock
+              <span className="px-2 py-1 sm:px-4 sm:py-2 bg-white text-slate-900 font-semibold rounded-lg text-xs sm:text-sm">
+                {isRTL ? 'نفذ المخزون' : 'Out of Stock'}
               </span>
             </div>
           )}
         </div>
 
         {/* Content */}
-        <div className="p-4">
-          <h3 className="font-semibold text-slate-900 mb-2 line-clamp-2 group-hover:text-slate-700 transition-colors">
+        <div className="p-2.5 sm:p-4">
+          <h3 className="font-medium sm:font-semibold text-slate-900 text-xs sm:text-base mb-1 sm:mb-2 line-clamp-2 leading-tight group-hover:text-slate-700 transition-colors">
             {product.name}
           </h3>
 
           {/* Price */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg font-bold" style={{ color: accentColor }}>
-              {displayPrice.toLocaleString()} DZD
+          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 mb-2 sm:mb-3">
+            <span className="text-sm sm:text-lg font-bold" style={{ color: accentColor }}>
+              {displayPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
             </span>
             {isOnSale && (
-              <span className="text-sm text-slate-400 line-through">
-                {product.price.toLocaleString()} DZD
+              <span className="text-[10px] sm:text-sm text-slate-400 line-through">
+                {product.price.toLocaleString()}
               </span>
             )}
           </div>
@@ -106,7 +109,7 @@ export default function ProductCard({ product, accentColor }: ProductCardProps) 
           <button
             onClick={handleAddToCart}
             disabled={isOutOfStock}
-            className={`w-full py-2.5 rounded-xl font-medium transition-colors ${
+            className={`w-full py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-colors ${
               isOutOfStock
                 ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                 : 'text-white hover:opacity-90'
@@ -114,10 +117,10 @@ export default function ProductCard({ product, accentColor }: ProductCardProps) 
             style={{ backgroundColor: isOutOfStock ? undefined : accentColor }}
           >
             {isOutOfStock
-              ? 'Out of Stock'
+              ? (isRTL ? 'نفذ' : 'Sold Out')
               : quantity > 0
-              ? `In Cart (${quantity})`
-              : 'Add to Cart'}
+              ? (isRTL ? `في السلة (${quantity})` : `In Cart (${quantity})`)
+              : (isRTL ? 'أضف للسلة' : 'Add to Cart')}
           </button>
         </div>
       </div>

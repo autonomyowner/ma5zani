@@ -1,7 +1,7 @@
 export default {
   providers: [
     {
-      domain: "https://touching-oarfish-55.clerk.accounts.dev",
+      domain: process.env.CLERK_ISSUER_URL || "https://clerk.ma5zani.com",
       applicationID: "convex",
     },
   ],

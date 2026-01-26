@@ -12,6 +12,7 @@ import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
 import type * as chat from "../chat.js";
+import type * as chatbot from "../chatbot.js";
 import type * as orders from "../orders.js";
 import type * as products from "../products.js";
 import type * as publicOrders from "../publicOrders.js";
@@ -30,6 +31,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   categories: typeof categories;
   chat: typeof chat;
+  chatbot: typeof chatbot;
   orders: typeof orders;
   products: typeof products;
   publicOrders: typeof publicOrders;

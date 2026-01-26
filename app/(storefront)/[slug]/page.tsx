@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
@@ -9,6 +9,7 @@ import { useCart } from '@/lib/CartContext';
 import StorefrontLayout from '@/components/storefront/StorefrontLayout';
 import CategoryNav from '@/components/storefront/CategoryNav';
 import ProductGrid from '@/components/storefront/ProductGrid';
+import SectionRenderer, { StorefrontSection } from '@/components/storefront/sections/SectionRenderer';
 
 export default function StorefrontPage() {
   const params = useParams();
@@ -26,6 +27,14 @@ export default function StorefrontPage() {
       setStorefrontSlug(slug);
     }
   }, [slug, setStorefrontSlug]);
+
+  // Get sections from storefront or use default template
+  const sections = useMemo(() => {
+    if (storefront?.sections && storefront.sections.length > 0) {
+      return storefront.sections as StorefrontSection[];
+    }
+    return null; // Use legacy layout
+  }, [storefront?.sections]);
 
   // Loading state
   if (storefront === undefined || productsData === undefined) {
@@ -61,6 +70,29 @@ export default function StorefrontPage() {
     ? products.filter((p) => p.categoryId === selectedCategory)
     : products;
 
+  // If storefront has custom sections, render them dynamically
+  if (sections && sections.length > 0) {
+    const sortedSections = [...sections].sort((a, b) => a.order - b.order);
+
+    return (
+      <StorefrontLayout storefront={storefront}>
+        {sortedSections.map((section) => (
+          <SectionRenderer
+            key={section.id}
+            section={section}
+            products={filteredProducts}
+            categories={categories}
+            primaryColor={storefront.colors?.primary || storefront.theme.primaryColor}
+            accentColor={storefront.colors?.accent || storefront.theme.accentColor}
+            selectedCategory={selectedCategory}
+            onSelectCategory={(id) => setSelectedCategory(id as Id<'categories'> | null)}
+          />
+        ))}
+      </StorefrontLayout>
+    );
+  }
+
+  // Legacy layout (no custom sections configured)
   return (
     <StorefrontLayout storefront={storefront}>
       {/* Store Description */}

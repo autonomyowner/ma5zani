@@ -37,3 +37,6 @@ Thumbs.db
 # Misc
 nul
 *.log
+
+.vercel
+.env*.local

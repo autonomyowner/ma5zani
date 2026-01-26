@@ -94,6 +94,57 @@ export default defineSchema({
     }),
     // Tracking & Analytics
     metaPixelId: v.optional(v.string()),
+
+    // ============ TEMPLATE SYSTEM ============
+    templateId: v.optional(v.string()), // "shopify", "minimal", "bold"
+
+    // Extended colors
+    colors: v.optional(v.object({
+      primary: v.string(),
+      accent: v.string(),
+      background: v.string(),
+      text: v.string(),
+      headerBg: v.string(),
+      footerBg: v.string(),
+    })),
+
+    // Sections array
+    sections: v.optional(v.array(v.object({
+      id: v.string(),
+      type: v.string(), // "hero", "announcement", "featured", "categories", "grid", "features", "collection", "newsletter", "about"
+      order: v.number(),
+      enabled: v.boolean(),
+      content: v.object({
+        title: v.optional(v.string()),
+        titleAr: v.optional(v.string()),
+        subtitle: v.optional(v.string()),
+        subtitleAr: v.optional(v.string()),
+        imageKey: v.optional(v.string()),
+        backgroundColor: v.optional(v.string()),
+        textColor: v.optional(v.string()),
+        ctaText: v.optional(v.string()),
+        ctaTextAr: v.optional(v.string()),
+        ctaLink: v.optional(v.string()),
+        items: v.optional(v.array(v.any())), // For features, collections
+        productsPerRow: v.optional(v.number()),
+        productCount: v.optional(v.number()),
+        showFilters: v.optional(v.boolean()),
+        layout: v.optional(v.string()), // "grid" | "scroll"
+      }),
+    }))),
+
+    // Footer customization
+    footer: v.optional(v.object({
+      showPoweredBy: v.boolean(),
+      customText: v.optional(v.string()),
+      customTextAr: v.optional(v.string()),
+      links: v.optional(v.array(v.object({
+        label: v.string(),
+        labelAr: v.optional(v.string()),
+        url: v.string(),
+      }))),
+    })),
+
     isPublished: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -131,4 +182,84 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index("by_chat", ["chatId"]),
+
+  // ============ AI CHATBOT SYSTEM ============
+
+  // Bot configuration per storefront
+  chatbots: defineTable({
+    storefrontId: v.id("storefronts"),
+    sellerId: v.id("sellers"),
+    name: v.string(),
+    greeting: v.string(),
+    personality: v.union(
+      v.literal("friendly"),
+      v.literal("professional"),
+      v.literal("casual")
+    ),
+    isEnabled: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_storefront", ["storefrontId"])
+    .index("by_seller", ["sellerId"]),
+
+  // Trained knowledge base
+  chatbotKnowledge: defineTable({
+    chatbotId: v.id("chatbots"),
+    category: v.string(), // "shipping", "returns", "products", "payment", "general"
+    question: v.string(),
+    answer: v.string(),
+    keywords: v.array(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_chatbot", ["chatbotId"])
+    .index("by_category", ["chatbotId", "category"]),
+
+  // Customer conversations with AI bot
+  chatbotConversations: defineTable({
+    chatbotId: v.id("chatbots"),
+    storefrontId: v.id("storefronts"),
+    sessionId: v.string(),
+    customerName: v.optional(v.string()),
+    customerPhone: v.optional(v.string()),
+    status: v.union(
+      v.literal("active"),
+      v.literal("handoff"),
+      v.literal("closed")
+    ),
+    lastMessageAt: v.number(),
+    context: v.optional(v.object({
+      currentProductId: v.optional(v.id("products")),
+      cartItems: v.optional(v.array(v.string())),
+      wilaya: v.optional(v.string()),
+    })),
+    createdAt: v.number(),
+  })
+    .index("by_chatbot", ["chatbotId"])
+    .index("by_storefront", ["storefrontId"])
+    .index("by_session", ["sessionId"])
+    .index("by_status", ["chatbotId", "status"]),
+
+  // Messages in chatbot conversations
+  chatbotMessages: defineTable({
+    conversationId: v.id("chatbotConversations"),
+    sender: v.union(
+      v.literal("customer"),
+      v.literal("bot"),
+      v.literal("seller")
+    ),
+    content: v.string(),
+    metadata: v.optional(v.object({
+      type: v.optional(v.union(
+        v.literal("text"),
+        v.literal("product"),
+        v.literal("order")
+      )),
+      productId: v.optional(v.id("products")),
+      orderId: v.optional(v.id("orders")),
+    })),
+    createdAt: v.number(),
+  })
+    .index("by_conversation", ["conversationId"]),
 });

@@ -2,6 +2,7 @@
 
 // Human support chat - v2
 import { useState, useRef, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { useLanguage } from '@/lib/LanguageContext'
@@ -11,8 +12,25 @@ function generateSessionId() {
   return 'chat_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36)
 }
 
+// Pages where support chat should appear
+const ALLOWED_PATHS = [
+  '/',           // Home page
+  '/dashboard',  // Dashboard and all subpages
+  '/login',
+  '/signup',
+  '/onboarding',
+  '/admin',      // Admin pages
+]
+
 export function SupportChat() {
+  const pathname = usePathname()
   const { language, dir } = useLanguage()
+
+  // Check if support chat should show on this page
+  const shouldShow = ALLOWED_PATHS.some(path =>
+    path === '/' ? pathname === '/' : pathname.startsWith(path)
+  )
+
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState('')
   const [sessionId, setSessionId] = useState<string | null>(null)
@@ -109,6 +127,11 @@ export function SupportChat() {
   }
 
   const hasMessages = messages && messages.length > 0
+
+  // Don't render on storefront pages
+  if (!shouldShow) {
+    return null
+  }
 
   return (
     <>

@@ -252,3 +252,190 @@ export const publishStorefront = mutation({
     return storefront._id;
   },
 });
+
+// ============ TEMPLATE SYSTEM MUTATIONS ============
+
+export const updateSections = mutation({
+  args: {
+    sections: v.array(v.object({
+      id: v.string(),
+      type: v.string(),
+      order: v.number(),
+      enabled: v.boolean(),
+      content: v.object({
+        title: v.optional(v.string()),
+        titleAr: v.optional(v.string()),
+        subtitle: v.optional(v.string()),
+        subtitleAr: v.optional(v.string()),
+        imageKey: v.optional(v.string()),
+        backgroundColor: v.optional(v.string()),
+        textColor: v.optional(v.string()),
+        ctaText: v.optional(v.string()),
+        ctaTextAr: v.optional(v.string()),
+        ctaLink: v.optional(v.string()),
+        items: v.optional(v.array(v.any())),
+        productsPerRow: v.optional(v.number()),
+        productCount: v.optional(v.number()),
+        showFilters: v.optional(v.boolean()),
+        layout: v.optional(v.string()),
+      }),
+    })),
+  },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_seller", (q) => q.eq("sellerId", seller._id))
+      .first();
+
+    if (!storefront) {
+      throw new Error("Storefront not found");
+    }
+
+    await ctx.db.patch(storefront._id, {
+      sections: args.sections,
+      updatedAt: Date.now(),
+    });
+
+    return storefront._id;
+  },
+});
+
+export const updateColors = mutation({
+  args: {
+    colors: v.object({
+      primary: v.string(),
+      accent: v.string(),
+      background: v.string(),
+      text: v.string(),
+      headerBg: v.string(),
+      footerBg: v.string(),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_seller", (q) => q.eq("sellerId", seller._id))
+      .first();
+
+    if (!storefront) {
+      throw new Error("Storefront not found");
+    }
+
+    // Also update the legacy theme colors for backward compatibility
+    await ctx.db.patch(storefront._id, {
+      colors: args.colors,
+      theme: {
+        primaryColor: args.colors.primary,
+        accentColor: args.colors.accent,
+      },
+      updatedAt: Date.now(),
+    });
+
+    return storefront._id;
+  },
+});
+
+export const updateFooter = mutation({
+  args: {
+    footer: v.object({
+      showPoweredBy: v.boolean(),
+      customText: v.optional(v.string()),
+      customTextAr: v.optional(v.string()),
+      links: v.optional(v.array(v.object({
+        label: v.string(),
+        labelAr: v.optional(v.string()),
+        url: v.string(),
+      }))),
+    }),
+  },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_seller", (q) => q.eq("sellerId", seller._id))
+      .first();
+
+    if (!storefront) {
+      throw new Error("Storefront not found");
+    }
+
+    await ctx.db.patch(storefront._id, {
+      footer: args.footer,
+      updatedAt: Date.now(),
+    });
+
+    return storefront._id;
+  },
+});
+
+export const applyTemplate = mutation({
+  args: {
+    templateId: v.string(),
+    sections: v.array(v.object({
+      id: v.string(),
+      type: v.string(),
+      order: v.number(),
+      enabled: v.boolean(),
+      content: v.object({
+        title: v.optional(v.string()),
+        titleAr: v.optional(v.string()),
+        subtitle: v.optional(v.string()),
+        subtitleAr: v.optional(v.string()),
+        imageKey: v.optional(v.string()),
+        backgroundColor: v.optional(v.string()),
+        textColor: v.optional(v.string()),
+        ctaText: v.optional(v.string()),
+        ctaTextAr: v.optional(v.string()),
+        ctaLink: v.optional(v.string()),
+        items: v.optional(v.array(v.any())),
+        productsPerRow: v.optional(v.number()),
+        productCount: v.optional(v.number()),
+        showFilters: v.optional(v.boolean()),
+        layout: v.optional(v.string()),
+      }),
+    })),
+    colors: v.optional(v.object({
+      primary: v.string(),
+      accent: v.string(),
+      background: v.string(),
+      text: v.string(),
+      headerBg: v.string(),
+      footerBg: v.string(),
+    })),
+  },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_seller", (q) => q.eq("sellerId", seller._id))
+      .first();
+
+    if (!storefront) {
+      throw new Error("Storefront not found");
+    }
+
+    const updates: Record<string, unknown> = {
+      templateId: args.templateId,
+      sections: args.sections,
+      updatedAt: Date.now(),
+    };
+
+    if (args.colors) {
+      updates.colors = args.colors;
+      updates.theme = {
+        primaryColor: args.colors.primary,
+        accentColor: args.colors.accent,
+      };
+    }
+
+    await ctx.db.patch(storefront._id, updates);
+
+    return storefront._id;
+  },
+});
