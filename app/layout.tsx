@@ -24,6 +24,10 @@ const cairo = Cairo({
 export const metadata: Metadata = {
   title: 'مخزني - ma5zani | حلول التوصيل للتجارة الإلكترونية في الجزائر',
   description: 'الحل الذكي للتخزين والتوصيل لبائعي التجارة الإلكترونية الجزائريين. خزّن، وصّل، ووسّع بسهولة.',
+  icons: {
+    icon: '/icon.png',
+    apple: '/apple-icon.png',
+  },
 }
 
 export default function RootLayout({

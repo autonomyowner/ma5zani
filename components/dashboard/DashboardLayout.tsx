@@ -49,6 +49,7 @@ export default function DashboardLayout({
     { label: t.dashboard.ordersNav, href: '/dashboard/orders' },
     { label: t.dashboard.productsNav, href: '/dashboard/products' },
     { label: t.dashboard.storefrontNav, href: '/dashboard/storefront' },
+    { label: t.chatbot.aiAssistant, href: '/dashboard/chatbot' },
     { label: t.dashboard.inventoryNav, href: '/dashboard/inventory' },
     { label: t.dashboard.analyticsNav, href: '/dashboard/analytics' },
     { label: t.dashboard.settingsNav, href: '/dashboard/settings' },
@@ -82,9 +83,9 @@ export default function DashboardLayout({
             <Image
               src="/logo.png"
               alt="ma5zani"
-              width={36}
-              height={36}
-              className="h-8 lg:h-10 w-auto"
+              width={40}
+              height={40}
+              className="h-8 lg:h-10 w-8 lg:w-10 rounded-full object-cover"
             />
             <span
               className="text-xl lg:text-2xl font-bold text-[#0054A6]"

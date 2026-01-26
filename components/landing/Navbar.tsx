@@ -22,9 +22,9 @@ export default function Navbar() {
             <Image
               src="/logo.png"
               alt="ma5zani"
-              width={50}
-              height={50}
-              className="h-12 w-auto"
+              width={48}
+              height={48}
+              className="h-12 w-12 rounded-full object-cover"
             />
             <span
               className="text-2xl font-bold text-[#0054A6]"
