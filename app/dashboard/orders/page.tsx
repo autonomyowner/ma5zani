@@ -62,7 +62,7 @@ export default function OrdersPage() {
     return labels[status] || status
   }
 
-  const handleStatusChange = async (orderId: Id<'orders'>, newStatus: OrderStatus) => {
+  const handleStatusChange = async (orderId: Id<'orders'>, newStatus: 'pending' | 'processing') => {
     setUpdatingOrder(orderId)
     try {
       await updateOrderStatus({ orderId, status: newStatus })
@@ -73,6 +73,9 @@ export default function OrdersPage() {
   }
 
   const statusOptions: OrderStatus[] = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
+
+  // Seller can only set pending or processing (send order). Other statuses are admin-controlled.
+  const isSellerActionable = (status: OrderStatus) => status === 'pending' || status === 'processing'
 
   return (
     <DashboardLayout
@@ -166,18 +169,34 @@ export default function OrdersPage() {
                         </Badge>
                       </td>
                       <td className="px-6 py-4">
-                        <select
-                          value={order.status}
-                          onChange={(e) => handleStatusChange(order._id, e.target.value as OrderStatus)}
-                          disabled={updatingOrder === order._id}
-                          className="px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:border-[#00AEEF] disabled:opacity-50"
-                        >
-                          {statusOptions.map(status => (
-                            <option key={status} value={status}>
-                              {getStatusLabel(status)}
-                            </option>
-                          ))}
-                        </select>
+                        {isSellerActionable(order.status) ? (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleStatusChange(order._id, 'pending')}
+                              disabled={updatingOrder === order._id || order.status === 'pending'}
+                              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                                order.status === 'pending'
+                                  ? 'bg-slate-200 text-slate-600 cursor-default'
+                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              }`}
+                            >
+                              {t.dashboard.pending}
+                            </button>
+                            <button
+                              onClick={() => handleStatusChange(order._id, 'processing')}
+                              disabled={updatingOrder === order._id || order.status === 'processing'}
+                              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
+                                order.status === 'processing'
+                                  ? 'bg-[#0054A6]/20 text-[#0054A6] cursor-default'
+                                  : 'bg-[#0054A6] text-white hover:bg-[#004690]'
+                              }`}
+                            >
+                              {t.dashboard.sendOrder}
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-slate-400">—</span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -229,18 +248,34 @@ export default function OrdersPage() {
                   <span className="font-bold text-slate-900">
                     {order.amount.toLocaleString()} {t.dashboard.dzd}
                   </span>
-                  <select
-                    value={order.status}
-                    onChange={(e) => handleStatusChange(order._id, e.target.value as OrderStatus)}
-                    disabled={updatingOrder === order._id}
-                    className="px-2 py-1 rounded-lg border border-slate-200 text-xs focus:outline-none focus:border-[#00AEEF] disabled:opacity-50"
-                  >
-                    {statusOptions.map(status => (
-                      <option key={status} value={status}>
-                        {getStatusLabel(status)}
-                      </option>
-                    ))}
-                  </select>
+                  {isSellerActionable(order.status) ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleStatusChange(order._id, 'pending')}
+                        disabled={updatingOrder === order._id || order.status === 'pending'}
+                        className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
+                          order.status === 'pending'
+                            ? 'bg-slate-200 text-slate-600 cursor-default'
+                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {t.dashboard.pending}
+                      </button>
+                      <button
+                        onClick={() => handleStatusChange(order._id, 'processing')}
+                        disabled={updatingOrder === order._id || order.status === 'processing'}
+                        className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
+                          order.status === 'processing'
+                            ? 'bg-[#0054A6]/20 text-[#0054A6] cursor-default'
+                            : 'bg-[#0054A6] text-white hover:bg-[#004690]'
+                        }`}
+                      >
+                        {t.dashboard.sendOrder}
+                      </button>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-slate-400">—</span>
+                  )}
                 </div>
               </div>
             ))

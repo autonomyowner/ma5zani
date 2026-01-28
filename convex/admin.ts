@@ -115,6 +115,32 @@ export const adminUpdateOrderStatus = mutation({
     if (args.password !== ADMIN_PASSWORD) {
       throw new Error("Unauthorized");
     }
+
+    const order = await ctx.db.get(args.orderId);
+    if (!order) {
+      throw new Error("Order not found");
+    }
+
+    // If cancelling, restore stock
+    if (args.status === "cancelled" && order.status !== "cancelled") {
+      const product = await ctx.db.get(order.productId);
+      if (product) {
+        const newStock = product.stock + order.quantity;
+        let newStatus: "active" | "low_stock" | "out_of_stock" = "active";
+        if (newStock === 0) {
+          newStatus = "out_of_stock";
+        } else if (newStock <= 10) {
+          newStatus = "low_stock";
+        }
+
+        await ctx.db.patch(order.productId, {
+          stock: newStock,
+          status: newStatus,
+          updatedAt: Date.now(),
+        });
+      }
+    }
+
     await ctx.db.patch(args.orderId, {
       status: args.status,
       updatedAt: Date.now(),

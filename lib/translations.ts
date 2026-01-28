@@ -261,6 +261,7 @@ export const translations = {
       shipped: 'تم الشحن',
       delivered: 'تم التوصيل',
       cancelled: 'ملغي',
+      sendOrder: 'ارسل الطلب',
       // Products
       products: 'المنتجات',
       manageProducts: 'إدارة كتالوج المنتجات',
@@ -666,6 +667,7 @@ export const translations = {
       shipped: 'Shipped',
       delivered: 'Delivered',
       cancelled: 'Cancelled',
+      sendOrder: 'Send Order',
       // Products
       products: 'Products',
       manageProducts: 'Manage your product catalog',
