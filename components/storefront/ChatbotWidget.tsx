@@ -48,12 +48,17 @@ export default function ChatbotWidget({ storefrontSlug, primaryColor, currentPro
 
   // Generate or retrieve session ID
   useEffect(() => {
-    let id = localStorage.getItem('ma5zani-chat-session')
-    if (!id) {
-      id = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      localStorage.setItem('ma5zani-chat-session', id)
+    try {
+      let id = localStorage.getItem('ma5zani-chat-session')
+      if (!id) {
+        id = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        localStorage.setItem('ma5zani-chat-session', id)
+      }
+      setSessionId(id)
+    } catch {
+      // localStorage unavailable, generate in-memory session
+      setSessionId(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
     }
-    setSessionId(id)
   }, [])
 
   // Scroll to bottom when messages change

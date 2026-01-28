@@ -19,16 +19,24 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Check localStorage for saved preference
-    const saved = localStorage.getItem('ma5zani-lang') as Language
-    if (saved && (saved === 'ar' || saved === 'en')) {
-      setLanguage(saved)
+    try {
+      const saved = localStorage.getItem('ma5zani-lang') as Language
+      if (saved && (saved === 'ar' || saved === 'en')) {
+        setLanguage(saved)
+      }
+    } catch {
+      // localStorage may be unavailable
     }
     setMounted(true)
   }, [])
 
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem('ma5zani-lang', language)
+      try {
+        localStorage.setItem('ma5zani-lang', language)
+      } catch {
+        // localStorage may be unavailable
+      }
       // Update HTML attributes
       document.documentElement.lang = language
       document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'
@@ -42,11 +50,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     dir: language === 'ar' ? 'rtl' : 'ltr' as 'rtl' | 'ltr',
   }
 
-  // Prevent flash of wrong language
-  if (!mounted) {
-    return null
-  }
-
+  // Always render children with default language to avoid hydration mismatch.
+  // The language will update on the client once localStorage is read.
   return (
     <LanguageContext.Provider value={value}>
       {children}

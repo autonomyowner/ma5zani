@@ -72,13 +72,18 @@ export function SupportChat() {
 
   // Initialize session ID
   useEffect(() => {
-    const stored = localStorage.getItem('ma5zani-chat-session')
-    if (stored) {
-      setSessionId(stored)
-    } else {
-      const newSession = generateSessionId()
-      localStorage.setItem('ma5zani-chat-session', newSession)
-      setSessionId(newSession)
+    try {
+      const stored = localStorage.getItem('ma5zani-chat-session')
+      if (stored) {
+        setSessionId(stored)
+      } else {
+        const newSession = generateSessionId()
+        localStorage.setItem('ma5zani-chat-session', newSession)
+        setSessionId(newSession)
+      }
+    } catch {
+      // localStorage unavailable
+      setSessionId(generateSessionId())
     }
   }, [])
 
