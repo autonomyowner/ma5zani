@@ -45,9 +45,6 @@ export default function Navbar() {
             <Link href="#pricing" className="text-slate-600 hover:text-[#0054A6] transition-colors font-medium">
               {t.nav.pricing}
             </Link>
-            <Link href="#testimonials" className="text-slate-600 hover:text-[#0054A6] transition-colors font-medium">
-              {t.nav.testimonials}
-            </Link>
           </div>
 
           {/* CTA Buttons + Language Toggle */}
@@ -103,9 +100,6 @@ export default function Navbar() {
               </Link>
               <Link href="#pricing" className="text-slate-600 hover:text-[#0054A6] font-medium py-2">
                 {t.nav.pricing}
-              </Link>
-              <Link href="#testimonials" className="text-slate-600 hover:text-[#0054A6] font-medium py-2">
-                {t.nav.testimonials}
               </Link>
               <div className="flex flex-col gap-2 pt-4 border-t border-slate-100">
                 {isSignedIn ? (

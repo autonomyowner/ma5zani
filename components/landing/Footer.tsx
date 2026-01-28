@@ -12,7 +12,6 @@ export default function Footer() {
       { label: t.footer.productLinks.features, href: '#features' },
       { label: t.footer.productLinks.pricing, href: '#pricing' },
       { label: t.footer.productLinks.howItWorks, href: '#how-it-works' },
-      { label: t.footer.productLinks.testimonials, href: '#testimonials' },
     ],
     company: [
       { label: t.footer.companyLinks.about, href: '#' },
