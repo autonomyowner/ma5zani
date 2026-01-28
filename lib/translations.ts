@@ -146,31 +146,31 @@ export const translations = {
         },
       ],
     },
-    // Testimonials
-    testimonials: {
-      sectionTag: 'قصص نجاح',
-      sectionTitle: 'موثوق من البائعين',
-      sectionDesc: 'انضم لمئات البائعين الجزائريين الذين وسّعوا أعمالهم مع مخزني.',
-      items: [
-        {
-          quote: 'مخزني غيّر عملي. انتقلت من شحن 10 طلبات يومياً إلى 100+ بدون توظيف أحد. المستودع في وهران يعني توصيل أسرع لعملائي.',
-          name: 'كريم ب.',
-          business: 'بائع إلكترونيات، وهران',
-          metric: '10 أضعاف الطلبات',
-        },
-        {
-          quote: 'تحصيل الدفع عند الاستلام والتحويل السريع غيّر اللعبة. كنت أنتظر أسابيع للدفع. الآن أركز على التوريد بينما مخزني يتولى الباقي.',
-          name: 'سارة م.',
-          business: 'بوتيك أزياء، الجزائر العاصمة',
-          metric: 'تحويل خلال 48 ساعة',
-        },
-        {
-          quote: 'التغليف الاحترافي جعل علامتي تبدو فاخرة. شكاوى العملاء انخفضت لصفر تقريباً. لوحة التحليلات تساعدني على فهم ما يباع وأين.',
-          name: 'يوسف ك.',
-          business: 'متجر مستلزمات المنزل، قسنطينة',
-          metric: '95% رضا',
-        },
-      ],
+    // Smart Tools
+    smartTools: {
+      sectionTag: 'أدوات ذكية',
+      sectionTitle: 'بِع أكثر بأدوات متقدمة',
+      sectionDesc: 'صفحات هبوط مخصصة وبوت ذكي يتابع الطلبات — كل ما تحتاجه لتحويل الزوار إلى عملاء.',
+      landingPages: {
+        title: 'صفحات هبوط مخصصة',
+        description: 'أنشئ متجرك الخاص برابط مخصص وشاركه مع عملائك مباشرة. صمم الواجهة، اختر الألوان، وأضف منتجاتك — بدون أي خبرة تقنية.',
+        features: [
+          'رابط خاص بمتجرك (ma5zani.com/اسمك)',
+          'تخصيص كامل للألوان والتصميم',
+          'صفحة منتج احترافية مع معرض صور',
+          'صفحة دفع جاهزة للطلبات',
+        ],
+      },
+      botIntegration: {
+        title: 'بوت تأكيد الطلبات',
+        description: 'بوت ذكي يعمل 24/7 يتواصل مع عملائك تلقائياً. يجيب على أسئلتهم، يؤكد الطلبات، ويتابع حالة التوصيل — بدون تدخل منك.',
+        features: [
+          'تأكيد الطلبات تلقائياً مع العملاء',
+          'إجابة فورية على الأسئلة الشائعة',
+          'درّب البوت على معلومات متجرك',
+          'تحويل المحادثة لك عند الحاجة',
+        ],
+      },
     },
     // CTA
     cta: {
@@ -551,31 +551,31 @@ export const translations = {
         },
       ],
     },
-    // Testimonials
-    testimonials: {
-      sectionTag: 'Success Stories',
-      sectionTitle: 'Trusted by Sellers',
-      sectionDesc: 'Join hundreds of Algerian sellers who scaled their business with ma5zani.',
-      items: [
-        {
-          quote: "ma5zani transformed my business. I went from shipping 10 orders a day to 100+ without hiring anyone. The warehouse in Oran means my customers get their products faster.",
-          name: 'Karim B.',
-          business: 'Electronics Seller, Oran',
-          metric: '10x more orders',
-        },
-        {
-          quote: "The COD collection and quick settlement is a game-changer. I used to wait weeks to get paid. Now I focus on sourcing products while ma5zani handles everything else.",
-          name: 'Sarah M.',
-          business: 'Fashion Boutique, Algiers',
-          metric: '48h settlement',
-        },
-        {
-          quote: "Professional packaging made my brand look premium. Customer complaints dropped to almost zero. The analytics dashboard helps me understand what's selling and where.",
-          name: 'Youcef K.',
-          business: 'Home Goods Store, Constantine',
-          metric: '95% satisfaction',
-        },
-      ],
+    // Smart Tools
+    smartTools: {
+      sectionTag: 'Smart Tools',
+      sectionTitle: 'Sell more with advanced tools',
+      sectionDesc: 'Custom landing pages and a smart bot that follows up on orders — everything you need to convert visitors into customers.',
+      landingPages: {
+        title: 'Custom Landing Pages',
+        description: 'Create your own store with a custom link and share it directly with your customers. Design the layout, pick your colors, and add your products — no technical skills needed.',
+        features: [
+          'Your own store link (ma5zani.com/yourname)',
+          'Full color and design customization',
+          'Professional product page with image gallery',
+          'Ready-to-use checkout page',
+        ],
+      },
+      botIntegration: {
+        title: 'Order Confirmation Bot',
+        description: 'A smart bot that works 24/7, communicating with your customers automatically. It answers their questions, confirms orders, and tracks delivery status — without any effort from you.',
+        features: [
+          'Automatic order confirmation with customers',
+          'Instant answers to common questions',
+          'Train the bot on your store info',
+          'Hand off conversations to you when needed',
+        ],
+      },
     },
     // CTA
     cta: {
