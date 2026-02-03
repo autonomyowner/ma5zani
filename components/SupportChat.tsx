@@ -1,12 +1,13 @@
 'use client'
 
-// Human support chat - v2
+// Human support chat - v2 with Vapi AI Voice
 import { useState, useRef, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { useLanguage } from '@/lib/LanguageContext'
 import { Id } from '@/convex/_generated/dataModel'
+import { VoiceCallButton } from './VoiceCallButton'
 
 function generateSessionId() {
   return 'chat_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36)
@@ -35,6 +36,7 @@ export function SupportChat() {
   const [input, setInput] = useState('')
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [chatId, setChatId] = useState<Id<"chats"> | null>(null)
+  const [isVoiceCallActive, setIsVoiceCallActive] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -57,6 +59,7 @@ export function SupportChat() {
       greeting: 'مرحبا! كيف يمكننا مساعدتك اليوم؟ فريقنا سيرد عليك في أقرب وقت.',
       waiting: 'في انتظار الرد...',
       online: 'متصل',
+      voiceCallActive: 'مكالمة صوتية نشطة...',
     },
     en: {
       title: 'Ma5zani Support',
@@ -65,6 +68,7 @@ export function SupportChat() {
       greeting: "Hello! How can we help you today? Our team will respond shortly.",
       waiting: 'Waiting for reply...',
       online: 'Online',
+      voiceCallActive: 'Voice call active...',
     },
   }
 
@@ -173,6 +177,11 @@ export function SupportChat() {
                   {texts.online}
                 </div>
               </div>
+              {/* Voice Call Button */}
+              <VoiceCallButton
+                language={language}
+                onCallStatusChange={setIsVoiceCallActive}
+              />
             </div>
           </div>
 
@@ -225,12 +234,13 @@ export function SupportChat() {
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder={texts.placeholder}
-                className="flex-1 px-4 py-2.5 rounded-full border border-slate-200 focus:border-[#00AEEF] focus:outline-none text-sm"
+                placeholder={isVoiceCallActive ? texts.voiceCallActive : texts.placeholder}
+                disabled={isVoiceCallActive}
+                className="flex-1 px-4 py-2.5 rounded-full border border-slate-200 focus:border-[#00AEEF] focus:outline-none text-sm disabled:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400"
               />
               <button
                 type="submit"
-                disabled={!input.trim()}
+                disabled={!input.trim() || isVoiceCallActive}
                 className="px-5 py-2.5 bg-[#F7941D] hover:bg-[#D35400] disabled:bg-slate-300 text-white rounded-full text-sm font-medium transition-colors"
               >
                 {texts.send}

@@ -448,6 +448,16 @@ export const translations = {
       disabled: 'معطّل',
       setupRequired: 'يرجى إنشاء متجر أولاً',
     },
+    // Voice AI Support
+    voice: {
+      callWithAI: 'اتصل بحسام',
+      connecting: 'جاري الاتصال...',
+      endCall: 'إنهاء المكالمة',
+      callActive: 'المكالمة نشطة',
+      listening: 'يستمع...',
+      speaking: 'يتحدث...',
+      micPermission: 'يرجى السماح بالوصول للميكروفون',
+    },
     // Telegram Bot
     telegram: {
       title: 'تيليجرام',
@@ -928,6 +938,16 @@ export const translations = {
       enabled: 'Enabled',
       disabled: 'Disabled',
       setupRequired: 'Please create a storefront first',
+    },
+    // Voice AI Support
+    voice: {
+      callWithAI: 'Call Houssam',
+      connecting: 'Connecting...',
+      endCall: 'End Call',
+      callActive: 'Call active',
+      listening: 'Listening...',
+      speaking: 'Speaking...',
+      micPermission: 'Please allow microphone access',
     },
     // Telegram Bot
     telegram: {
