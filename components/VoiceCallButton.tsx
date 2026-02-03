@@ -65,7 +65,14 @@ export function VoiceCallButton({ language, onCallStatusChange }: VoiceCallButto
 
     const handleError = (err: Error) => {
       console.error('Vapi error:', err)
-      setError(err.message)
+      // Provide user-friendly error messages
+      let errorMsg = err.message
+      if (err.message.includes('ejection') || err.message.includes('ended')) {
+        errorMsg = language === 'ar'
+          ? 'الخدمة غير متاحة حالياً'
+          : 'Service unavailable'
+      }
+      setError(errorMsg)
       setCallStatus('idle')
       onCallStatusChange?.(false)
     }

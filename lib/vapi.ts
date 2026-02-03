@@ -56,6 +56,7 @@ Ma5zani is an e-commerce fulfillment solution for Algerian sellers:
 ## Guidelines
 - Be helpful and patient
 - Explain things simply
+- Keep responses concise for voice
 - If you don't know something specific, offer to connect them with human support
 - Encourage them to start a free trial
 - Website: www.ma5zani.com`
@@ -76,7 +77,7 @@ export async function startHoussamCall(language: 'ar' | 'en' = 'ar'): Promise<vo
   const vapi = getVapiClient()
 
   // Use inline assistant configuration for Vapi
-  // Using 'as any' to bypass strict type checking since Vapi SDK types may not be up to date
+  // Using Vapi's default voice provider for better compatibility
   const assistantConfig = {
     name: 'Houssam',
     model: {
@@ -89,15 +90,27 @@ export async function startHoussamCall(language: 'ar' | 'en' = 'ar'): Promise<vo
         },
       ],
     },
+    // Use Vapi's built-in voice for better compatibility
+    // You can change this in Vapi dashboard after adding voice provider credentials
     voice: {
-      provider: 'playht',
-      voiceId: 'jennifer',
+      provider: 'vapi',
+      voiceId: 'Elliot', // Vapi's default male voice
     },
     firstMessage: getFirstMessage(language),
+    // Silence timeout - end call after 30s of silence
+    silenceTimeoutSeconds: 30,
+    // Max duration - 5 minutes
+    maxDurationSeconds: 300,
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await vapi.start(assistantConfig as any)
+}
+
+// Start call with a pre-created assistant ID (recommended for production)
+export async function startAssistantCall(assistantId: string): Promise<void> {
+  const vapi = getVapiClient()
+  await vapi.start(assistantId)
 }
 
 // End the current call
