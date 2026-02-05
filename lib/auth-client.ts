@@ -1,10 +1,9 @@
 import { createAuthClient } from "better-auth/react";
 import { convexClient } from "@convex-dev/better-auth/client/plugins";
 
-// Use Convex site URL directly for OAuth to work properly
-// This ensures state cookies are set on Convex domain where callbacks arrive
+// NO baseURL - uses same-origin /api/auth/* routes on Next.js
+// Next.js proxies to Convex, keeping cookies on the same domain
 export const authClient = createAuthClient({
-  baseURL: "https://colorless-cricket-513.convex.site",
   plugins: [convexClient()],
 });
 

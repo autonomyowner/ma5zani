@@ -6,22 +6,20 @@ import { QueryCtx, MutationCtx } from "./_generated/server";
 import { betterAuth } from "better-auth";
 import authConfig from "./auth.config";
 
-// For OAuth callbacks, we need to use the Convex site URL directly
-// to avoid cross-domain cookie issues with state parameter
-const convexSiteUrl = process.env.CONVEX_SITE_URL || "https://colorless-cricket-513.convex.site";
-const frontendUrl = process.env.SITE_URL || "http://localhost:3000";
+// baseURL must point to the FRONTEND (Next.js) URL, not Convex
+// OAuth callbacks go to Next.js /api/auth/* which proxies to Convex
+const siteUrl = process.env.SITE_URL || "http://localhost:3000";
 
 export const authComponent = createClient<DataModel>(components.betterAuth);
 
 export const createAuth = (ctx: GenericCtx<DataModel>) => {
   return betterAuth({
-    baseURL: convexSiteUrl,
+    baseURL: siteUrl,
     database: authComponent.adapter(ctx),
     trustedOrigins: [
       "https://www.ma5zani.com",
       "https://ma5zani.com",
       "http://localhost:3000",
-      "https://colorless-cricket-513.convex.site",
     ],
     emailAndPassword: {
       enabled: true,
