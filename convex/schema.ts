@@ -133,6 +133,16 @@ export default defineSchema({
       }),
     }))),
 
+    // AI-generated fonts
+    fonts: v.optional(v.object({
+      display: v.string(),  // Font for headings
+      body: v.string(),     // Font for body text
+      arabic: v.string(),   // Font for Arabic text
+    })),
+
+    // AI aesthetic direction
+    aestheticDirection: v.optional(v.string()),
+
     // Footer customization
     footer: v.optional(v.object({
       showPoweredBy: v.boolean(),
@@ -240,6 +250,41 @@ export default defineSchema({
     .index("by_storefront", ["storefrontId"])
     .index("by_session", ["sessionId"])
     .index("by_status", ["chatbotId", "status"]),
+
+  // ============ TELEGRAM BOT INTEGRATION ============
+
+  telegramLinks: defineTable({
+    sellerId: v.id("sellers"),
+    telegramUserId: v.string(),
+    telegramUsername: v.optional(v.string()),
+    verificationCode: v.optional(v.string()),
+    codeExpiresAt: v.optional(v.number()),
+    status: v.union(v.literal("pending"), v.literal("linked"), v.literal("unlinked")),
+    linkedAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_seller", ["sellerId"])
+    .index("by_telegram_user", ["telegramUserId"])
+    .index("by_verification_code", ["verificationCode"]),
+
+  telegramSessions: defineTable({
+    telegramUserId: v.string(),
+    sellerId: v.id("sellers"),
+    command: v.string(),
+    step: v.number(),
+    data: v.object({
+      name: v.optional(v.string()),
+      price: v.optional(v.number()),
+      stock: v.optional(v.number()),
+      description: v.optional(v.string()),
+      imageKeys: v.optional(v.array(v.string())),
+      productId: v.optional(v.string()),
+    }),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_telegram_user", ["telegramUserId"]),
 
   // Messages in chatbot conversations
   chatbotMessages: defineTable({
