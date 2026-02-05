@@ -1,10 +1,12 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from 'convex/react'
-import { useUser, UserButton } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
 import { useLanguage } from '@/lib/LanguageContext'
+import { useCurrentSeller } from '@/hooks/useCurrentSeller'
+import { authClient } from '@/lib/auth-client'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import StatsCards from '@/components/dashboard/StatsCards'
 import OrdersTable from '@/components/dashboard/OrdersTable'
@@ -12,14 +14,27 @@ import ProductsList from '@/components/dashboard/ProductsList'
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { user, isLoaded } = useUser()
   const { t } = useLanguage()
-  const seller = useQuery(api.sellers.getCurrentSellerProfile)
-  const stats = useQuery(api.stats.getDashboardStats)
-  const orders = useQuery(api.orders.getOrders, {})
-  const products = useQuery(api.products.getProducts)
+  const { seller, session, isLoading, isAuthenticated } = useCurrentSeller()
 
-  if (!isLoaded || seller === undefined) {
+  // Only query when we have a seller to avoid errors
+  const stats = useQuery(api.stats.getDashboardStats, seller ? undefined : "skip")
+  const orders = useQuery(api.orders.getOrders, seller ? {} : "skip")
+  const products = useQuery(api.products.getProducts, seller ? undefined : "skip")
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      window.location.href = '/login'
+    }
+  }, [isLoading, isAuthenticated])
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && seller === null) {
+      router.push('/onboarding')
+    }
+  }, [isLoading, isAuthenticated, seller, router])
+
+  if (isLoading || seller === undefined) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
@@ -27,9 +42,17 @@ export default function DashboardPage() {
     )
   }
 
-  if (seller === null && user) {
-    router.push('/onboarding')
-    return null
+  if (seller === null) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="animate-pulse text-slate-400">Redirecting to onboarding...</div>
+      </div>
+    )
+  }
+
+  const handleSignOut = async () => {
+    await authClient.signOut()
+    window.location.href = '/'
   }
 
   const displayStats = stats || {
@@ -49,7 +72,7 @@ export default function DashboardPage() {
     <DashboardLayout
       seller={seller}
       title={t.dashboard.title}
-      subtitle={`${t.dashboard.welcomeBack}, ${seller?.name || user?.firstName || 'Seller'}`}
+      subtitle={`${t.dashboard.welcomeBack}, ${seller?.name || session?.user?.name || 'Seller'}`}
       headerActions={
         <>
           {seller && (
@@ -57,7 +80,12 @@ export default function DashboardPage() {
               {planLabels[seller.plan] || 'Active'}
             </span>
           )}
-          <UserButton afterSignOutUrl="/" />
+          <button
+            onClick={handleSignOut}
+            className="px-3 lg:px-4 py-1.5 lg:py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs lg:text-sm font-medium transition-colors"
+          >
+            Sign out
+          </button>
         </>
       }
     >

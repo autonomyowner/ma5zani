@@ -6,12 +6,18 @@ import Button from '@/components/ui/Button'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 import { useLanguage } from '@/lib/LanguageContext'
 import { useState } from 'react'
-import { useUser, UserButton } from '@clerk/nextjs'
+import { authClient } from '@/lib/auth-client'
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { t, dir } = useLanguage()
-  const { isSignedIn, isLoaded } = useUser()
+  const { data: session, isPending } = authClient.useSession()
+  const isSignedIn = !!session
+
+  const handleSignOut = async () => {
+    await authClient.signOut()
+    window.location.href = '/'
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-slate-100">
@@ -50,14 +56,19 @@ export default function Navbar() {
           {/* CTA Buttons + Language Toggle */}
           <div className="hidden md:flex items-center gap-4">
             <LanguageToggle />
-            {!isLoaded ? (
+            {isPending ? (
               <div className="w-20 h-9 bg-slate-100 rounded-lg animate-pulse" />
             ) : isSignedIn ? (
               <>
                 <Link href="/dashboard">
                   <Button variant="primary" size="sm">{t.nav.dashboard || 'Dashboard'}</Button>
                 </Link>
-                <UserButton afterSignOutUrl="/" />
+                <button
+                  onClick={handleSignOut}
+                  className="px-3 py-1.5 text-sm text-slate-600 hover:text-slate-900 font-medium"
+                >
+                  Sign out
+                </button>
               </>
             ) : (
               <>
@@ -107,9 +118,12 @@ export default function Navbar() {
                     <Link href="/dashboard">
                       <Button variant="primary" size="md" className="w-full">{t.nav.dashboard || 'Dashboard'}</Button>
                     </Link>
-                    <div className="flex justify-center py-2">
-                      <UserButton afterSignOutUrl="/" />
-                    </div>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full py-2 text-sm text-slate-600 hover:text-slate-900 font-medium"
+                    >
+                      Sign out
+                    </button>
                   </>
                 ) : (
                   <>

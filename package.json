@@ -11,9 +11,10 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.974.0",
     "@aws-sdk/s3-request-presigner": "^3.974.0",
-    "@clerk/nextjs": "^6.36.9",
+    "@convex-dev/better-auth": "^0.10.10",
     "@vapi-ai/web": "^2.5.2",
-    "convex": "^1.31.6",
+    "better-auth": "^1.4.9",
+    "convex": "^1.31.7",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

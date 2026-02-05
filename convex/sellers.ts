@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getCurrentSeller } from "./auth";
+import { getCurrentSeller, getAuthUser } from "./auth";
 
 export const getCurrentSellerProfile = query({
   args: {},
@@ -17,15 +17,18 @@ export const upsertSeller = mutation({
     plan: v.union(v.literal("basic"), v.literal("plus"), v.literal("gros")),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    const authUser = await getAuthUser(ctx);
+    if (!authUser || !authUser.email) {
       throw new Error("Unauthorized");
     }
 
+    // Use email from auth user, not from args (security)
+    const email = authUser.email;
+
     const existingSeller = await ctx.db
       .query("sellers")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", identity.subject))
-      .unique();
+      .withIndex("by_email", (q) => q.eq("email", email))
+      .first();
 
     const now = Date.now();
 
@@ -40,8 +43,7 @@ export const upsertSeller = mutation({
     }
 
     const sellerId = await ctx.db.insert("sellers", {
-      clerkId: identity.subject,
-      email: args.email,
+      email,
       name: args.name,
       phone: args.phone,
       plan: args.plan,

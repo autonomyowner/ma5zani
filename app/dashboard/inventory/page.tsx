@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation } from 'convex/react'
-import { useUser } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
 import { useLanguage } from '@/lib/LanguageContext'
+import { useCurrentSeller } from '@/hooks/useCurrentSeller'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
@@ -14,16 +14,21 @@ import Card from '@/components/ui/Card'
 
 export default function InventoryPage() {
   const router = useRouter()
-  const { user, isLoaded } = useUser()
   const { t } = useLanguage()
-  const seller = useQuery(api.sellers.getCurrentSellerProfile)
+  const { seller, isLoading, isAuthenticated } = useCurrentSeller()
   const products = useQuery(api.products.getProducts)
   const updateStock = useMutation(api.products.updateStock)
 
   const [updatingProduct, setUpdatingProduct] = useState<string | null>(null)
   const [stockInputs, setStockInputs] = useState<Record<string, string>>({})
 
-  if (!isLoaded || seller === undefined) {
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      window.location.href = '/login'
+    }
+  }, [isLoading, isAuthenticated])
+
+  if (isLoading || seller === undefined) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
@@ -31,7 +36,7 @@ export default function InventoryPage() {
     )
   }
 
-  if (seller === null && user) {
+  if (seller === null && isAuthenticated) {
     router.push('/onboarding')
     return null
   }

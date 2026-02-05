@@ -1,6 +1,6 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { auth } from '@clerk/nextjs/server';
+import { isAuthenticated } from '@/lib/auth-server';
 import { NextResponse } from 'next/server';
 
 const R2 = new S3Client({
@@ -16,9 +16,9 @@ const BUCKET_NAME = process.env.R2_BUCKET_NAME || 'ma5zani';
 
 export async function POST(request: Request) {
   try {
-    const { userId } = await auth();
+    const authenticated = await isAuthenticated();
 
-    if (!userId) {
+    if (!authenticated) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2, 8);
     const extension = filename.split('.').pop() || 'jpg';
-    const key = `${folder}/${userId}/${timestamp}-${randomId}.${extension}`;
+    const key = `${folder}/${timestamp}-${randomId}.${extension}`;
 
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,

@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
-import { useUser } from '@clerk/nextjs';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
+import { useCurrentSeller } from '@/hooks/useCurrentSeller';
 import { getR2PublicUrl } from '@/lib/r2';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import Button from '@/components/ui/Button';
@@ -15,11 +15,9 @@ import SlugInput from '@/components/ui/SlugInput';
 
 export default function StorefrontPage() {
   const router = useRouter();
-  const { user, isLoaded } = useUser();
   const { language, t } = useLanguage();
   const isRTL = language === 'ar';
-
-  const seller = useQuery(api.sellers.getCurrentSellerProfile);
+  const { seller, isLoading, isAuthenticated } = useCurrentSeller();
   const storefront = useQuery(api.storefronts.getMyStorefront);
   const products = useQuery(api.products.getProducts);
   const createStorefront = useMutation(api.storefronts.createStorefront);
@@ -38,6 +36,13 @@ export default function StorefrontPage() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savingPixel, setSavingPixel] = useState(false);
+
+  // Auth protection
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      window.location.href = '/login';
+    }
+  }, [isLoading, isAuthenticated]);
 
   // Initialize form when storefront loads
   useEffect(() => {
@@ -163,7 +168,7 @@ export default function StorefrontPage() {
   const storefrontProducts = products?.filter(p => p.showOnStorefront) || [];
   const availableProducts = products?.filter(p => !p.showOnStorefront) || [];
 
-  if (!isLoaded || seller === undefined || storefront === undefined || products === undefined) {
+  if (isLoading || seller === undefined || storefront === undefined || products === undefined) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
@@ -171,7 +176,7 @@ export default function StorefrontPage() {
     );
   }
 
-  if (seller === null && user) {
+  if (seller === null && isAuthenticated) {
     router.push('/onboarding');
     return null;
   }

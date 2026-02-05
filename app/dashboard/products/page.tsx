@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation } from 'convex/react'
-import { useUser } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
 import { useLanguage } from '@/lib/LanguageContext'
+import { useCurrentSeller } from '@/hooks/useCurrentSeller'
 import { getR2PublicUrl } from '@/lib/r2'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Badge from '@/components/ui/Badge'
@@ -17,9 +17,8 @@ import ImageUpload from '@/components/ui/ImageUpload'
 
 export default function ProductsPage() {
   const router = useRouter()
-  const { user, isLoaded } = useUser()
   const { t } = useLanguage()
-  const seller = useQuery(api.sellers.getCurrentSellerProfile)
+  const { seller, isLoading, isAuthenticated } = useCurrentSeller()
   const products = useQuery(api.products.getProducts)
   const createProduct = useMutation(api.products.createProduct)
   const updateProduct = useMutation(api.products.updateProduct)
@@ -37,7 +36,13 @@ export default function ProductsPage() {
     imageKeys: [] as string[],
   })
 
-  if (!isLoaded || seller === undefined) {
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      window.location.href = '/login'
+    }
+  }, [isLoading, isAuthenticated])
+
+  if (isLoading || seller === undefined) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
@@ -45,7 +50,7 @@ export default function ProductsPage() {
     )
   }
 
-  if (seller === null && user) {
+  if (seller === null && isAuthenticated) {
     router.push('/onboarding')
     return null
   }
@@ -97,9 +102,10 @@ export default function ProductsPage() {
         })
       }
       resetForm()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to save product:', error)
-      alert(error?.message || 'Failed to save product. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Failed to save product. Please try again.'
+      alert(errorMessage)
     }
     setIsSubmitting(false)
   }

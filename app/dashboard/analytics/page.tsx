@@ -1,23 +1,29 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from 'convex/react'
-import { useUser } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
 import { useLanguage } from '@/lib/LanguageContext'
+import { useCurrentSeller } from '@/hooks/useCurrentSeller'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 
 export default function AnalyticsPage() {
   const router = useRouter()
-  const { user, isLoaded } = useUser()
   const { t } = useLanguage()
-  const seller = useQuery(api.sellers.getCurrentSellerProfile)
+  const { seller, isLoading, isAuthenticated } = useCurrentSeller()
   const stats = useQuery(api.stats.getDashboardStats)
   const orders = useQuery(api.orders.getOrders, {})
   const products = useQuery(api.products.getProducts)
 
-  if (!isLoaded || seller === undefined) {
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      window.location.href = '/login'
+    }
+  }, [isLoading, isAuthenticated])
+
+  if (isLoading || seller === undefined) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
@@ -25,7 +31,7 @@ export default function AnalyticsPage() {
     )
   }
 
-  if (seller === null && user) {
+  if (seller === null && isAuthenticated) {
     router.push('/onboarding')
     return null
   }

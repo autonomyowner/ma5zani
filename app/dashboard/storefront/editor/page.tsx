@@ -3,9 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
-import { useUser } from '@clerk/nextjs';
 import { api } from '@/convex/_generated/api';
 import { useLanguage } from '@/lib/LanguageContext';
+import { useCurrentSeller } from '@/hooks/useCurrentSeller';
 import { getR2PublicUrl } from '@/lib/r2';
 import { templates, sectionTypeLabels, availableSectionTypes, getTemplate } from '@/lib/templates';
 import { StorefrontSection } from '@/components/storefront/sections';
@@ -18,11 +18,9 @@ const generateId = () => `section-${Date.now()}-${Math.random().toString(36).sub
 
 export default function StorefrontEditorPage() {
   const router = useRouter();
-  const { user, isLoaded } = useUser();
   const { language, t } = useLanguage();
   const isRTL = language === 'ar';
-
-  const seller = useQuery(api.sellers.getCurrentSellerProfile);
+  const { seller, isLoading, isAuthenticated } = useCurrentSeller();
   const storefront = useQuery(api.storefronts.getMyStorefront);
 
   const updateSections = useMutation(api.storefronts.updateSections);
@@ -43,6 +41,13 @@ export default function StorefrontEditorPage() {
   const [saving, setSaving] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [showAddSection, setShowAddSection] = useState(false);
+
+  // Auth protection
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      window.location.href = '/login';
+    }
+  }, [isLoading, isAuthenticated]);
 
   // Initialize state from storefront data
   useEffect(() => {
@@ -183,7 +188,7 @@ export default function StorefrontEditorPage() {
     }
   };
 
-  if (!isLoaded || seller === undefined || storefront === undefined) {
+  if (isLoading || seller === undefined || storefront === undefined) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
@@ -191,7 +196,7 @@ export default function StorefrontEditorPage() {
     );
   }
 
-  if (seller === null && user) {
+  if (seller === null && isAuthenticated) {
     router.push('/onboarding');
     return null;
   }

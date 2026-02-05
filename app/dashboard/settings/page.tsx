@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation } from 'convex/react'
-import { useUser, UserProfile } from '@clerk/nextjs'
 import { api } from '@/convex/_generated/api'
 import { useLanguage } from '@/lib/LanguageContext'
+import { useCurrentSeller } from '@/hooks/useCurrentSeller'
+import { authClient } from '@/lib/auth-client'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -13,9 +14,8 @@ import Input from '@/components/ui/Input'
 
 export default function SettingsPage() {
   const router = useRouter()
-  const { user, isLoaded } = useUser()
   const { t } = useLanguage()
-  const seller = useQuery(api.sellers.getCurrentSellerProfile)
+  const { seller, session, isLoading, isAuthenticated } = useCurrentSeller()
   const updateProfile = useMutation(api.sellers.updateSellerProfile)
 
   const [isEditing, setIsEditing] = useState(false)
@@ -31,7 +31,13 @@ export default function SettingsPage() {
     { id: 'gros' as const, name: t.dashboard.grosPlan, price: '15,000' },
   ]
 
-  if (!isLoaded || seller === undefined) {
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      window.location.href = '/login'
+    }
+  }, [isLoading, isAuthenticated])
+
+  if (isLoading || seller === undefined) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="animate-pulse text-slate-400">{t.dashboard.loading}</div>
@@ -39,7 +45,7 @@ export default function SettingsPage() {
     )
   }
 
-  if (seller === null && user) {
+  if (seller === null && isAuthenticated) {
     router.push('/onboarding')
     return null
   }
@@ -75,6 +81,11 @@ export default function SettingsPage() {
         console.error('Failed to change plan:', error)
       }
     }
+  }
+
+  const handleSignOut = async () => {
+    await authClient.signOut()
+    window.location.href = '/'
   }
 
   return (
@@ -172,7 +183,7 @@ export default function SettingsPage() {
           </div>
         </Card>
 
-        {/* Clerk Profile Management */}
+        {/* Account Security */}
         <Card className="p-4 lg:p-6">
           <h2 className="text-base lg:text-lg font-bold text-[#0054A6] mb-4 lg:mb-6" style={{ fontFamily: 'var(--font-outfit)' }}>
             {t.dashboard.accountSecurity}
@@ -180,14 +191,21 @@ export default function SettingsPage() {
           <p className="text-slate-600 mb-4 text-sm lg:text-base">
             {t.dashboard.securityDescription}
           </p>
-          <UserProfile
-            appearance={{
-              elements: {
-                rootBox: 'w-full',
-                card: 'shadow-none border border-slate-200 rounded-xl',
-              }
-            }}
-          />
+
+          <div className="space-y-4">
+            <div className="p-4 bg-slate-50 rounded-xl">
+              <p className="text-sm text-slate-500 mb-1">Email</p>
+              <p className="font-medium text-slate-900">{session?.user?.email || seller?.email || '-'}</p>
+            </div>
+
+            <Button
+              variant="secondary"
+              onClick={handleSignOut}
+              className="w-full sm:w-auto"
+            >
+              Sign out
+            </Button>
+          </div>
         </Card>
       </div>
     </DashboardLayout>

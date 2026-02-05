@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useUser } from '@clerk/nextjs'
 import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
+import { authClient } from '@/lib/auth-client'
 import Link from 'next/link'
 import Image from 'next/image'
 import Button from '@/components/ui/Button'
@@ -35,7 +35,7 @@ const plans = [
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const { user, isLoaded } = useUser()
+  const { data: session, isPending } = authClient.useSession()
   const upsertSeller = useMutation(api.sellers.upsertSeller)
 
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'plus' | 'gros'>('plus')
@@ -43,7 +43,13 @@ export default function OnboardingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  if (!isLoaded) {
+  useEffect(() => {
+    if (!isPending && !session) {
+      router.push('/login')
+    }
+  }, [isPending, session, router])
+
+  if (isPending) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="animate-pulse text-slate-400">Loading...</div>
@@ -51,8 +57,7 @@ export default function OnboardingPage() {
     )
   }
 
-  if (!user) {
-    router.push('/login')
+  if (!session) {
     return null
   }
 
@@ -63,8 +68,8 @@ export default function OnboardingPage() {
 
     try {
       await upsertSeller({
-        name: user.fullName || user.firstName || 'Seller',
-        email: user.primaryEmailAddress?.emailAddress || '',
+        name: session.user?.name || 'Seller',
+        email: session.user?.email || '',
         phone: phone || undefined,
         plan: selectedPlan,
       })
@@ -111,7 +116,7 @@ export default function OnboardingPage() {
               className="text-2xl font-bold text-[#0054A6] mb-2"
               style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
             >
-              Welcome, {user.firstName || 'Seller'}!
+              Welcome, {session.user?.name?.split(' ')[0] || 'Seller'}!
             </h1>
             <p className="text-slate-600">
               Complete your setup to get started with ma5zani

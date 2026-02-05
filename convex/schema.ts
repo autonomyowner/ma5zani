@@ -3,7 +3,8 @@ import { v } from "convex/values";
 
 export default defineSchema({
   sellers: defineTable({
-    clerkId: v.string(),
+    // clerkId kept as optional for backwards compatibility during migration
+    clerkId: v.optional(v.string()),
     email: v.string(),
     name: v.string(),
     phone: v.optional(v.string()),
@@ -16,7 +17,6 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_clerk_id", ["clerkId"])
     .index("by_email", ["email"]),
 
   products: defineTable({

@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { SignOutButton } from '@clerk/nextjs'
 import { Doc } from '@/convex/_generated/dataModel'
 import { useLanguage } from '@/lib/LanguageContext'
+import { authClient } from '@/lib/auth-client'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 
 interface DashboardLayoutProps {
@@ -50,6 +50,7 @@ export default function DashboardLayout({
     { label: t.dashboard.productsNav, href: '/dashboard/products' },
     { label: t.dashboard.storefrontNav, href: '/dashboard/storefront' },
     { label: t.chatbot.aiAssistant, href: '/dashboard/chatbot' },
+    { label: t.telegram.telegramNav, href: '/dashboard/telegram' },
     { label: t.dashboard.inventoryNav, href: '/dashboard/inventory' },
     { label: t.dashboard.analyticsNav, href: '/dashboard/analytics' },
     { label: t.dashboard.settingsNav, href: '/dashboard/settings' },
@@ -141,11 +142,15 @@ export default function DashboardLayout({
               {seller ? planLabels[seller.plan] : '...'}
             </p>
           </div>
-          <SignOutButton>
-            <button className="w-full text-left px-3 lg:px-4 py-2 lg:py-3 text-slate-600 hover:text-red-600 font-medium transition-colors text-sm lg:text-base">
-              {t.dashboard.signOut}
-            </button>
-          </SignOutButton>
+          <button
+            onClick={async () => {
+              await authClient.signOut()
+              window.location.href = '/'
+            }}
+            className="w-full text-left px-3 lg:px-4 py-2 lg:py-3 text-slate-600 hover:text-red-600 font-medium transition-colors text-sm lg:text-base"
+          >
+            {t.dashboard.signOut}
+          </button>
         </div>
       </aside>
 
