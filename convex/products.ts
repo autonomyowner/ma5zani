@@ -30,6 +30,19 @@ export const getProduct = query({
   },
 });
 
+// Query to get products by seller ID (for internal API use)
+export const getProductsBySeller = query({
+  args: { sellerId: v.id("sellers") },
+  handler: async (ctx, args) => {
+    const products = await ctx.db
+      .query("products")
+      .withIndex("by_seller", (q) => q.eq("sellerId", args.sellerId))
+      .collect();
+
+    return products;
+  },
+});
+
 export const createProduct = mutation({
   args: {
     name: v.string(),

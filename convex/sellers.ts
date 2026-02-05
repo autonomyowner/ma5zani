@@ -53,6 +53,14 @@ export const upsertSeller = mutation({
   },
 });
 
+// Query to get seller by ID (for internal API use)
+export const getSellerById = query({
+  args: { sellerId: v.id("sellers") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.sellerId);
+  },
+});
+
 export const updateSellerProfile = mutation({
   args: {
     name: v.optional(v.string()),
