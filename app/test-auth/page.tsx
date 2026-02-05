@@ -22,14 +22,16 @@ export default function TestAuthPage() {
     window.location.reload()
   }
 
-  const handleTestGoogleSignIn = () => {
-    // Redirect directly to Convex OAuth endpoint
-    // This ensures cookies are set on the correct domain
-    const convexSiteUrl = 'https://colorless-cricket-513.convex.site'
-    const callbackURL = encodeURIComponent(window.location.origin + '/test-auth')
-
-    // Direct browser navigation to Convex OAuth endpoint
-    window.location.href = `${convexSiteUrl}/api/auth/sign-in/social?provider=google&callbackURL=${callbackURL}`
+  const handleTestGoogleSignIn = async () => {
+    try {
+      await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: '/test-auth',
+      })
+    } catch (err) {
+      console.error('Google sign in error:', err)
+      alert('Error: ' + (err as Error).message)
+    }
   }
 
   const handleTestEmailSignIn = async () => {

@@ -39,13 +39,17 @@ export default function LoginPage() {
     }
   }
 
-  const handleGoogleSignIn = () => {
+  const handleGoogleSignIn = async () => {
     setError('')
-    // Direct browser redirect to Convex OAuth endpoint
-    // This avoids cross-domain cookie issues with state parameter
-    const convexSiteUrl = 'https://colorless-cricket-513.convex.site'
-    const callbackURL = encodeURIComponent(window.location.origin + '/dashboard')
-    window.location.href = `${convexSiteUrl}/api/auth/sign-in/social?provider=google&callbackURL=${callbackURL}`
+    try {
+      await authClient.signIn.social({
+        provider: 'google',
+        callbackURL: '/dashboard',
+      })
+    } catch (err: unknown) {
+      console.error('Google sign in error:', err)
+      setError('Failed to sign in with Google')
+    }
   }
 
   return (
