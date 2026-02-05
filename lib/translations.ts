@@ -172,7 +172,7 @@ export const translations = {
     // CTA
     cta: {
       title: 'مستعد لتوسيع عملك؟',
-      description: 'انضم لأكثر من 500 بائع جزائري يثقون بمخزني للتوصيل. ابدأ تجربتك المجانية اليوم - بدون بطاقة ائتمان.',
+      description: 'ابدأ تجربتك المجانية اليوم واستمتع بتوصيل سريع وموثوق عبر 58 ولاية - بدون بطاقة ائتمان.',
       startTrial: 'ابدأ تجربة مجانية',
       viewPricing: 'عرض الأسعار',
       trialInfo: 'تجربة 14 يوم مجانية — بدون رسوم إعداد — ألغِ في أي وقت',
@@ -663,7 +663,7 @@ export const translations = {
     // CTA
     cta: {
       title: 'Ready to Scale Your Business?',
-      description: 'Join 500+ Algerian sellers who trust ma5zani with their fulfillment. Start your free trial today - no credit card required.',
+      description: 'Start your free trial today and enjoy fast, reliable delivery across 58 wilayas - no credit card required.',
       startTrial: 'Start Free Trial',
       viewPricing: 'View Pricing',
       trialInfo: '14-day free trial — No setup fees — Cancel anytime',
