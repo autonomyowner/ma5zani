@@ -3,9 +3,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { SignOutButton } from '@clerk/nextjs'
 import { Doc } from '@/convex/_generated/dataModel'
 import { useLanguage } from '@/lib/LanguageContext'
+import { authClient } from '@/lib/auth-client'
 import LanguageToggle from '@/components/ui/LanguageToggle'
 
 interface SidebarProps {
@@ -21,6 +21,7 @@ export default function Sidebar({ seller }: SidebarProps) {
     { label: t.dashboard.ordersNav, href: '/dashboard/orders' },
     { label: t.dashboard.productsNav, href: '/dashboard/products' },
     { label: t.dashboard.storefrontNav, href: '/dashboard/storefront' },
+    { label: t.aiBuilder?.aiDesignerNav || 'AI Designer', href: '/dashboard/storefront/ai' },
     { label: t.dashboard.inventoryNav, href: '/dashboard/inventory' },
     { label: t.dashboard.analyticsNav, href: '/dashboard/analytics' },
     { label: t.dashboard.settingsNav, href: '/dashboard/settings' },
@@ -89,11 +90,15 @@ export default function Sidebar({ seller }: SidebarProps) {
             {seller ? planLabels[seller.plan] : '...'}
           </p>
         </div>
-        <SignOutButton>
-          <button className="w-full text-left px-4 py-3 text-slate-600 hover:text-red-600 font-medium transition-colors">
-            {t.dashboard.signOut}
-          </button>
-        </SignOutButton>
+        <button
+          onClick={async () => {
+            await authClient.signOut()
+            window.location.href = '/'
+          }}
+          className="w-full text-left px-4 py-3 text-slate-600 hover:text-red-600 font-medium transition-colors"
+        >
+          {t.dashboard.signOut}
+        </button>
       </div>
     </aside>
   )
