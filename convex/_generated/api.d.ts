@@ -19,6 +19,7 @@ import type * as publicOrders from "../publicOrders.js";
 import type * as sellers from "../sellers.js";
 import type * as stats from "../stats.js";
 import type * as storefronts from "../storefronts.js";
+import type * as telegram from "../telegram.js";
 
 import type {
   ApiFromModules,
@@ -38,6 +39,7 @@ declare const fullApi: ApiFromModules<{
   sellers: typeof sellers;
   stats: typeof stats;
   storefronts: typeof storefronts;
+  telegram: typeof telegram;
 }>;
 
 /**

@@ -21,6 +21,19 @@ export const getMyStorefront = query({
   },
 });
 
+// Query to get storefront by seller ID (for internal API use)
+export const getStorefrontBySeller = query({
+  args: { sellerId: v.id("sellers") },
+  handler: async (ctx, args) => {
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_seller", (q) => q.eq("sellerId", args.sellerId))
+      .first();
+
+    return storefront;
+  },
+});
+
 export const getStorefrontBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
@@ -432,6 +445,42 @@ export const applyTemplate = mutation({
         primaryColor: args.colors.primary,
         accentColor: args.colors.accent,
       };
+    }
+
+    await ctx.db.patch(storefront._id, updates);
+
+    return storefront._id;
+  },
+});
+
+export const updateFonts = mutation({
+  args: {
+    fonts: v.object({
+      display: v.string(),
+      body: v.string(),
+      arabic: v.string(),
+    }),
+    aestheticDirection: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_seller", (q) => q.eq("sellerId", seller._id))
+      .first();
+
+    if (!storefront) {
+      throw new Error("Storefront not found");
+    }
+
+    const updates: Record<string, unknown> = {
+      fonts: args.fonts,
+      updatedAt: Date.now(),
+    };
+
+    if (args.aestheticDirection !== undefined) {
+      updates.aestheticDirection = args.aestheticDirection;
     }
 
     await ctx.db.patch(storefront._id, updates);
