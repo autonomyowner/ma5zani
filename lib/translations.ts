@@ -26,7 +26,7 @@ export const translations = {
     stats: {
       freeReturns: 'رسوم الإرجاع',
       availability: 'متوفرون دائماً',
-      deliveryRate: 'نسبة نجاح التوصيل',
+      fastDelivery: 'توصيل سريع',
     },
     // Features
     features: {
@@ -517,7 +517,7 @@ export const translations = {
     stats: {
       freeReturns: 'Return Fees',
       availability: 'Always Available',
-      deliveryRate: 'Delivery Success Rate',
+      fastDelivery: 'Fast Delivery',
     },
     // Features
     features: {
