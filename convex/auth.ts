@@ -32,6 +32,15 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       },
     },
+    // Fix OAuth state_mismatch: cookies need SameSite=None for cross-site redirects
+    advanced: {
+      useSecureCookies: true,
+      defaultCookieAttributes: {
+        sameSite: "none",
+        secure: true,
+        httpOnly: true,
+      },
+    },
     plugins: [convex({ authConfig })],
   });
 };
