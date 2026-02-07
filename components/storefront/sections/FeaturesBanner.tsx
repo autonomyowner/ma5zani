@@ -18,89 +18,154 @@ interface FeaturesBannerProps {
     items?: FeatureItem[];
   };
   primaryColor: string;
+  accentColor?: string;
 }
 
+// Helper to determine if a color is light
+function isLightColor(color: string): boolean {
+  const hex = color.replace('#', '');
+  if (hex.length !== 6) return false;
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5;
+}
+
+// Default features using BOLD TYPOGRAPHY (numbers, single words) - no icons
 const defaultFeatures: FeatureItem[] = [
   {
-    title: 'Free Shipping',
-    titleAr: 'شحن مجاني',
-    description: 'On all orders',
-    descriptionAr: 'على جميع الطلبات',
+    title: '24H',
+    titleAr: '24 ساعة',
+    description: 'Fast delivery',
+    descriptionAr: 'توصيل سريع',
   },
   {
-    title: 'Secure Payment',
-    titleAr: 'دفع آمن',
-    description: 'Cash on delivery',
-    descriptionAr: 'الدفع عند الاستلام',
+    title: 'COD',
+    titleAr: 'الدفع',
+    description: 'Pay on delivery',
+    descriptionAr: 'عند الاستلام',
   },
   {
-    title: '24/7 Support',
-    titleAr: 'دعم متواصل',
-    description: 'We\'re here to help',
-    descriptionAr: 'نحن هنا لمساعدتك',
+    title: '58',
+    titleAr: '58',
+    description: 'Wilayas covered',
+    descriptionAr: 'ولاية مغطاة',
   },
   {
-    title: 'Easy Returns',
-    titleAr: 'إرجاع سهل',
-    description: 'Hassle-free returns',
-    descriptionAr: 'إرجاع بدون متاعب',
+    title: '100%',
+    titleAr: '100%',
+    description: 'Authentic products',
+    descriptionAr: 'منتجات أصلية',
   },
 ];
 
-export default function FeaturesBanner({ content, primaryColor }: FeaturesBannerProps) {
+export default function FeaturesBanner({ content, primaryColor, accentColor = '#c9a962' }: FeaturesBannerProps) {
   const { language } = useLanguage();
   const isRTL = language === 'ar';
 
   const features = content.items?.length ? content.items : defaultFeatures;
   const title = isRTL ? (content.titleAr || content.title) : content.title;
 
+  const bgColor = content.backgroundColor || primaryColor;
+  const isLightBg = isLightColor(bgColor);
+  const textColor = content.textColor || (isLightBg ? '#1a1a1a' : '#f5f5dc');
+  const textMuted = isLightBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
+  const borderColor = isLightBg ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+
   return (
     <section
-      className="py-10 px-4"
-      style={{
-        backgroundColor: content.backgroundColor || '#f8fafc',
-      }}
+      className="relative py-20 lg:py-24 overflow-hidden"
+      style={{ backgroundColor: bgColor }}
     >
-      <div className="max-w-7xl mx-auto">
+      {/* Subtle background gradient */}
+      <div
+        className="absolute inset-0 opacity-30"
+        style={{
+          background: `radial-gradient(ellipse at center, ${accentColor}10 0%, transparent 70%)`,
+        }}
+      />
+
+      <div className="relative max-w-[1600px] mx-auto px-6 lg:px-12">
+        {/* Section Title */}
         {title && (
-          <h2
-            className="text-2xl font-bold mb-8 text-center"
-            style={{ color: content.textColor || '#1e293b' }}
-          >
-            {title}
-          </h2>
-        )}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="text-center p-4"
+          <div className="text-center mb-16">
+            <p
+              className="text-xs tracking-[0.4em] uppercase mb-4"
+              style={{ color: accentColor }}
             >
+              {isRTL ? 'لماذا نحن' : 'Why Choose Us'}
+            </p>
+            <h2
+              className="text-3xl md:text-4xl font-light"
+              style={{
+                color: textColor,
+                fontFamily: 'var(--font-display, serif)',
+              }}
+            >
+              {title}
+            </h2>
+            <div
+              className="h-px mx-auto mt-8"
+              style={{
+                width: '60px',
+                background: `linear-gradient(to right, transparent, ${accentColor}, transparent)`,
+              }}
+            />
+          </div>
+        )}
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-4">
+          {features.map((feature, index) => {
+            const featureTitle = isRTL ? (feature.titleAr || feature.title) : feature.title;
+            const featureDescription = isRTL
+              ? (feature.descriptionAr || feature.description)
+              : feature.description;
+
+            return (
               <div
-                className="w-12 h-12 rounded-full mx-auto mb-3 flex items-center justify-center"
-                style={{
-                  backgroundColor: `${primaryColor}15`,
-                }}
+                key={index}
+                className="relative text-center p-8 lg:p-10 group"
               >
+                {/* Decorative borders between items (desktop) */}
+                {index < features.length - 1 && (
+                  <div
+                    className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-16 w-px"
+                    style={{ backgroundColor: borderColor }}
+                  />
+                )}
+
+                {/* Bold Typography Title - The main visual element */}
                 <div
-                  className="w-6 h-6 rounded-full"
-                  style={{ backgroundColor: primaryColor }}
+                  className="text-4xl md:text-5xl lg:text-6xl font-light mb-4 transition-colors duration-300"
+                  style={{
+                    color: accentColor,
+                    fontFamily: 'var(--font-display, serif)',
+                  }}
+                >
+                  {featureTitle}
+                </div>
+
+                {/* Description - Smaller, supporting text */}
+                <p
+                  className="text-xs tracking-[0.2em] uppercase"
+                  style={{
+                    color: textMuted,
+                    fontFamily: 'var(--font-body, sans-serif)',
+                  }}
+                >
+                  {featureDescription}
+                </p>
+
+                {/* Hover accent line */}
+                <div
+                  className="absolute bottom-4 left-1/2 -translate-x-1/2 h-px w-0 group-hover:w-8 transition-all duration-300"
+                  style={{ backgroundColor: accentColor }}
                 />
               </div>
-              <h3
-                className="font-semibold mb-1"
-                style={{ color: content.textColor || '#1e293b' }}
-              >
-                {isRTL ? (feature.titleAr || feature.title) : feature.title}
-              </h3>
-              <p
-                className="text-sm opacity-70"
-                style={{ color: content.textColor || '#64748b' }}
-              >
-                {isRTL ? (feature.descriptionAr || feature.description) : feature.description}
-              </p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

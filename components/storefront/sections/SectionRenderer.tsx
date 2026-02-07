@@ -42,8 +42,17 @@ interface SectionRendererProps {
   categories: Doc<'categories'>[];
   primaryColor: string;
   accentColor: string;
+  backgroundColor?: string;
+  textColor?: string;
+  fonts?: {
+    display: string;
+    body: string;
+    arabic: string;
+  };
   selectedCategory?: string | null;
   onSelectCategory?: (categoryId: string | null) => void;
+  searchQuery?: string;
+  onSearchChange?: (query: string) => void;
 }
 
 export default function SectionRenderer({
@@ -52,8 +61,13 @@ export default function SectionRenderer({
   categories,
   primaryColor,
   accentColor,
+  backgroundColor = '#0a0a0a',
+  textColor = '#f5f5dc',
+  fonts,
   selectedCategory,
   onSelectCategory,
+  searchQuery,
+  onSearchChange,
 }: SectionRendererProps) {
   if (!section.enabled) return null;
 
@@ -64,6 +78,7 @@ export default function SectionRenderer({
           content={section.content}
           primaryColor={primaryColor}
           accentColor={accentColor}
+          fonts={fonts}
         />
       );
 
@@ -89,6 +104,7 @@ export default function SectionRenderer({
         <FeaturesBanner
           content={section.content as { items?: { title: string; titleAr?: string; description: string; descriptionAr?: string }[] } & typeof section.content}
           primaryColor={primaryColor}
+          accentColor={accentColor}
         />
       );
 
@@ -115,6 +131,7 @@ export default function SectionRenderer({
         <AboutSection
           content={section.content}
           primaryColor={primaryColor}
+          accentColor={accentColor}
         />
       );
 
@@ -133,17 +150,17 @@ export default function SectionRenderer({
 
     case 'grid':
       return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          {section.content.title && (
-            <h2
-              className="text-2xl md:text-3xl font-bold mb-8 text-center"
-              style={{ color: section.content.textColor || '#1e293b' }}
-            >
-              {section.content.title}
-            </h2>
-          )}
-          <ProductGrid products={products} accentColor={accentColor} />
-        </div>
+        <ProductGrid
+          products={products}
+          accentColor={accentColor}
+          backgroundColor={section.content.backgroundColor || backgroundColor}
+          textColor={section.content.textColor || textColor}
+          productsPerRow={section.content.productsPerRow || 4}
+          title={section.content.title}
+          titleAr={section.content.titleAr}
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
+        />
       );
 
     default:

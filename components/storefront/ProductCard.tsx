@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Doc } from '@/convex/_generated/dataModel';
@@ -10,22 +11,46 @@ import { useLanguage } from '@/lib/LanguageContext';
 interface ProductCardProps {
   product: Doc<'products'>;
   accentColor: string;
+  backgroundColor?: string;
+  textColor?: string;
 }
 
-export default function ProductCard({ product, accentColor }: ProductCardProps) {
+// Helper to determine if a color is light
+function isLightColor(color: string): boolean {
+  const hex = color.replace('#', '');
+  if (hex.length !== 6) return false;
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5;
+}
+
+export default function ProductCard({
+  product,
+  accentColor,
+  backgroundColor = '#0a0a0a',
+  textColor = '#f5f5dc',
+}: ProductCardProps) {
   const params = useParams();
   const slug = params.slug as string;
   const { addItem, getItemQuantity } = useCart();
   const { language } = useLanguage();
   const isRTL = language === 'ar';
-  const quantity = getItemQuantity(product._id);
+  const [isHovered, setIsHovered] = useState(false);
 
+  const quantity = getItemQuantity(product._id);
   const images = product.imageKeys && product.imageKeys.length > 0 ? product.imageKeys : [];
   const imageUrl = images.length > 0 ? getR2PublicUrl(images[0]) : null;
 
   const isOnSale = product.salePrice && product.salePrice < product.price;
   const displayPrice = product.salePrice ?? product.price;
   const isOutOfStock = product.status === 'out_of_stock';
+
+  const isLightBg = isLightColor(backgroundColor);
+  const cardBg = isLightBg ? '#ffffff' : '#141414';
+  const borderColor = isLightBg ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+  const textMuted = isLightBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -42,88 +67,164 @@ export default function ProductCard({ product, accentColor }: ProductCardProps) 
   };
 
   return (
-    <Link href={`/${slug}/product/${product._id}`} className="block">
-      <div className="bg-white rounded-xl sm:rounded-2xl border border-slate-200 overflow-hidden group hover:shadow-lg transition-shadow">
-        {/* Image */}
-        <div className="aspect-square bg-slate-100 relative overflow-hidden">
+    <Link href={`/${slug}/product/${product._id}`}>
+      <article
+        className="group relative"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Image Container */}
+        <div
+          className="relative aspect-[3/4] overflow-hidden mb-5"
+          style={{ backgroundColor: cardBg }}
+        >
           {imageUrl ? (
             <img
               src={imageUrl}
               alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              className="w-full h-full object-cover transition-transform duration-700 ease-out"
+              style={{
+                transform: isHovered ? 'scale(1.05)' : 'scale(1)',
+              }}
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-slate-300">
-              <svg className="w-10 h-10 sm:w-16 sm:h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div
+              className="w-full h-full flex items-center justify-center"
+              style={{ color: textMuted }}
+            >
+              <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
           )}
 
-          {/* Multiple Images Indicator */}
-          {images.length > 1 && (
-            <span className="absolute bottom-2 right-2 sm:bottom-3 sm:right-3 bg-black/60 text-white text-[10px] sm:text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-md sm:rounded-lg">
-              +{images.length - 1}
-            </span>
-          )}
+          {/* Hover Overlay */}
+          <div
+            className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-6 transition-opacity duration-300"
+            style={{
+              backgroundColor: `${backgroundColor}99`,
+              opacity: isHovered && !isOutOfStock ? 1 : 0,
+              pointerEvents: isHovered && !isOutOfStock ? 'auto' : 'none',
+            }}
+          >
+            {/* Quick Add Button */}
+            <button
+              onClick={handleAddToCart}
+              className="w-full max-w-[200px] py-3 text-xs tracking-[0.15em] uppercase font-medium transition-all duration-300 hover:scale-[1.02]"
+              style={{
+                backgroundColor: accentColor,
+                color: isLightColor(accentColor) ? '#0a0a0a' : '#ffffff',
+              }}
+            >
+              {quantity > 0
+                ? (isRTL ? `في السلة (${quantity})` : `In Cart (${quantity})`)
+                : (isRTL ? 'أضف للسلة' : 'Add to Cart')}
+            </button>
+          </div>
 
           {/* Sale Badge */}
           {isOnSale && !isOutOfStock && (
-            <span
-              className="absolute top-2 left-2 sm:top-3 sm:left-3 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[10px] sm:text-xs font-semibold text-white rounded-md sm:rounded-lg"
-              style={{ backgroundColor: accentColor }}
+            <div
+              className="absolute top-4 left-4 px-3 py-1 text-[10px] tracking-[0.15em] uppercase font-medium"
+              style={{
+                backgroundColor: accentColor,
+                color: isLightColor(accentColor) ? '#0a0a0a' : '#ffffff',
+              }}
             >
               {isRTL ? 'تخفيض' : 'Sale'}
-            </span>
+            </div>
           )}
 
-          {/* Out of Stock Badge */}
+          {/* Out of Stock Overlay */}
           {isOutOfStock && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span className="px-2 py-1 sm:px-4 sm:py-2 bg-white text-slate-900 font-semibold rounded-lg text-xs sm:text-sm">
-                {isRTL ? 'نفذ المخزون' : 'Out of Stock'}
+            <div
+              className="absolute inset-0 flex items-center justify-center"
+              style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+            >
+              <span
+                className="px-4 py-2 text-xs tracking-[0.2em] uppercase font-medium"
+                style={{
+                  backgroundColor: cardBg,
+                  color: textColor,
+                }}
+              >
+                {isRTL ? 'نفذ المخزون' : 'Sold Out'}
               </span>
+            </div>
+          )}
+
+          {/* Mobile Quick Add Button - always visible on touch devices */}
+          <button
+            onClick={handleAddToCart}
+            className="absolute bottom-3 right-3 w-9 h-9 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 active:scale-90 touch-add-btn"
+            style={{
+              backgroundColor: accentColor,
+              color: isLightColor(accentColor) ? '#0a0a0a' : '#ffffff',
+              opacity: isOutOfStock ? 0 : 1,
+              pointerEvents: isOutOfStock ? 'none' : 'auto',
+            }}
+          >
+            {quantity > 0 ? quantity : '+'}
+          </button>
+
+          {/* Multiple Images Indicator */}
+          {images.length > 1 && (
+            <div
+              className="absolute bottom-4 left-4 flex gap-2"
+              style={{ opacity: isHovered ? 0 : 1, transition: 'opacity 0.3s' }}
+            >
+              {images.slice(0, 4).map((_, i) => (
+                <div
+                  key={i}
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{
+                    backgroundColor: i === 0 ? accentColor : textMuted,
+                  }}
+                />
+              ))}
             </div>
           )}
         </div>
 
-        {/* Content */}
-        <div className="p-2.5 sm:p-4">
-          <h3 className="font-medium sm:font-semibold text-slate-900 text-xs sm:text-base mb-1 sm:mb-2 line-clamp-2 leading-tight group-hover:text-slate-700 transition-colors">
+        {/* Product Info */}
+        <div className="space-y-2">
+          <h3
+            className="text-sm tracking-[0.1em] uppercase transition-colors duration-300"
+            style={{
+              color: isHovered ? accentColor : textColor,
+            }}
+          >
             {product.name}
           </h3>
 
           {/* Price */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 mb-2 sm:mb-3">
-            <span className="text-sm sm:text-lg font-bold" style={{ color: accentColor }}>
+          <div className="flex items-center gap-3">
+            <span
+              className="text-sm font-medium"
+              style={{ color: textColor }}
+            >
               {displayPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
             </span>
             {isOnSale && (
-              <span className="text-[10px] sm:text-sm text-slate-400 line-through">
+              <span
+                className="text-xs line-through"
+                style={{ color: textMuted }}
+              >
                 {product.price.toLocaleString()}
               </span>
             )}
           </div>
-
-          {/* Add to Cart Button */}
-          <button
-            onClick={handleAddToCart}
-            disabled={isOutOfStock}
-            className={`w-full py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-medium text-xs sm:text-sm transition-colors ${
-              isOutOfStock
-                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                : 'text-white hover:opacity-90'
-            }`}
-            style={{ backgroundColor: isOutOfStock ? undefined : accentColor }}
-          >
-            {isOutOfStock
-              ? (isRTL ? 'نفذ' : 'Sold Out')
-              : quantity > 0
-              ? (isRTL ? `في السلة (${quantity})` : `In Cart (${quantity})`)
-              : (isRTL ? 'أضف للسلة' : 'Add to Cart')}
-          </button>
         </div>
-      </div>
+
+        {/* Decorative line on hover */}
+        <div
+          className="absolute -bottom-2 left-0 h-px transition-all duration-500 ease-out"
+          style={{
+            width: isHovered ? '100%' : '0%',
+            backgroundColor: accentColor,
+          }}
+        />
+      </article>
     </Link>
   );
 }

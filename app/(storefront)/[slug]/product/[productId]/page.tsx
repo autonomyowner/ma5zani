@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { getR2PublicUrl } from '@/lib/r2';
 import { useLanguage } from '@/lib/LanguageContext';
+import { useCart } from '@/lib/CartContext';
 import StorefrontLayout from '@/components/storefront/StorefrontLayout';
 import WilayaSelect from '@/components/storefront/WilayaSelect';
 import Link from 'next/link';
@@ -33,6 +34,9 @@ export default function ProductDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const orderFormRef = useRef<HTMLDivElement>(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+  const { addItem, getItemQuantity } = useCart();
 
   // Form state
   const [customerName, setCustomerName] = useState('');
@@ -65,6 +69,18 @@ export default function ProductDetailPage() {
     }
     setTouchStart(null);
   };
+
+  // Sticky bar: show when order form scrolls out of view (mobile only)
+  useEffect(() => {
+    const el = orderFormRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setShowStickyBar(!entry.isIntersecting),
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [data]);
 
   // Handle order submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -113,11 +129,35 @@ export default function ProductDetailPage() {
     }
   };
 
-  // Loading state
+  // Loading state - Skeleton
   if (data === undefined) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-pulse text-slate-400">{isRTL ? 'جاري التحميل...' : 'Loading...'}</div>
+      <div className="min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
+        <div className="h-20" />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Image skeleton */}
+            <div className="aspect-square rounded-xl bg-white/5 skeleton-shimmer" />
+            {/* Info skeleton */}
+            <div className="space-y-4 pt-4">
+              <div className="w-20 h-3 rounded bg-white/10 skeleton-shimmer" />
+              <div className="w-3/4 h-6 rounded bg-white/10 skeleton-shimmer" />
+              <div className="w-1/3 h-8 rounded bg-white/10 skeleton-shimmer" />
+              <div className="w-24 h-3 rounded bg-white/10 skeleton-shimmer" />
+              <div className="mt-8 space-y-3">
+                <div className="w-full h-4 rounded bg-white/10 skeleton-shimmer" />
+                <div className="w-5/6 h-4 rounded bg-white/10 skeleton-shimmer" />
+                <div className="w-2/3 h-4 rounded bg-white/10 skeleton-shimmer" />
+              </div>
+              <div className="mt-8 rounded-xl bg-white/5 p-6 space-y-4">
+                <div className="w-1/3 h-4 rounded bg-white/10 skeleton-shimmer" />
+                <div className="w-full h-10 rounded bg-white/10 skeleton-shimmer" />
+                <div className="w-full h-10 rounded bg-white/10 skeleton-shimmer" />
+                <div className="w-full h-12 rounded bg-white/10 skeleton-shimmer" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -350,7 +390,7 @@ export default function ProductDetailPage() {
 
           {/* Order Form */}
           {!isOutOfStock ? (
-            <div className="bg-slate-50 rounded-xl sm:rounded-2xl p-4 sm:p-6">
+            <div ref={orderFormRef} className="bg-slate-50 rounded-xl sm:rounded-2xl p-4 sm:p-6">
               <h3 className="font-semibold text-slate-900 mb-4 text-sm sm:text-base">
                 {isRTL ? 'اطلب الآن' : 'Order Now'}
               </h3>
@@ -543,6 +583,51 @@ export default function ProductDetailPage() {
             })}
           </div>
         </section>
+      )}
+      {/* Mobile Sticky Bottom Bar */}
+      {!isOutOfStock && showStickyBar && (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-40 sm:hidden border-t backdrop-blur-md"
+          style={{
+            backgroundColor: `${storefront.colors?.background || '#ffffff'}f0`,
+            borderColor: 'rgba(0,0,0,0.1)',
+            paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          }}
+        >
+          <div className="flex items-center justify-between px-4 py-3">
+            <div>
+              <p className="text-lg font-bold" style={{ color: accentColor }}>
+                {displayPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+              </p>
+              {isOnSale && (
+                <p className="text-xs text-slate-400 line-through">
+                  {product.price.toLocaleString()}
+                </p>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                addItem({
+                  productId: product._id,
+                  name: product.name,
+                  price: product.price,
+                  salePrice: product.salePrice,
+                  imageKey: product.imageKeys?.[0],
+                  stock: product.stock,
+                });
+              }}
+              className="px-6 py-3 rounded-xl text-sm font-semibold transition-opacity active:opacity-80"
+              style={{
+                backgroundColor: accentColor,
+                color: '#ffffff',
+              }}
+            >
+              {getItemQuantity(product._id) > 0
+                ? (isRTL ? `في السلة (${getItemQuantity(product._id)})` : `In Cart (${getItemQuantity(product._id)})`)
+                : (isRTL ? 'أضف للسلة' : 'Add to Cart')}
+            </button>
+          </div>
+        </div>
       )}
     </StorefrontLayout>
   );

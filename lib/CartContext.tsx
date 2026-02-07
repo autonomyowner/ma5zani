@@ -24,6 +24,9 @@ interface CartContextType {
   totalPrice: number;
   storefrontSlug: string | null;
   setStorefrontSlug: (slug: string) => void;
+  isCartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -34,6 +37,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [storefrontSlug, setStorefrontSlug] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  const openCart = () => setIsCartOpen(true);
+  const closeCart = () => setIsCartOpen(false);
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -119,6 +126,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
         totalPrice,
         storefrontSlug,
         setStorefrontSlug,
+        isCartOpen,
+        openCart,
+        closeCart,
       }}
     >
       {children}

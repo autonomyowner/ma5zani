@@ -17,6 +17,7 @@ export default function StorefrontPage() {
   const { setStorefrontSlug } = useCart();
 
   const [selectedCategory, setSelectedCategory] = useState<Id<'categories'> | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const storefront = useQuery(api.storefronts.getStorefrontBySlug, { slug });
   const productsData = useQuery(api.publicOrders.getStorefrontProducts, { slug });
@@ -36,11 +37,32 @@ export default function StorefrontPage() {
     return null; // Use legacy layout
   }, [storefront?.sections]);
 
-  // Loading state
+  // Loading state - Skeleton
   if (storefront === undefined || productsData === undefined) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-pulse text-slate-400">Loading...</div>
+      <div className="min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
+        {/* Header skeleton */}
+        <div className="h-20 flex items-center justify-between px-6">
+          <div className="w-16 h-3 rounded bg-white/10 skeleton-shimmer" />
+          <div className="w-10 h-10 rounded-full bg-white/10 skeleton-shimmer" />
+          <div className="w-12 h-3 rounded bg-white/10 skeleton-shimmer" />
+        </div>
+        {/* Hero skeleton */}
+        <div className="w-full h-[60vh] bg-white/5 skeleton-shimmer" />
+        {/* Products grid skeleton */}
+        <div className="max-w-[1600px] mx-auto px-6 py-16">
+          <div className="w-32 h-3 rounded bg-white/10 skeleton-shimmer mx-auto mb-4" />
+          <div className="w-48 h-6 rounded bg-white/10 skeleton-shimmer mx-auto mb-12" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i}>
+                <div className="aspect-[3/4] rounded bg-white/5 skeleton-shimmer mb-4" />
+                <div className="w-3/4 h-3 rounded bg-white/10 skeleton-shimmer mb-2" />
+                <div className="w-1/2 h-3 rounded bg-white/10 skeleton-shimmer" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -65,10 +87,26 @@ export default function StorefrontPage() {
 
   const { products, categories } = productsData;
 
-  // Filter products by category
-  const filteredProducts = selectedCategory
-    ? products.filter((p) => p.categoryId === selectedCategory)
-    : products;
+  // Filter products by category and search
+  const filteredProducts = products.filter((p) => {
+    const matchesCategory = !selectedCategory || p.categoryId === selectedCategory;
+    const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  // Get colors and fonts for sections
+  const colors = {
+    primary: storefront.colors?.primary || storefront.theme.primaryColor || '#0a0a0a',
+    accent: storefront.colors?.accent || storefront.theme.accentColor || '#c9a962',
+    background: storefront.colors?.background || '#0a0a0a',
+    text: storefront.colors?.text || '#f5f5dc',
+  };
+
+  const fonts = storefront.fonts || {
+    display: 'Playfair Display',
+    body: 'Inter',
+    arabic: 'Tajawal',
+  };
 
   // If storefront has custom sections, render them dynamically
   if (sections && sections.length > 0) {
@@ -82,10 +120,15 @@ export default function StorefrontPage() {
             section={section}
             products={filteredProducts}
             categories={categories}
-            primaryColor={storefront.colors?.primary || storefront.theme.primaryColor}
-            accentColor={storefront.colors?.accent || storefront.theme.accentColor}
+            primaryColor={colors.primary}
+            accentColor={colors.accent}
+            backgroundColor={colors.background}
+            textColor={colors.text}
+            fonts={fonts}
             selectedCategory={selectedCategory}
             onSelectCategory={(id) => setSelectedCategory(id as Id<'categories'> | null)}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
           />
         ))}
       </StorefrontLayout>
@@ -97,8 +140,16 @@ export default function StorefrontPage() {
     <StorefrontLayout storefront={storefront}>
       {/* Store Description */}
       {storefront.description && (
-        <div className="text-center mb-8">
-          <p className="text-slate-600 max-w-2xl mx-auto">{storefront.description}</p>
+        <div
+          className="text-center py-12 px-6"
+          style={{ backgroundColor: colors.background }}
+        >
+          <p
+            className="text-base max-w-2xl mx-auto leading-relaxed"
+            style={{ color: colors.text, opacity: 0.7 }}
+          >
+            {storefront.description}
+          </p>
         </div>
       )}
 
@@ -107,11 +158,20 @@ export default function StorefrontPage() {
         categories={categories}
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
-        primaryColor={storefront.theme.primaryColor}
+        primaryColor={colors.primary}
       />
 
       {/* Products Grid */}
-      <ProductGrid products={filteredProducts} accentColor={storefront.theme.accentColor} />
+      <ProductGrid
+        products={filteredProducts}
+        accentColor={colors.accent}
+        backgroundColor={colors.background}
+        textColor={colors.text}
+        title="Products"
+        titleAr="المنتجات"
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+      />
     </StorefrontLayout>
   );
 }

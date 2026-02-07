@@ -1,19 +1,44 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/CartContext';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface StorefrontHeaderProps {
   slug: string;
   boutiqueName: string;
   logoUrl: string | null;
   socialLinks?: {
-    instagram?: string;
     facebook?: string;
+    instagram?: string;
     tiktok?: string;
+    whatsapp?: string;
   };
-  primaryColor: string;
-  headerBg?: string;
+  colors: {
+    primary: string;
+    accent: string;
+    background: string;
+    text: string;
+    headerBg: string;
+    footerBg: string;
+  };
+  fonts: {
+    display: string;
+    body: string;
+    arabic: string;
+  };
+}
+
+// Helper to determine if a color is light
+function isLightColor(color: string): boolean {
+  const hex = color.replace('#', '');
+  if (hex.length !== 6) return false;
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.5;
 }
 
 export default function StorefrontHeader({
@@ -21,103 +46,288 @@ export default function StorefrontHeader({
   boutiqueName,
   logoUrl,
   socialLinks,
-  primaryColor,
-  headerBg = '#ffffff',
+  colors,
+  fonts,
 }: StorefrontHeaderProps) {
-  const { totalItems } = useCart();
+  const { totalItems, openCart } = useCart();
+  const { language, setLanguage } = useLanguage();
+  const isRTL = language === 'ar';
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const isLightHeader = isLightColor(colors.headerBg);
+  const textColor = isLightHeader ? colors.primary : colors.text;
+  const textMuted = isLightHeader ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)';
+  const borderColor = isLightHeader ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isMobileMenuOpen]);
 
   return (
-    <header
-      className="border-b border-slate-200 sticky top-0 z-40"
-      style={{ backgroundColor: headerBg }}
+    <>
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        isScrolled ? 'backdrop-blur-md' : ''
+      }`}
+      style={{
+        backgroundColor: isScrolled ? `${colors.headerBg}f5` : 'transparent',
+        borderBottom: isScrolled ? `1px solid ${borderColor}` : 'none',
+      }}
     >
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo & Name */}
-          <Link href={`/${slug}`} className="flex items-center gap-3">
-            {logoUrl && (
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+        <div className="flex items-center justify-between h-20 lg:h-24">
+          {/* Left - Navigation Links (Desktop) */}
+          <div className="hidden md:flex items-center gap-10">
+            <Link
+              href={`/${slug}`}
+              className="text-xs tracking-[0.2em] uppercase transition-colors duration-300 hover:opacity-100"
+              style={{ color: textMuted }}
+            >
+              {isRTL ? 'الرئيسية' : 'Home'}
+            </Link>
+            <Link
+              href={`/${slug}#products`}
+              className="text-xs tracking-[0.2em] uppercase transition-colors duration-300 hover:opacity-100"
+              style={{ color: textMuted }}
+            >
+              {isRTL ? 'المنتجات' : 'Products'}
+            </Link>
+          </div>
+
+          {/* Center - Logo */}
+          <Link
+            href={`/${slug}`}
+            className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center"
+          >
+            {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={boutiqueName}
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-10 h-10 lg:w-12 lg:h-12 rounded-full object-cover"
               />
+            ) : (
+              <>
+                <span
+                  className="text-3xl lg:text-4xl font-light tracking-[0.3em]"
+                  style={{ fontFamily: `'${fonts.display}', serif`, color: textColor }}
+                >
+                  {boutiqueName.charAt(0)}
+                </span>
+                <span
+                  className="text-[10px] tracking-[0.4em] uppercase mt-0.5"
+                  style={{ color: textMuted }}
+                >
+                  {boutiqueName}
+                </span>
+              </>
             )}
-            <span
-              className="text-xl font-bold"
-              style={{ color: primaryColor, fontFamily: 'var(--font-outfit), sans-serif' }}
-            >
-              {boutiqueName}
-            </span>
           </Link>
 
-          {/* Right Side */}
-          <div className="flex items-center gap-4">
-            {/* Social Links */}
-            {socialLinks && (
-              <div className="hidden sm:flex items-center gap-3">
-                {socialLinks.instagram && (
-                  <a
-                    href={`https://instagram.com/${socialLinks.instagram}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-slate-400 hover:text-slate-600 transition-colors"
-                    aria-label="Instagram"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                    </svg>
-                  </a>
-                )}
-                {socialLinks.facebook && (
-                  <a
-                    href={`https://facebook.com/${socialLinks.facebook}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-slate-400 hover:text-slate-600 transition-colors"
-                    aria-label="Facebook"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                    </svg>
-                  </a>
-                )}
-                {socialLinks.tiktok && (
-                  <a
-                    href={`https://tiktok.com/@${socialLinks.tiktok}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-slate-400 hover:text-slate-600 transition-colors"
-                    aria-label="TikTok"
-                  >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
-                    </svg>
-                  </a>
-                )}
-              </div>
+          {/* Right - Actions */}
+          <div className="flex items-center gap-6 lg:gap-10 ml-auto">
+            {/* Social Links (Desktop) */}
+            {socialLinks?.instagram && (
+              <a
+                href={socialLinks.instagram.startsWith('http') ? socialLinks.instagram : `https://instagram.com/${socialLinks.instagram}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden md:block text-xs tracking-[0.2em] uppercase transition-colors duration-300"
+                style={{ color: textMuted }}
+              >
+                Instagram
+              </a>
             )}
+
+            {/* Language Toggle */}
+            <button
+              onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+              className="text-xs tracking-[0.15em] uppercase transition-colors duration-300 hover:opacity-100"
+              style={{ color: textMuted }}
+            >
+              {language === 'ar' ? 'EN' : 'عربي'}
+            </button>
 
             {/* Cart Button */}
             <button
-              id="cart-toggle"
-              className="relative p-2 rounded-lg hover:bg-slate-100 transition-colors"
+              onClick={openCart}
+              className="relative group"
               aria-label="Shopping cart"
             >
-              <svg className="w-6 h-6 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
+              <span
+                className="text-xs tracking-[0.2em] uppercase transition-colors duration-300 group-hover:opacity-100"
+                style={{ color: textMuted }}
+              >
+                {isRTL ? 'السلة' : 'Cart'}
+              </span>
               {totalItems > 0 && (
                 <span
-                  className="absolute -top-1 -right-1 w-5 h-5 text-xs text-white rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: primaryColor }}
+                  className="absolute -top-2 -right-4 w-5 h-5 text-[10px] font-medium flex items-center justify-center rounded-full transition-transform"
+                  style={{
+                    backgroundColor: colors.accent,
+                    color: isLightColor(colors.accent) ? '#000' : '#fff',
+                  }}
                 >
                   {totalItems}
                 </span>
               )}
             </button>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden flex flex-col gap-1.5 p-2"
+              aria-label="Menu"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <span className="w-5 h-px" style={{ backgroundColor: textColor }} />
+              <span className="w-5 h-px" style={{ backgroundColor: textColor }} />
+            </button>
           </div>
         </div>
       </div>
-    </header>
+    </nav>
+
+      {/* Mobile Menu Drawer */}
+      <div
+        className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-300 ${
+          isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: `${colors.headerBg}cc` }}
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+
+        {/* Menu Panel */}
+        <div
+          className={`absolute top-0 ${isRTL ? 'left-0' : 'right-0'} h-full w-[85%] max-w-sm transform transition-transform duration-300 ease-out ${
+            isMobileMenuOpen
+              ? 'translate-x-0'
+              : isRTL ? '-translate-x-full' : 'translate-x-full'
+          }`}
+          style={{ backgroundColor: colors.headerBg }}
+        >
+          {/* Close Button */}
+          <div className="flex justify-end p-6">
+            <button
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="w-10 h-10 flex items-center justify-center"
+              style={{ color: textColor }}
+            >
+              <span className="text-2xl font-light">&times;</span>
+            </button>
+          </div>
+
+          {/* Store Name */}
+          <div className="px-8 mb-10 text-center">
+            {logoUrl ? (
+              <img src={logoUrl} alt={boutiqueName} className="w-16 h-16 rounded-full object-cover mx-auto" />
+            ) : (
+              <span
+                className="text-4xl font-light tracking-[0.3em]"
+                style={{ fontFamily: `'${fonts.display}', serif`, color: textColor }}
+              >
+                {boutiqueName.charAt(0)}
+              </span>
+            )}
+            <p
+              className="text-xs tracking-[0.3em] uppercase mt-3"
+              style={{ color: textMuted }}
+            >
+              {boutiqueName}
+            </p>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="px-8 space-y-6">
+            <a
+              href={`/${slug}`}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block text-sm tracking-[0.2em] uppercase"
+              style={{ color: textColor }}
+            >
+              {isRTL ? 'الرئيسية' : 'Home'}
+            </a>
+            <a
+              href={`/${slug}#products`}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block text-sm tracking-[0.2em] uppercase"
+              style={{ color: textColor }}
+            >
+              {isRTL ? 'المنتجات' : 'Products'}
+            </a>
+          </nav>
+
+          {/* Language Toggle */}
+          <div className="px-8 mt-10">
+            <button
+              onClick={() => {
+                setLanguage(language === 'ar' ? 'en' : 'ar');
+                setIsMobileMenuOpen(false);
+              }}
+              className="text-sm tracking-[0.2em] uppercase px-4 py-2"
+              style={{ color: textMuted, border: `1px solid ${borderColor}` }}
+            >
+              {language === 'ar' ? 'English' : 'عربي'}
+            </button>
+          </div>
+
+          {/* Social Links */}
+          {socialLinks && (
+            <div className="absolute bottom-12 left-0 right-0 px-8 flex items-center gap-6">
+              {socialLinks.instagram && (
+                <a
+                  href={socialLinks.instagram.startsWith('http') ? socialLinks.instagram : `https://instagram.com/${socialLinks.instagram}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs tracking-[0.2em] uppercase"
+                  style={{ color: textMuted }}
+                >
+                  Instagram
+                </a>
+              )}
+              {socialLinks.facebook && (
+                <a
+                  href={socialLinks.facebook.startsWith('http') ? socialLinks.facebook : `https://facebook.com/${socialLinks.facebook}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs tracking-[0.2em] uppercase"
+                  style={{ color: textMuted }}
+                >
+                  Facebook
+                </a>
+              )}
+              {socialLinks.tiktok && (
+                <a
+                  href={socialLinks.tiktok.startsWith('http') ? socialLinks.tiktok : `https://tiktok.com/@${socialLinks.tiktok}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs tracking-[0.2em] uppercase"
+                  style={{ color: textMuted }}
+                >
+                  TikTok
+                </a>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }
