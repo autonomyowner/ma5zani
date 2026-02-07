@@ -138,10 +138,13 @@ export default function StorefrontPage() {
   // Legacy layout (no custom sections configured)
   return (
     <StorefrontLayout storefront={storefront}>
+      {/* Spacer for fixed header */}
+      <div className="h-24 lg:h-28" />
+
       {/* Store Description */}
       {storefront.description && (
         <div
-          className="text-center py-12 px-6"
+          className="text-center pt-4 pb-12 px-6"
           style={{ backgroundColor: colors.background }}
         >
           <p
