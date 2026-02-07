@@ -190,32 +190,53 @@ export default function ProductDetailPage() {
   const displayPrice = product.salePrice ?? product.price;
   const totalPrice = displayPrice * quantity;
   const isOutOfStock = product.status === 'out_of_stock';
-  const accentColor = storefront.theme.accentColor;
+  const accentColor = storefront.colors?.accent || storefront.theme.accentColor;
+  const bgColor = storefront.colors?.background || '#0a0a0a';
+  const txtColor = storefront.colors?.text || '#f5f5dc';
+
+  // Derive theme-aware colors
+  const isLightBg = (() => {
+    const hex = bgColor.replace('#', '');
+    if (hex.length !== 6) return false;
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.5;
+  })();
+  const cardBg = isLightBg ? '#ffffff' : '#141414';
+  const borderClr = isLightBg ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)';
+  const textMuted = isLightBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
+  const inputBg = isLightBg ? '#ffffff' : 'rgba(255,255,255,0.06)';
+  const inputText = isLightBg ? '#1e293b' : '#f5f5dc';
+  const formBg = isLightBg ? '#f8fafc' : 'rgba(255,255,255,0.04)';
 
   return (
     <StorefrontLayout storefront={storefront}>
+      {/* Spacer for fixed header */}
+      <div className="h-20 lg:h-24" />
+
       {/* Breadcrumb - Hidden on mobile */}
       <nav className="hidden sm:block mb-6 px-4">
-        <ol className="flex items-center gap-2 text-sm text-slate-500">
+        <ol className="flex items-center gap-2 text-sm" style={{ color: textMuted }}>
           <li>
-            <Link href={`/${slug}`} className="hover:text-slate-900">
+            <Link href={`/${slug}`} className="hover:opacity-80">
               {storefront.boutiqueName}
             </Link>
           </li>
           <li>/</li>
           {category && (
             <>
-              <li className="text-slate-400">{category.name}</li>
+              <li>{isRTL ? category.nameAr : category.name}</li>
               <li>/</li>
             </>
           )}
-          <li className="text-slate-900 font-medium truncate">{product.name}</li>
+          <li className="font-medium truncate" style={{ color: txtColor }}>{product.name}</li>
         </ol>
       </nav>
 
       {/* Back button on mobile */}
       <div className="sm:hidden px-4 mb-4">
-        <Link href={`/${slug}`} className="inline-flex items-center gap-2 text-slate-600">
+        <Link href={`/${slug}`} className="inline-flex items-center gap-2" style={{ color: textMuted }}>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -230,7 +251,8 @@ export default function ProductDetailPage() {
           {/* Main Image - Swipeable on mobile */}
           <div
             ref={imageContainerRef}
-            className="aspect-square bg-slate-100 rounded-xl sm:rounded-2xl overflow-hidden relative mx-4 sm:mx-0"
+            className="aspect-square rounded-xl sm:rounded-2xl overflow-hidden relative mx-4 sm:mx-0"
+            style={{ backgroundColor: cardBg }}
             onTouchStart={handleTouchStart}
             onTouchEnd={(e) => handleTouchEnd(e, images.length)}
           >
@@ -333,13 +355,13 @@ export default function ProductDetailPage() {
         <div className="px-4 sm:px-0 lg:sticky lg:top-8 lg:self-start">
           {/* Category */}
           {category && (
-            <p className="text-xs sm:text-sm text-slate-500 mb-1 sm:mb-2">
+            <p className="text-xs sm:text-sm mb-1 sm:mb-2" style={{ color: textMuted }}>
               {isRTL ? category.nameAr : category.name}
             </p>
           )}
 
           {/* Title */}
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 mb-3 sm:mb-4">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4" style={{ color: txtColor }}>
             {product.name}
           </h1>
 
@@ -369,7 +391,7 @@ export default function ProductDetailPage() {
                   : 'bg-green-500'
               }`}
             />
-            <span className="text-xs sm:text-sm text-slate-600">
+            <span className="text-xs sm:text-sm" style={{ color: textMuted }}>
               {isOutOfStock
                 ? (isRTL ? 'نفذ المخزون' : 'Out of stock')
                 : product.status === 'low_stock'
@@ -381,22 +403,26 @@ export default function ProductDetailPage() {
           {/* Description */}
           {product.description && (
             <div className="mb-6 sm:mb-8">
-              <h3 className="font-medium text-slate-900 mb-2 text-sm sm:text-base">
+              <h3 className="font-medium mb-2 text-sm sm:text-base" style={{ color: txtColor }}>
                 {isRTL ? 'الوصف' : 'Description'}
               </h3>
-              <p className="text-slate-600 leading-relaxed text-sm sm:text-base">{product.description}</p>
+              <p className="leading-relaxed text-sm sm:text-base" style={{ color: textMuted }}>{product.description}</p>
             </div>
           )}
 
           {/* Order Form */}
           {!isOutOfStock ? (
-            <div ref={orderFormRef} className="bg-slate-50 rounded-xl sm:rounded-2xl p-4 sm:p-6">
-              <h3 className="font-semibold text-slate-900 mb-4 text-sm sm:text-base">
+            <div
+              ref={orderFormRef}
+              className="rounded-xl sm:rounded-2xl p-4 sm:p-6"
+              style={{ backgroundColor: formBg, border: `1px solid ${borderClr}` }}
+            >
+              <h3 className="font-semibold mb-4 text-sm sm:text-base" style={{ color: txtColor }}>
                 {isRTL ? 'اطلب الآن' : 'Order Now'}
               </h3>
 
               {error && (
-                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm">
+                <div className="mb-4 p-3 bg-red-500/10 text-red-400 rounded-xl text-sm" style={{ border: `1px solid rgba(239,68,68,0.2)` }}>
                   {error}
                 </div>
               )}
@@ -404,22 +430,24 @@ export default function ProductDetailPage() {
               <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
                 {/* Quantity */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium mb-1" style={{ color: textMuted }}>
                     {isRTL ? 'الكمية' : 'Quantity'}
                   </label>
-                  <div className="flex items-center border border-slate-200 rounded-xl bg-white w-fit">
+                  <div className="flex items-center rounded-xl w-fit" style={{ border: `1px solid ${borderClr}`, backgroundColor: inputBg }}>
                     <button
                       type="button"
                       onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                      className="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-50 rounded-l-xl"
+                      className="w-10 h-10 flex items-center justify-center rounded-l-xl"
+                      style={{ color: textMuted }}
                     >
                       -
                     </button>
-                    <span className="w-12 text-center font-medium text-sm sm:text-base">{quantity}</span>
+                    <span className="w-12 text-center font-medium text-sm sm:text-base" style={{ color: txtColor }}>{quantity}</span>
                     <button
                       type="button"
                       onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                      className="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-50 rounded-r-xl"
+                      className="w-10 h-10 flex items-center justify-center rounded-r-xl"
+                      style={{ color: textMuted }}
                     >
                       +
                     </button>
@@ -428,14 +456,15 @@ export default function ProductDetailPage() {
 
                 {/* Customer Name */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium mb-1" style={{ color: textMuted }}>
                     {isRTL ? 'الاسم الكامل *' : 'Full Name *'}
                   </label>
                   <input
                     type="text"
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-slate-200 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-current/20"
+                    style={{ backgroundColor: inputBg, border: `1px solid ${borderClr}`, color: inputText }}
                     placeholder={isRTL ? 'اسمك الكامل' : 'Your full name'}
                     required
                   />
@@ -443,14 +472,15 @@ export default function ProductDetailPage() {
 
                 {/* Phone */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium mb-1" style={{ color: textMuted }}>
                     {isRTL ? 'رقم الهاتف *' : 'Phone Number *'}
                   </label>
                   <input
                     type="tel"
                     value={customerPhone}
                     onChange={(e) => setCustomerPhone(e.target.value)}
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-slate-200 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-current/20"
+                    style={{ backgroundColor: inputBg, border: `1px solid ${borderClr}`, color: inputText }}
                     placeholder="05XX XXX XXX"
                     required
                     dir="ltr"
@@ -459,21 +489,28 @@ export default function ProductDetailPage() {
 
                 {/* Wilaya */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium mb-1" style={{ color: textMuted }}>
                     {isRTL ? 'الولاية *' : 'Wilaya *'}
                   </label>
-                  <WilayaSelect value={wilaya} onChange={setWilaya} />
+                  <WilayaSelect
+                    value={wilaya}
+                    onChange={setWilaya}
+                    backgroundColor={inputBg}
+                    borderColor={borderClr}
+                    textColor={inputText}
+                  />
                 </div>
 
                 {/* Address */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-1">
+                  <label className="block text-xs sm:text-sm font-medium mb-1" style={{ color: textMuted }}>
                     {isRTL ? 'عنوان التوصيل *' : 'Delivery Address *'}
                   </label>
                   <textarea
                     value={deliveryAddress}
                     onChange={(e) => setDeliveryAddress(e.target.value)}
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-slate-200 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-current/20"
+                    style={{ backgroundColor: inputBg, border: `1px solid ${borderClr}`, color: inputText }}
                     placeholder={isRTL ? 'الشارع، المبنى، الشقة...' : 'Street, building, apartment...'}
                     rows={2}
                     required
@@ -481,16 +518,16 @@ export default function ProductDetailPage() {
                 </div>
 
                 {/* Total & Submit */}
-                <div className="pt-3 sm:pt-4 border-t border-slate-200">
+                <div className="pt-3 sm:pt-4" style={{ borderTop: `1px solid ${borderClr}` }}>
                   <div className="flex items-center justify-between mb-3 sm:mb-4">
-                    <span className="text-sm sm:text-base text-slate-600">
+                    <span className="text-sm sm:text-base" style={{ color: textMuted }}>
                       {isRTL ? 'المجموع' : 'Total'}
                     </span>
                     <span className="text-lg sm:text-xl font-bold" style={{ color: accentColor }}>
                       {totalPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-500 mb-3 sm:mb-4">
+                  <p className="text-xs sm:text-sm mb-3 sm:mb-4" style={{ color: textMuted }}>
                     {isRTL ? 'الدفع عند الاستلام' : 'Cash on delivery (COD)'}
                   </p>
                   <button
@@ -507,13 +544,14 @@ export default function ProductDetailPage() {
               </form>
             </div>
           ) : (
-            <div className="bg-slate-100 rounded-xl sm:rounded-2xl p-6 text-center">
-              <p className="text-slate-600 mb-4 text-sm sm:text-base">
+            <div className="rounded-xl sm:rounded-2xl p-6 text-center" style={{ backgroundColor: formBg, border: `1px solid ${borderClr}` }}>
+              <p className="mb-4 text-sm sm:text-base" style={{ color: textMuted }}>
                 {isRTL ? 'هذا المنتج غير متوفر حالياً' : 'This product is currently out of stock.'}
               </p>
               <Link
                 href={`/${slug}`}
-                className="inline-block px-6 py-3 bg-slate-900 text-white rounded-xl font-medium hover:bg-slate-800 text-sm sm:text-base"
+                className="inline-block px-6 py-3 text-white rounded-xl font-medium hover:opacity-90 text-sm sm:text-base"
+                style={{ backgroundColor: accentColor }}
               >
                 {isRTL ? 'تصفح منتجات أخرى' : 'Browse Other Products'}
               </Link>
@@ -524,8 +562,8 @@ export default function ProductDetailPage() {
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <section className="border-t border-slate-200 pt-8 sm:pt-12 px-4 sm:px-0">
-          <h2 className="text-lg sm:text-xl font-bold text-slate-900 mb-4 sm:mb-6">
+        <section className="pt-8 sm:pt-12 px-4 sm:px-0" style={{ borderTop: `1px solid ${borderClr}` }}>
+          <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ color: txtColor }}>
             {isRTL ? 'منتجات مشابهة' : 'You may also like'}
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
@@ -540,8 +578,8 @@ export default function ProductDetailPage() {
                   href={`/${slug}/product/${relatedProduct._id}`}
                   className="group"
                 >
-                  <div className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="aspect-square bg-slate-100 relative overflow-hidden">
+                  <div className="rounded-xl overflow-hidden hover:shadow-md transition-shadow" style={{ backgroundColor: cardBg, border: `1px solid ${borderClr}` }}>
+                    <div className="aspect-square relative overflow-hidden" style={{ backgroundColor: formBg }}>
                       {relatedImage ? (
                         <img
                           src={getR2PublicUrl(relatedImage)}
@@ -565,7 +603,7 @@ export default function ProductDetailPage() {
                       )}
                     </div>
                     <div className="p-2.5 sm:p-3">
-                      <h3 className="font-medium text-slate-900 text-xs sm:text-sm truncate">{relatedProduct.name}</h3>
+                      <h3 className="font-medium text-xs sm:text-sm truncate" style={{ color: txtColor }}>{relatedProduct.name}</h3>
                       <div className="flex items-center gap-1 sm:gap-2 mt-1">
                         <span className="text-xs sm:text-sm font-semibold" style={{ color: accentColor }}>
                           {relatedDisplayPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
