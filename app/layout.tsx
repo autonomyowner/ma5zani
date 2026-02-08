@@ -40,7 +40,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl" className={`${outfit.variable} ${plusJakartaSans.variable} ${cairo.variable}`}>
-      <head>
+      <body style={{ fontFamily: 'var(--font-cairo), var(--font-plus-jakarta), sans-serif' }}>
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)
@@ -64,8 +64,6 @@ export default function RootLayout({
             alt=""
           />
         </noscript>
-      </head>
-      <body style={{ fontFamily: 'var(--font-cairo), var(--font-plus-jakarta), sans-serif' }}>
         <Providers>
           {children}
         </Providers>
