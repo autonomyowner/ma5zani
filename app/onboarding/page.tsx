@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { authClient } from '@/lib/auth-client'
+import { useLanguage } from '@/lib/LanguageContext'
 import Link from 'next/link'
 import Image from 'next/image'
 import { trackEvent, sendServerEvent, generateEventId, META_EVENTS } from '@/lib/meta-pixel'
@@ -12,30 +13,11 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Card from '@/components/ui/Card'
 
-const plans = [
-  {
-    id: 'basic' as const,
-    name: 'Basic',
-    price: '2,500',
-    features: ['50 products', '1 warehouse', 'Standard delivery'],
-  },
-  {
-    id: 'plus' as const,
-    name: 'Plus',
-    price: '6,500',
-    features: ['200 products', '3 warehouses', 'Express delivery'],
-    popular: true,
-  },
-  {
-    id: 'gros' as const,
-    name: 'Gros',
-    price: '15,000',
-    features: ['Unlimited products', 'All warehouses', 'Same-day delivery'],
-  },
-]
+const planIds = ['basic', 'plus', 'gros'] as const
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const { t, language, setLanguage, dir } = useLanguage()
   const { data: session, isPending } = authClient.useSession()
   const upsertSeller = useMutation(api.sellers.upsertSeller)
 
@@ -53,7 +35,7 @@ export default function OnboardingPage() {
   if (isPending) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="animate-pulse text-slate-400">Loading...</div>
+        <div className="animate-pulse text-slate-400">{t.auth.onboarding.loading}</div>
       </main>
     )
   }
@@ -96,14 +78,36 @@ export default function OnboardingPage() {
       router.push('/dashboard')
     } catch (err) {
       console.error('Failed to create seller:', err)
-      setError('Failed to complete setup. Please try again.')
+      setError(t.auth.onboarding.failedSetup)
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  const plans = [
+    {
+      id: 'basic' as const,
+      name: t.auth.onboarding.plans.basic.name,
+      price: '2,500',
+      features: t.auth.onboarding.plans.basic.features,
+    },
+    {
+      id: 'plus' as const,
+      name: t.auth.onboarding.plans.plus.name,
+      price: '6,500',
+      features: t.auth.onboarding.plans.plus.features,
+      popular: true,
+    },
+    {
+      id: 'gros' as const,
+      name: t.auth.onboarding.plans.gros.name,
+      price: '15,000',
+      features: t.auth.onboarding.plans.gros.features,
+    },
+  ]
+
   return (
-    <main className="min-h-screen bg-slate-50 py-12 px-6 relative overflow-hidden">
+    <main dir={dir} className="min-h-screen bg-slate-50 py-12 px-6 relative overflow-hidden">
       {/* Background Decorations */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#00AEEF]/5" />
@@ -111,6 +115,16 @@ export default function OnboardingPage() {
       </div>
 
       <div className="max-w-2xl mx-auto">
+        {/* Language Toggle */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+            className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-[#0054A6] bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+          >
+            {language === 'ar' ? 'EN' : 'عربي'}
+          </button>
+        </div>
+
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex flex-col items-center gap-2">
@@ -134,12 +148,12 @@ export default function OnboardingPage() {
           <div className="text-center mb-8">
             <h1
               className="text-2xl font-bold text-[#0054A6] mb-2"
-              style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
+              style={{ fontFamily: language === 'ar' ? 'var(--font-cairo), sans-serif' : 'var(--font-outfit), sans-serif' }}
             >
-              Welcome, {session.user?.name?.split(' ')[0] || 'Seller'}!
+              {t.auth.onboarding.welcome} {session.user?.name?.split(' ')[0] || t.auth.onboarding.defaultName}!
             </h1>
             <p className="text-slate-600">
-              Complete your setup to get started with ma5zani
+              {t.auth.onboarding.subtitle}
             </p>
           </div>
 
@@ -148,15 +162,15 @@ export default function OnboardingPage() {
             <div>
               <h2
                 className="text-lg font-semibold text-[#0054A6] mb-4"
-                style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
+                style={{ fontFamily: language === 'ar' ? 'var(--font-cairo), sans-serif' : 'var(--font-outfit), sans-serif' }}
               >
-                Contact Information
+                {t.auth.onboarding.contactInfo}
               </h2>
               <Input
                 id="phone"
                 type="tel"
-                label="Phone Number (Optional)"
-                placeholder="+213 555 123 456"
+                label={t.auth.onboarding.phone}
+                placeholder={t.auth.onboarding.phonePlaceholder}
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
               />
@@ -164,11 +178,11 @@ export default function OnboardingPage() {
 
             {/* Beta Notice */}
             <div className="p-4 bg-[#22B14C]/10 border border-[#22B14C]/30 rounded-xl">
-              <p className="text-sm font-semibold text-[#22B14C] mb-1" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
-                We&apos;re in Beta — Everything is Free!
+              <p className="text-sm font-semibold text-[#22B14C] mb-1" style={{ fontFamily: language === 'ar' ? 'var(--font-cairo), sans-serif' : 'var(--font-outfit), sans-serif' }}>
+                {t.auth.onboarding.betaTitle}
               </p>
               <p className="text-sm text-slate-600">
-                ma5zani is completely free to use during our beta period. We only charge for specific fulfillment services when you use them. No monthly fees, no hidden costs — just pick a plan to get started.
+                {t.auth.onboarding.betaDesc}
               </p>
             </div>
 
@@ -176,24 +190,24 @@ export default function OnboardingPage() {
             <div>
               <h2
                 className="text-lg font-semibold text-[#0054A6] mb-4"
-                style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
+                style={{ fontFamily: language === 'ar' ? 'var(--font-cairo), sans-serif' : 'var(--font-outfit), sans-serif' }}
               >
-                Choose Your Plan
+                {t.auth.onboarding.choosePlan}
               </h2>
 
               {/* Special Offer */}
               <div className="mb-4 p-4 bg-[#F7941D]/10 border-2 border-[#F7941D] rounded-xl">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
-                    <p className="font-bold text-[#F7941D] text-lg" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
-                      4,000 DA/year
+                    <p className="font-bold text-[#F7941D] text-lg" style={{ fontFamily: language === 'ar' ? 'var(--font-cairo), sans-serif' : 'var(--font-outfit), sans-serif' }}>
+                      {t.auth.onboarding.specialOfferPrice}
                     </p>
                     <p className="text-sm text-slate-600">
-                      Get full access to ma5zani for just 4,000 DA per year — limited time founder offer!
+                      {t.auth.onboarding.specialOfferDesc}
                     </p>
                   </div>
                   <span className="bg-[#F7941D] text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
-                    BEST VALUE
+                    {t.auth.onboarding.bestValue}
                   </span>
                 </div>
               </div>
@@ -204,7 +218,7 @@ export default function OnboardingPage() {
                     key={plan.id}
                     type="button"
                     onClick={() => setSelectedPlan(plan.id)}
-                    className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                    className={`relative p-4 rounded-xl border-2 text-start transition-all ${
                       selectedPlan === plan.id
                         ? 'border-[#0054A6] bg-[#0054A6]/5'
                         : 'border-slate-200 hover:border-slate-300'
@@ -212,17 +226,17 @@ export default function OnboardingPage() {
                   >
                     {plan.popular && (
                       <span className="absolute -top-2 right-2 bg-[#F7941D] text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                        Popular
+                        {t.auth.onboarding.popular}
                       </span>
                     )}
                     <h3
                       className="font-bold text-[#0054A6]"
-                      style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
+                      style={{ fontFamily: language === 'ar' ? 'var(--font-cairo), sans-serif' : 'var(--font-outfit), sans-serif' }}
                     >
                       {plan.name}
                     </h3>
                     <p className="text-xl font-bold text-slate-900 mt-1">
-                      {plan.price} <span className="text-sm font-normal text-slate-500">DZD/mo</span>
+                      {plan.price} <span className="text-sm font-normal text-slate-500">{t.auth.onboarding.currency}</span>
                     </p>
                     <ul className="mt-3 space-y-1">
                       {plan.features.map((feature, i) => (
@@ -250,7 +264,7 @@ export default function OnboardingPage() {
               className="w-full"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Setting up...' : 'Complete Setup'}
+              {isSubmitting ? t.auth.onboarding.settingUp : t.auth.onboarding.completeSetup}
             </Button>
           </form>
         </Card>
