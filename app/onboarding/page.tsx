@@ -142,6 +142,16 @@ export default function OnboardingPage() {
               />
             </div>
 
+            {/* Beta Notice */}
+            <div className="p-4 bg-[#22B14C]/10 border border-[#22B14C]/30 rounded-xl">
+              <p className="text-sm font-semibold text-[#22B14C] mb-1" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+                We&apos;re in Beta — Everything is Free!
+              </p>
+              <p className="text-sm text-slate-600">
+                ma5zani is completely free to use during our beta period. We only charge for specific fulfillment services when you use them. No monthly fees, no hidden costs — just pick a plan to get started.
+              </p>
+            </div>
+
             {/* Plan Selection */}
             <div>
               <h2
