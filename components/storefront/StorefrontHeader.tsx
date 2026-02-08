@@ -112,7 +112,7 @@ export default function StorefrontHeader({
           {/* Center - Logo */}
           <Link
             href={`/${slug}`}
-            className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center"
+            className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center max-w-[40%] sm:max-w-none"
           >
             {logoUrl ? (
               <img
@@ -129,7 +129,7 @@ export default function StorefrontHeader({
                   {boutiqueName.charAt(0)}
                 </span>
                 <span
-                  className="text-[10px] tracking-[0.4em] uppercase mt-0.5"
+                  className="text-[10px] tracking-[0.4em] uppercase mt-0.5 truncate max-w-full"
                   style={{ color: textMuted }}
                 >
                   {boutiqueName}
@@ -139,7 +139,7 @@ export default function StorefrontHeader({
           </Link>
 
           {/* Right - Actions */}
-          <div className="flex items-center gap-6 lg:gap-10 ml-auto">
+          <div className="flex items-center gap-3 sm:gap-6 lg:gap-10 ml-auto">
             {/* Social Links (Desktop) */}
             {socialLinks?.instagram && (
               <a
@@ -156,7 +156,7 @@ export default function StorefrontHeader({
             {/* Language Toggle */}
             <button
               onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-              className="text-xs tracking-[0.15em] uppercase transition-colors duration-300 hover:opacity-100"
+              className="text-xs tracking-[0.15em] uppercase transition-colors duration-300 hover:opacity-100 whitespace-nowrap flex-shrink-0"
               style={{ color: textMuted }}
             >
               {language === 'ar' ? 'EN' : 'عربي'}
@@ -165,7 +165,7 @@ export default function StorefrontHeader({
             {/* Cart Button */}
             <button
               onClick={openCart}
-              className="relative group"
+              className="relative group flex-shrink-0"
               aria-label="Shopping cart"
             >
               <span
