@@ -451,7 +451,7 @@ export const translations = {
     // Founder Offer
     founderOffer: {
       title: 'عرض المؤسسين',
-      specialOffer: 'عرض خاص — 2000 دج للسنة كاملة',
+      specialOffer: 'عرض خاص — 4000 دج للسنة كاملة',
       subtitle: 'افتح متجرك الإلكتروني + المساعد الذكي بأقل سعر',
       features: [
         'متجر إلكتروني احترافي برابط خاص',
@@ -464,7 +464,7 @@ export const translations = {
       sendProof: 'أرسل إثبات الدفع عبر واتساب',
       whatsappNumber: '0658399645',
       limitedSpots: 'الأماكن محدودة — هذا العرض لن يتكرر',
-      unlockBanner: 'افتح المتجر والمساعد الذكي — 2000 دج/سنة',
+      unlockBanner: 'افتح المتجر والمساعد الذكي — 4000 دج/سنة',
     },
     // Voice AI Support
     voice: {
@@ -960,7 +960,7 @@ export const translations = {
     // Founder Offer
     founderOffer: {
       title: 'Founder Offer',
-      specialOffer: 'Special Offer — 2000 DA for 1 year',
+      specialOffer: 'Special Offer — 4000 DA for 1 year',
       subtitle: 'Unlock your online store + AI chatbot at the lowest price',
       features: [
         'Professional online store with custom link',
@@ -973,7 +973,7 @@ export const translations = {
       sendProof: 'Send payment proof via WhatsApp',
       whatsappNumber: '0658399645',
       limitedSpots: 'Limited spots — this offer won\'t come back',
-      unlockBanner: 'Unlock storefront & AI chatbot — 2000 DA/year',
+      unlockBanner: 'Unlock storefront & AI chatbot — 4000 DA/year',
     },
     // Voice AI Support
     voice: {
