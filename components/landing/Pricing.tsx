@@ -102,7 +102,7 @@ export default function Pricing() {
             className="text-2xl font-bold text-[#F7941D] mb-2"
             style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}
           >
-            {language === 'ar' ? 'عرض المؤسسين: 2,000 دج/السنة' : 'Founder Offer: 2,000 DA/year'}
+            {language === 'ar' ? 'عرض خاص: 2,000 دج/السنة' : 'Founder Offer: 2,000 DA/year'}
           </p>
           <p className="text-slate-600">
             {language === 'ar'
