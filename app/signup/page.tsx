@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { authClient } from '@/lib/auth-client'
+import { trackEvent, sendServerEvent, generateEventId, META_EVENTS } from '@/lib/meta-pixel'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 
@@ -37,6 +38,15 @@ export default function SignupPage() {
       if (error) {
         setError(error.message || 'Failed to sign up')
       } else {
+        // Track Lead event on successful signup
+        const eventId = generateEventId();
+        trackEvent(META_EVENTS.LEAD, { content_name: 'signup' }, eventId);
+        sendServerEvent({
+          eventName: META_EVENTS.LEAD,
+          eventId,
+          sourceUrl: window.location.href,
+          userData: { email, firstName: name.split(' ')[0] },
+        });
         window.location.href = '/onboarding'
       }
     } catch (err: unknown) {

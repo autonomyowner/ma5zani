@@ -18,17 +18,7 @@ interface CheckoutFormProps {
 }
 
 import { isLightColor } from '@/lib/colors';
-
-// Helper to track Meta Pixel events
-const trackPixelEvent = (eventName: string, data?: Record<string, unknown>) => {
-  if (typeof window !== 'undefined' && (window as unknown as { fbq?: unknown }).fbq) {
-    (window as unknown as { fbq: (action: string, event: string, data?: Record<string, unknown>) => void }).fbq(
-      'track',
-      eventName,
-      data
-    );
-  }
-};
+import { trackEvent, sendServerEvent, generateEventId, META_EVENTS } from '@/lib/meta-pixel';
 
 export default function CheckoutForm({
   slug,
@@ -59,13 +49,21 @@ export default function CheckoutForm({
 
   // Track InitiateCheckout when checkout page loads
   useEffect(() => {
-    if (metaPixelId && items.length > 0) {
-      trackPixelEvent('InitiateCheckout', {
+    if (items.length > 0) {
+      const eventId = generateEventId();
+      const eventData = {
         value: totalPrice,
         currency: 'DZD',
         content_ids: items.map((item) => item.productId),
         content_type: 'product',
         num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+      };
+      trackEvent(META_EVENTS.INITIATE_CHECKOUT, eventData, eventId);
+      sendServerEvent({
+        eventName: META_EVENTS.INITIATE_CHECKOUT,
+        eventId,
+        sourceUrl: window.location.href,
+        customData: eventData,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,15 +104,27 @@ export default function CheckoutForm({
         deliveryAddress,
       });
 
-      if (metaPixelId) {
-        trackPixelEvent('Purchase', {
-          value: totalPrice,
-          currency: 'DZD',
-          content_ids: items.map((item) => item.productId),
-          content_type: 'product',
-          num_items: items.reduce((sum, item) => sum + item.quantity, 0),
-        });
-      }
+      // Track Purchase with dedup
+      const purchaseEventId = generateEventId();
+      const purchaseData = {
+        value: totalPrice,
+        currency: 'DZD',
+        content_ids: items.map((item) => item.productId),
+        content_type: 'product',
+        num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+      };
+      trackEvent(META_EVENTS.PURCHASE, purchaseData, purchaseEventId);
+      sendServerEvent({
+        eventName: META_EVENTS.PURCHASE,
+        eventId: purchaseEventId,
+        sourceUrl: window.location.href,
+        userData: {
+          phone: customerPhone,
+          firstName: customerName.split(' ')[0],
+          lastName: customerName.split(' ').slice(1).join(' ') || undefined,
+        },
+        customData: purchaseData,
+      });
 
       clearCart();
       router.push(`/${slug}/order-success/${result.orderIds[0]}`);

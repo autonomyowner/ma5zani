@@ -7,6 +7,7 @@ import { api } from '@/convex/_generated/api'
 import { authClient } from '@/lib/auth-client'
 import Link from 'next/link'
 import Image from 'next/image'
+import { trackEvent, sendServerEvent, generateEventId, META_EVENTS } from '@/lib/meta-pixel'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Card from '@/components/ui/Card'
@@ -73,6 +74,25 @@ export default function OnboardingPage() {
         phone: phone || undefined,
         plan: selectedPlan,
       })
+
+      // Track CompleteRegistration event
+      const eventId = generateEventId();
+      trackEvent(META_EVENTS.COMPLETE_REGISTRATION, {
+        content_name: selectedPlan,
+        status: true,
+      }, eventId);
+      sendServerEvent({
+        eventName: META_EVENTS.COMPLETE_REGISTRATION,
+        eventId,
+        sourceUrl: window.location.href,
+        userData: {
+          email: session.user?.email || undefined,
+          firstName: session.user?.name?.split(' ')[0],
+          phone: phone || undefined,
+        },
+        customData: { plan: selectedPlan },
+      });
+
       router.push('/dashboard')
     } catch (err) {
       console.error('Failed to create seller:', err)

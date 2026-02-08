@@ -11,17 +11,7 @@ import { useCart } from '@/lib/CartContext';
 import StorefrontLayout from '@/components/storefront/StorefrontLayout';
 import WilayaSelect from '@/components/storefront/WilayaSelect';
 import Link from 'next/link';
-
-// Helper to track Meta Pixel events
-const trackPixelEvent = (eventName: string, data?: Record<string, unknown>) => {
-  if (typeof window !== 'undefined' && (window as unknown as { fbq?: unknown }).fbq) {
-    (window as unknown as { fbq: (action: string, event: string, data?: Record<string, unknown>) => void }).fbq(
-      'track',
-      eventName,
-      data
-    );
-  }
-};
+import { trackEvent, sendServerEvent, generateEventId, META_EVENTS } from '@/lib/meta-pixel';
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -108,17 +98,27 @@ export default function ProductDetailPage() {
         deliveryAddress,
       });
 
-      // Track Meta Pixel Purchase event
-      if (data.storefront.metaPixelId) {
-        const displayPrice = data.product.salePrice ?? data.product.price;
-        trackPixelEvent('Purchase', {
-          value: displayPrice * quantity,
-          currency: 'DZD',
-          content_ids: [data.product._id],
-          content_type: 'product',
-          num_items: quantity,
-        });
-      }
+      // Track Purchase with dedup (fires for both ma5zani pixel and storefront pixel)
+      const purchaseEventId = generateEventId();
+      const purchaseData = {
+        value: (data.product.salePrice ?? data.product.price) * quantity,
+        currency: 'DZD',
+        content_ids: [data.product._id],
+        content_type: 'product',
+        num_items: quantity,
+      };
+      trackEvent(META_EVENTS.PURCHASE, purchaseData, purchaseEventId);
+      sendServerEvent({
+        eventName: META_EVENTS.PURCHASE,
+        eventId: purchaseEventId,
+        sourceUrl: window.location.href,
+        userData: {
+          phone: customerPhone,
+          firstName: customerName.split(' ')[0],
+          lastName: customerName.split(' ').slice(1).join(' ') || undefined,
+        },
+        customData: purchaseData,
+      });
 
       router.push(`/${slug}/order-success/${result.orderIds[0]}`);
     } catch (err) {
