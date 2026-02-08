@@ -7,8 +7,6 @@ import Image from 'next/image'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
-import Card from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
 
 type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
 
@@ -180,7 +178,7 @@ export default function AdminOrdersPage() {
             </div>
           </div>
 
-          <Card className="bg-slate-800 border-slate-700 overflow-hidden">
+          <div className="rounded-2xl bg-slate-800 border border-slate-700 overflow-hidden">
             {filteredOrders.length === 0 ? (
               <div className="p-12 text-center text-slate-400">
                 No orders found
@@ -242,7 +240,7 @@ export default function AdminOrdersPage() {
                 </table>
               </div>
             )}
-          </Card>
+          </div>
         </div>
       </main>
     </div>

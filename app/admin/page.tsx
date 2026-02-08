@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import Button from '@/components/ui/Button'
-import Card from '@/components/ui/Card'
 
 export default function AdminLoginPage() {
   const router = useRouter()
@@ -54,7 +53,7 @@ export default function AdminLoginPage() {
           <p className="text-slate-400 mt-2">ma5zani Management Dashboard</p>
         </div>
 
-        <Card className="p-8 bg-slate-800 border border-slate-700">
+        <div className="rounded-2xl p-8 bg-slate-800 border border-slate-700">
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="w-full">
               <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-2" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
@@ -79,7 +78,7 @@ export default function AdminLoginPage() {
               {isChecking ? 'Checking...' : 'Access Admin Panel'}
             </Button>
           </form>
-        </Card>
+        </div>
       </div>
     </main>
   )
