@@ -72,7 +72,7 @@ export default function StorefrontHeader({
         isScrolled ? 'backdrop-blur-md' : ''
       }`}
       style={{
-        backgroundColor: isScrolled ? `${colors.headerBg}f5` : 'transparent',
+        backgroundColor: isScrolled ? `${colors.headerBg}f5` : colors.headerBg,
         borderBottom: isScrolled ? `1px solid ${borderColor}` : 'none',
       }}
     >
