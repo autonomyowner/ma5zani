@@ -159,7 +159,7 @@ export default function StorefrontHeader({
               className="text-xs tracking-[0.15em] uppercase transition-colors duration-300 hover:opacity-100 whitespace-nowrap flex-shrink-0"
               style={{ color: textMuted }}
             >
-              {language === 'ar' ? 'EN' : 'عربي'}
+              {language === 'ar' ? 'EN' : 'AR'}
             </button>
 
             {/* Cart Button */}
@@ -284,7 +284,7 @@ export default function StorefrontHeader({
               className="text-sm tracking-[0.2em] uppercase px-4 py-2"
               style={{ color: textMuted, border: `1px solid ${borderColor}` }}
             >
-              {language === 'ar' ? 'English' : 'عربي'}
+              {language === 'ar' ? 'EN' : 'AR'}
             </button>
           </div>
 
