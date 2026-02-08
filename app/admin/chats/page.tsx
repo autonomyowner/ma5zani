@@ -167,8 +167,8 @@ export default function AdminChats() {
                   </span>
                   <span className={`text-xs px-2 py-0.5 rounded-full ${
                     chat.status === 'open'
-                      ? 'bg-green-500/20 text-green-400'
-                      : 'bg-slate-600 text-slate-400'
+                      ? 'bg-green-600 text-green-100'
+                      : 'bg-slate-600 text-slate-300'
                   }`}>
                     {chat.status}
                   </span>
@@ -176,7 +176,7 @@ export default function AdminChats() {
                 <p className="text-sm text-slate-400 truncate">
                   {chat.lastMessage || 'No messages'}
                 </p>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-slate-400 mt-1">
                   {new Date(chat.lastMessageAt).toLocaleString()}
                 </p>
               </button>

@@ -190,13 +190,13 @@ export default function AdminOrdersPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-slate-700">
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Order #</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Seller</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Customer</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Wilaya</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Amount</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Order #</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Seller</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Customer</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Wilaya</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Amount</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-700">
@@ -231,7 +231,7 @@ export default function AdminOrdersPage() {
                         <td className="px-6 py-4">
                           <button
                             onClick={() => handleDelete(order._id, order.orderNumber)}
-                            className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 text-sm font-medium"
+                            className="px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm font-medium"
                           >
                             Delete
                           </button>

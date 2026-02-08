@@ -162,8 +162,8 @@ export default function AdminStorefronts() {
                         <span
                           className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
                             storefront.isPublished
-                              ? 'bg-green-900/50 text-green-400'
-                              : 'bg-yellow-900/50 text-yellow-400'
+                              ? 'bg-green-600 text-green-100'
+                              : 'bg-yellow-600 text-yellow-100'
                           }`}
                         >
                           {storefront.isPublished ? 'Published' : 'Draft'}

@@ -160,13 +160,13 @@ export default function AdminSellersPage() {
                 <table className="w-full">
                   <thead>
                     <tr className="bg-slate-700">
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Name</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Phone</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Plan</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Status</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Joined</th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Name</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Email</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Phone</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Plan</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Status</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Joined</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-200 uppercase">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-700">
@@ -192,7 +192,7 @@ export default function AdminSellersPage() {
                         <td className="px-6 py-4">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             seller.isActivated
-                              ? 'bg-green-500/20 text-green-400'
+                              ? 'bg-green-600 text-green-100'
                               : 'bg-slate-600 text-slate-300'
                           }`}>
                             {seller.isActivated ? 'Active' : 'Inactive'}
@@ -209,14 +209,14 @@ export default function AdminSellersPage() {
                               className={`px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50 ${
                                 seller.isActivated
                                   ? 'bg-slate-600 text-slate-300 hover:bg-slate-500'
-                                  : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                                  : 'bg-green-600 text-white hover:bg-green-700'
                               }`}
                             >
                               {seller.isActivated ? 'Deactivate' : 'Activate'}
                             </button>
                             <button
                               onClick={() => handleDelete(seller._id, seller.name)}
-                              className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 text-sm font-medium"
+                              className="px-3 py-1.5 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm font-medium"
                             >
                               Delete
                             </button>
