@@ -52,7 +52,7 @@ export default function OfferPage() {
             className="text-[#F7941D] font-semibold tracking-wide uppercase mb-3 text-sm"
             style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}
           >
-            عرض المؤسسين
+            عرض افتتاح
           </p>
           <h1
             className="text-3xl sm:text-4xl font-bold text-[#0054A6] leading-tight mb-2"
