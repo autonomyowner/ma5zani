@@ -1,10 +1,49 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { trackEvent } from '@/lib/meta-pixel'
+
+function useCountdown() {
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+
+  useEffect(() => {
+    // Set deadline to 5 days from first visit, persisted in localStorage
+    const storageKey = 'ma5zani-offer-deadline'
+    let deadline = localStorage.getItem(storageKey)
+    if (!deadline) {
+      const d = new Date()
+      d.setDate(d.getDate() + 5)
+      deadline = d.toISOString()
+      localStorage.setItem(storageKey, deadline)
+    }
+    const endDate = new Date(deadline)
+
+    const tick = () => {
+      const now = new Date()
+      const diff = endDate.getTime() - now.getTime()
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+        return
+      }
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((diff / (1000 * 60)) % 60),
+        seconds: Math.floor((diff / 1000) % 60),
+      })
+    }
+
+    tick()
+    const interval = setInterval(tick, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  return timeLeft
+}
 
 export default function OfferPage() {
   const [copied, setCopied] = useState<string | null>(null)
+  const countdown = useCountdown()
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
@@ -43,6 +82,34 @@ export default function OfferPage() {
         >
           عرض محدود — الأماكن تنفذ بسرعة
         </p>
+      </div>
+
+      {/* Countdown Timer */}
+      <div className="bg-[#0054A6] py-4 px-4">
+        <p
+          className="text-white text-center text-sm font-bold mb-3"
+          style={{ fontFamily: 'var(--font-cairo), var(--font-outfit), sans-serif' }}
+        >
+          ينتهي العرض خلال
+        </p>
+        <div className="flex justify-center gap-3" dir="ltr">
+          {[
+            { value: countdown.days, label: 'يوم' },
+            { value: countdown.hours, label: 'ساعة' },
+            { value: countdown.minutes, label: 'دقيقة' },
+            { value: countdown.seconds, label: 'ثانية' },
+          ].map((unit, i) => (
+            <div key={i} className="text-center">
+              <div
+                className="bg-white text-[#0054A6] rounded-lg w-14 h-14 flex items-center justify-center text-2xl font-bold"
+                style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
+              >
+                {String(unit.value).padStart(2, '0')}
+              </div>
+              <p className="text-white/80 text-xs mt-1" dir="rtl">{unit.label}</p>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="max-w-lg mx-auto px-5 py-10">
