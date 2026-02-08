@@ -271,9 +271,11 @@ export default function StorefrontEditorPage() {
                     <button
                       key={template.id}
                       onClick={() => handleApplyTemplate(template.id)}
-                      className="flex-shrink-0 px-4 py-2.5 text-xs border border-slate-200 rounded-lg hover:border-[#0054A6] hover:bg-slate-50 transition-colors"
+                      className="flex-shrink-0 px-3 py-2 text-xs border border-slate-200 rounded-lg hover:border-[#0054A6] hover:bg-slate-50 transition-colors flex items-center gap-1.5"
                     >
-                      {isRTL ? template.nameAr : template.name}
+                      <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.primary }} />
+                      <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.accent }} />
+                      <span>{isRTL ? template.nameAr : template.name}</span>
                     </button>
                   ))}
                 </div>
@@ -483,14 +485,16 @@ export default function StorefrontEditorPage() {
             <label className="block text-sm font-medium text-slate-700 mb-2">
               {isRTL ? 'القوالب' : 'Templates'}
             </label>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {Object.values(templates).map((template) => (
                 <button
                   key={template.id}
                   onClick={() => handleApplyTemplate(template.id)}
-                  className="flex-1 px-3 py-2 text-xs border border-slate-200 rounded-lg hover:border-[#0054A6] hover:bg-slate-50 transition-colors"
+                  className="px-3 py-2 text-xs border border-slate-200 rounded-lg hover:border-[#0054A6] hover:bg-slate-50 transition-colors flex items-center gap-1.5"
                 >
-                  {isRTL ? template.nameAr : template.name}
+                  <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.primary }} />
+                  <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.accent }} />
+                  <span>{isRTL ? template.nameAr : template.name}</span>
                 </button>
               ))}
             </div>

@@ -1,6 +1,14 @@
 import { StorefrontSection } from '@/components/storefront/sections';
 import { shopifyTemplate, shopifyColors, shopifyFooter } from './shopify';
 import { minimalTemplate, minimalColors, minimalFooter } from './minimal';
+import {
+  elegantDarkTemplate,
+  oceanBreezeTemplate,
+  roseGoldTemplate,
+  forestTemplate,
+  sunsetTemplate,
+  slateProTemplate,
+} from './themes';
 
 export interface TemplateConfig {
   id: string;
@@ -45,6 +53,12 @@ export const templates: Record<string, TemplateConfig> = {
     colors: minimalColors,
     footer: minimalFooter,
   },
+  'elegant-dark': elegantDarkTemplate,
+  'ocean-breeze': oceanBreezeTemplate,
+  'rose-gold': roseGoldTemplate,
+  forest: forestTemplate,
+  sunset: sunsetTemplate,
+  'slate-pro': slateProTemplate,
 };
 
 export const getTemplate = (templateId: string): TemplateConfig => {
