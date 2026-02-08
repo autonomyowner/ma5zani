@@ -95,6 +95,26 @@ export default function Pricing() {
             )
           })}
         </div>
+
+        {/* Founder Offer Banner */}
+        <div className="max-w-3xl mx-auto mt-12 p-6 bg-[#F7941D]/10 border-2 border-[#F7941D] rounded-2xl text-center">
+          <p
+            className="text-2xl font-bold text-[#F7941D] mb-2"
+            style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}
+          >
+            {language === 'ar' ? 'عرض المؤسسين: 2,000 دج/السنة' : 'Founder Offer: 2,000 DA/year'}
+          </p>
+          <p className="text-slate-600">
+            {language === 'ar'
+              ? 'احصل على وصول كامل لمنصة ma5zani بـ 2,000 دج فقط في السنة — عرض لفترة محدودة!'
+              : 'Get full access to ma5zani for just 2,000 DA per year — limited time offer!'}
+          </p>
+          <Link href="/signup">
+            <Button variant="primary" size="lg" className="mt-4">
+              {language === 'ar' ? 'ابدأ الآن' : 'Claim Offer'}
+            </Button>
+          </Link>
+        </div>
       </div>
     </section>
   )
