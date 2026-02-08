@@ -17,16 +17,7 @@ interface CheckoutFormProps {
   metaPixelId?: string;
 }
 
-// Helper to determine if a color is light
-function isLightColor(color: string): boolean {
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return false;
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5;
-}
+import { isLightColor } from '@/lib/colors';
 
 // Helper to track Meta Pixel events
 const trackPixelEvent = (eventName: string, data?: Record<string, unknown>) => {
@@ -86,6 +77,13 @@ export default function CheckoutForm({
 
     if (!customerName || !customerPhone || !wilaya || !deliveryAddress) {
       setError(isRTL ? 'يرجى ملء جميع الحقول' : 'Please fill all fields');
+      return;
+    }
+
+    // Algerian phone validation: must start with 05, 06, or 07 and be 10 digits
+    const phoneDigits = customerPhone.replace(/\s+/g, '');
+    if (!/^0[567]\d{8}$/.test(phoneDigits)) {
+      setError(isRTL ? 'رقم الهاتف غير صالح (يجب أن يبدأ بـ 05/06/07 ويتكون من 10 أرقام)' : 'Invalid phone number (must start with 05/06/07 and be 10 digits)');
       return;
     }
 
@@ -220,6 +218,7 @@ export default function CheckoutForm({
                         src={getR2PublicUrl(item.imageKey)}
                         alt={item.name}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     ) : (
                       <div
@@ -336,7 +335,7 @@ export default function CheckoutForm({
                   className="w-full px-4 py-3 text-sm transition-colors focus:outline-none"
                   style={{
                     backgroundColor: inputBg,
-                    border: `1px solid ${inputBorder}`,
+                    border: `1px solid ${error && !/^0[567]\d{8}$/.test(customerPhone.replace(/\s+/g, '')) && customerPhone ? '#ef4444' : inputBorder}`,
                     color: textColor,
                   }}
                   placeholder="05XX XXX XXX"
@@ -393,7 +392,7 @@ export default function CheckoutForm({
                 }}
               >
                 {submitting
-                  ? (isRTL ? 'جاري الإرسال...' : 'Placing Order...')
+                  ? (isRTL ? '⏳ جاري الإرسال...' : '⏳ Placing Order...')
                   : (isRTL ? 'تأكيد الطلب' : 'Place Order')}
               </button>
             </form>

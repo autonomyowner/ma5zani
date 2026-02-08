@@ -144,6 +144,8 @@ export default function SectionRenderer({
             selectedCategory={selectedCategory as Doc<'categories'>['_id'] | null}
             onSelectCategory={(id) => onSelectCategory?.(id)}
             primaryColor={primaryColor}
+            backgroundColor={backgroundColor}
+            textColor={textColor}
           />
         </div>
       );

@@ -15,16 +15,7 @@ interface ProductCardProps {
   textColor?: string;
 }
 
-// Helper to determine if a color is light
-function isLightColor(color: string): boolean {
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return false;
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5;
-}
+import { isLightColor } from '@/lib/colors';
 
 export default function ProductCard({
   product,
@@ -83,6 +74,7 @@ export default function ProductCard({
               src={imageUrl}
               alt={product.name}
               className="w-full h-full object-cover transition-transform duration-700 ease-out"
+              loading="lazy"
               style={{
                 transform: isHovered ? 'scale(1.05)' : 'scale(1)',
               }}

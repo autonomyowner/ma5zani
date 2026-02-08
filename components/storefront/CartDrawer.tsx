@@ -23,16 +23,7 @@ interface CartDrawerProps {
   };
 }
 
-// Helper to determine if a color is light
-function isLightColor(color: string): boolean {
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return false;
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5;
-}
+import { isLightColor } from '@/lib/colors';
 
 export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
   const { items, removeItem, updateQuantity, totalItems, totalPrice, isCartOpen, closeCart } = useCart();
@@ -78,12 +69,12 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
 
       {/* Cart Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-full max-w-md z-50 flex flex-col transform transition-transform duration-300 ease-out ${
-          isCartOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed top-0 h-full w-full max-w-md z-50 flex flex-col transform transition-transform duration-300 ease-out`}
         style={{
           backgroundColor: colors.background,
-          borderLeft: `1px solid ${borderColor}`,
+          ...(isRTL
+            ? { left: 0, borderRight: `1px solid ${borderColor}`, transform: isCartOpen ? 'translateX(0)' : 'translateX(-100%)' }
+            : { right: 0, borderLeft: `1px solid ${borderColor}`, transform: isCartOpen ? 'translateX(0)' : 'translateX(100%)' }),
         }}
       >
         {/* Header */}
@@ -150,6 +141,7 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
                         src={getR2PublicUrl(item.imageKey)}
                         alt={item.name}
                         className="w-full h-full object-cover"
+                        loading="lazy"
                       />
                     ) : (
                       <div
@@ -173,6 +165,11 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
                     </h3>
                     <p className="text-xs mt-1" style={{ color: textMuted }}>
                       {(item.salePrice ?? item.price).toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                      {item.quantity > 1 && (
+                        <span style={{ color: textMuted }}>
+                          {' '}× {item.quantity} = {((item.salePrice ?? item.price) * item.quantity).toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                        </span>
+                      )}
                     </p>
 
                     {/* Quantity Controls */}

@@ -162,6 +162,8 @@ export default function StorefrontPage() {
         selectedCategory={selectedCategory}
         onSelectCategory={setSelectedCategory}
         primaryColor={colors.primary}
+        backgroundColor={colors.background}
+        textColor={colors.text}
       />
 
       {/* Products Grid */}

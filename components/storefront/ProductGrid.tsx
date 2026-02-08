@@ -16,16 +16,7 @@ interface ProductGridProps {
   onSearchChange?: (query: string) => void;
 }
 
-// Helper to determine if a color is light
-function isLightColor(color: string): boolean {
-  const hex = color.replace('#', '');
-  if (hex.length !== 6) return false;
-  const r = parseInt(hex.substr(0, 2), 16);
-  const g = parseInt(hex.substr(2, 2), 16);
-  const b = parseInt(hex.substr(4, 2), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.5;
-}
+import { isLightColor } from '@/lib/colors';
 
 export default function ProductGrid({
   products,
@@ -101,8 +92,8 @@ export default function ProductGrid({
   const gridCols = {
     2: 'grid-cols-1 sm:grid-cols-2',
     3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
-    4: 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
-  }[productsPerRow] || 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-4';
+    4: 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4',
+  }[productsPerRow] || 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4';
 
   return (
     <section
