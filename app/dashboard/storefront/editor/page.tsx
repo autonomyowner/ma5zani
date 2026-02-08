@@ -41,6 +41,7 @@ export default function StorefrontEditorPage() {
   const [saving, setSaving] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [showAddSection, setShowAddSection] = useState(false);
+  const [activeTab, setActiveTab] = useState<'sections' | 'edit' | 'colors'>('sections');
 
   // Auth protection
   useEffect(() => {
@@ -76,6 +77,11 @@ export default function StorefrontEditorPage() {
   }, [storefront]);
 
   const selectedSection = sections.find(s => s.id === selectedSectionId);
+
+  const selectSectionMobile = (id: string) => {
+    setSelectedSectionId(id);
+    setActiveTab('edit');
+  };
 
   // Handle section reordering
   const moveSection = (index: number, direction: 'up' | 'down') => {
@@ -227,7 +233,249 @@ export default function StorefrontEditorPage() {
         </div>
       }
     >
-      <div className="flex gap-6 h-[calc(100vh-180px)]">
+      {/* ===== MOBILE LAYOUT (<md) ===== */}
+      <div className="md:hidden flex flex-col h-[calc(100vh-180px)]">
+        {/* Mobile Tab Bar */}
+        <div className="flex gap-1 bg-slate-100 rounded-xl p-1 mb-3 flex-shrink-0">
+          {([
+            { key: 'sections' as const, label: isRTL ? 'الأقسام' : 'Sections' },
+            { key: 'edit' as const, label: isRTL ? 'تحرير' : 'Edit' },
+            { key: 'colors' as const, label: isRTL ? 'الألوان' : 'Colors' },
+          ]).map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === tab.key
+                  ? 'bg-white text-[#0054A6] shadow-sm'
+                  : 'text-slate-500'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Mobile Content Area */}
+        <div className="flex-1 overflow-y-auto min-h-0">
+          {/* Sections Tab */}
+          {activeTab === 'sections' && (
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col h-full">
+              {/* Template Selector - horizontal scroll */}
+              <div className="p-4 border-b border-slate-100">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {isRTL ? 'القوالب' : 'Templates'}
+                </label>
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                  {Object.values(templates).map((template) => (
+                    <button
+                      key={template.id}
+                      onClick={() => handleApplyTemplate(template.id)}
+                      className="flex-shrink-0 px-4 py-2.5 text-xs border border-slate-200 rounded-lg hover:border-[#0054A6] hover:bg-slate-50 transition-colors"
+                    >
+                      {isRTL ? template.nameAr : template.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sections List */}
+              <div className="flex-1 overflow-y-auto p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-sm font-medium text-slate-700">
+                    {isRTL ? 'الأقسام' : 'Sections'}
+                  </h3>
+                  <button
+                    onClick={() => setShowAddSection(!showAddSection)}
+                    className="text-xs text-[#0054A6] hover:underline"
+                  >
+                    {isRTL ? '+ إضافة' : '+ Add'}
+                  </button>
+                </div>
+
+                {showAddSection && (
+                  <div className="mb-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <p className="text-xs text-slate-500 mb-2">
+                      {isRTL ? 'اختر نوع القسم' : 'Choose section type'}
+                    </p>
+                    <div className="space-y-1">
+                      {availableSectionTypes.map((type) => (
+                        <button
+                          key={type}
+                          onClick={() => addSection(type)}
+                          className="w-full text-left px-3 py-2.5 text-sm rounded hover:bg-white transition-colors min-h-[44px]"
+                        >
+                          {isRTL ? sectionTypeLabels[type]?.ar : sectionTypeLabels[type]?.en}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  {sections
+                    .sort((a, b) => a.order - b.order)
+                    .map((section, index) => (
+                      <div
+                        key={section.id}
+                        className={`p-4 rounded-xl border transition-colors cursor-pointer ${
+                          selectedSectionId === section.id
+                            ? 'border-[#0054A6] bg-blue-50'
+                            : 'border-slate-200 hover:border-slate-300'
+                        }`}
+                        onClick={() => selectSectionMobile(section.id)}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="flex flex-col gap-1">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); moveSection(index, 'up'); }}
+                              disabled={index === 0}
+                              className="text-slate-400 hover:text-slate-600 disabled:opacity-30 min-w-[44px] min-h-[22px] flex items-center justify-center"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); moveSection(index, 'down'); }}
+                              disabled={index === sections.length - 1}
+                              className="text-slate-400 hover:text-slate-600 disabled:opacity-30 min-w-[44px] min-h-[22px] flex items-center justify-center"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </button>
+                          </div>
+
+                          <button
+                            onClick={(e) => { e.stopPropagation(); toggleSection(section.id); }}
+                            className="w-10 h-5 rounded-full transition-colors flex-shrink-0"
+                            style={{ backgroundColor: section.enabled ? '#22c55e' : '#cbd5e1' }}
+                          >
+                            <span
+                              className="block w-4 h-4 bg-white rounded-full transition-transform"
+                              style={{
+                                transform: section.enabled ? 'translateX(21px)' : 'translateX(2px)',
+                              }}
+                            />
+                          </button>
+
+                          <span className={`flex-1 text-sm truncate ${!section.enabled ? 'opacity-50' : ''}`}>
+                            {isRTL ? sectionTypeLabels[section.type]?.ar : sectionTypeLabels[section.type]?.en}
+                          </span>
+
+                          <button
+                            onClick={(e) => { e.stopPropagation(); deleteSection(section.id); }}
+                            className="text-slate-400 hover:text-red-500 min-w-[44px] min-h-[44px] flex items-center justify-center"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Edit Tab */}
+          {activeTab === 'edit' && (
+            <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col h-full">
+              {selectedSection ? (
+                <>
+                  <div className="p-4 border-b border-slate-100 flex items-center gap-3">
+                    <button
+                      onClick={() => setActiveTab('sections')}
+                      className="text-slate-400 hover:text-slate-600 min-w-[44px] min-h-[44px] flex items-center justify-center -ml-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isRTL ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"} />
+                      </svg>
+                    </button>
+                    <h3 className="font-semibold text-slate-900">
+                      {isRTL ? sectionTypeLabels[selectedSection.type]?.ar : sectionTypeLabels[selectedSection.type]?.en}
+                    </h3>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <SectionEditor
+                      section={selectedSection}
+                      onUpdate={(field, value) => updateSectionContent(selectedSection.id, field, value)}
+                      onImageUpload={(file) => handleImageUpload(selectedSection.id, file)}
+                      isRTL={isRTL}
+                      primaryColor={colors.primary}
+                    />
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-slate-400 p-8">
+                  <div className="text-center">
+                    <p className="mb-3">{isRTL ? 'اختر قسماً للتحرير' : 'Select a section to edit'}</p>
+                    <button
+                      onClick={() => setActiveTab('sections')}
+                      className="text-sm text-[#0054A6] hover:underline"
+                    >
+                      {isRTL ? 'عرض الأقسام' : 'View sections'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Colors Tab */}
+          {activeTab === 'colors' && (
+            <div className="bg-white rounded-2xl border border-slate-200 p-4">
+              <h3 className="text-sm font-medium text-slate-700 mb-4">
+                {isRTL ? 'الألوان' : 'Colors'}
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { key: 'primary', label: isRTL ? 'رئيسي' : 'Primary' },
+                  { key: 'accent', label: isRTL ? 'ثانوي' : 'Accent' },
+                  { key: 'background', label: isRTL ? 'خلفية' : 'Background' },
+                  { key: 'text', label: isRTL ? 'نص' : 'Text' },
+                  { key: 'headerBg', label: isRTL ? 'رأس الصفحة' : 'Header' },
+                  { key: 'footerBg', label: isRTL ? 'تذييل' : 'Footer' },
+                ].map(({ key, label }) => (
+                  <div key={key} className="flex items-center gap-3">
+                    <input
+                      type="color"
+                      value={colors[key as keyof typeof colors]}
+                      onChange={(e) => setColors({ ...colors, [key]: e.target.value })}
+                      className="w-10 h-10 rounded-lg border cursor-pointer flex-shrink-0"
+                    />
+                    <span className="text-sm text-slate-600">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Sticky Bottom Bar */}
+        <div className="flex-shrink-0 pt-3 flex gap-2">
+          <a
+            href={`/${storefront.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 py-3 border border-slate-200 rounded-xl text-sm text-slate-600 text-center font-medium"
+          >
+            {isRTL ? 'معاينة' : 'Preview'}
+          </a>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex-1 py-3 bg-[#0054A6] text-white rounded-xl text-sm font-medium disabled:opacity-50"
+          >
+            {saving ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : (isRTL ? 'حفظ' : 'Save')}
+          </button>
+        </div>
+      </div>
+
+      {/* ===== DESKTOP LAYOUT (md+) ===== */}
+      <div className="hidden md:flex gap-6 h-[calc(100vh-180px)]">
         {/* Left Panel - Section List */}
         <div className="w-72 flex-shrink-0 bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col">
           {/* Template Selector */}
