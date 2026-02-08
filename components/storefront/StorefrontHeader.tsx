@@ -92,7 +92,7 @@ export default function StorefrontHeader({
       <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
         <div className="flex items-center justify-between h-20 lg:h-24">
           {/* Left - Navigation Links (Desktop) */}
-          <div className="hidden md:flex items-center gap-10">
+          <div className="hidden md:flex items-center gap-10 relative z-10">
             <Link
               href={`/${slug}`}
               className="text-xs tracking-[0.2em] uppercase transition-colors duration-300 hover:opacity-100"
@@ -112,7 +112,7 @@ export default function StorefrontHeader({
           {/* Center - Logo */}
           <Link
             href={`/${slug}`}
-            className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center max-w-[40%] sm:max-w-none"
+            className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center max-w-[30%] sm:max-w-[40%] md:max-w-none pointer-events-auto"
           >
             {logoUrl ? (
               <img
@@ -139,7 +139,7 @@ export default function StorefrontHeader({
           </Link>
 
           {/* Right - Actions */}
-          <div className="flex items-center gap-3 sm:gap-6 lg:gap-10 ml-auto">
+          <div className="flex items-center gap-3 sm:gap-6 lg:gap-10 ml-auto relative z-10">
             {/* Social Links (Desktop) */}
             {socialLinks?.instagram && (
               <a
