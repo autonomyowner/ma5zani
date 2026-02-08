@@ -63,7 +63,7 @@ export default function Footer() {
             </p>
             <div className="space-y-2">
               <p className="text-slate-400">
-                <span className="text-white font-medium">{t.footer.email}</span> contact@ma5zani.dz
+                <span className="text-white font-medium">{t.footer.email}</span> contact@ma5zani.com
               </p>
               <p className="text-slate-400">
                 <span className="text-white font-medium">{t.footer.phone}</span> <span dir="ltr">+213 658 39 96 44</span>
