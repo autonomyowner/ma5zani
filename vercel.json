@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "ma5zani.com"
+        }
+      ],
+      "destination": "https://www.ma5zani.com/:path*",
+      "permanent": true
+    }
+  ]
+}
