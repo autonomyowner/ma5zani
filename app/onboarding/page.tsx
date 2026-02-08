@@ -176,16 +176,6 @@ export default function OnboardingPage() {
               />
             </div>
 
-            {/* Beta Notice */}
-            <div className="p-4 bg-[#22B14C]/10 border border-[#22B14C]/30 rounded-xl">
-              <p className="text-sm font-semibold text-[#22B14C] mb-1" style={{ fontFamily: language === 'ar' ? 'var(--font-cairo), sans-serif' : 'var(--font-outfit), sans-serif' }}>
-                {t.auth.onboarding.betaTitle}
-              </p>
-              <p className="text-sm text-slate-600">
-                {t.auth.onboarding.betaDesc}
-              </p>
-            </div>
-
             {/* Plan Selection */}
             <div>
               <h2
