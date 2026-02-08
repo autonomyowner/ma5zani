@@ -9,11 +9,13 @@ import { getR2PublicUrl } from '@/lib/r2';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import ImageUpload from '@/components/ui/ImageUpload';
+import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
 
 export default function StorefrontProductsPage() {
   const { language } = useLanguage();
   const isRTL = language === 'ar';
 
+  const seller = useQuery(api.sellers.getCurrentSellerProfile);
   const products = useQuery(api.products.getProducts);
   const categories = useQuery(api.categories.getCategories);
   const updateProduct = useMutation(api.products.updateProduct);
@@ -55,6 +57,10 @@ export default function StorefrontProductsPage() {
     });
     setEditingProduct(null);
   };
+
+  if (seller && !seller.isActivated) {
+    return <FounderOfferGate />;
+  }
 
   if (!products) {
     return (

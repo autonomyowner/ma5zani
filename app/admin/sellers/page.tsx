@@ -27,6 +27,7 @@ export default function AdminSellersPage() {
   const sellers = useQuery(api.admin.getAllSellers, password ? { password } : 'skip')
   const updatePlan = useMutation(api.admin.updateSellerPlan)
   const deleteSeller = useMutation(api.admin.deleteSeller)
+  const activateSeller = useMutation(api.admin.activateSeller)
 
   const handlePlanChange = async (sellerId: Id<'sellers'>, plan: 'basic' | 'plus' | 'gros') => {
     if (!password) return
@@ -35,6 +36,17 @@ export default function AdminSellersPage() {
       await updatePlan({ password, sellerId, plan })
     } catch (error) {
       console.error('Failed to update plan:', error)
+    }
+    setUpdatingId(null)
+  }
+
+  const handleActivate = async (sellerId: Id<'sellers'>, currentStatus: boolean) => {
+    if (!password) return
+    setUpdatingId(sellerId)
+    try {
+      await activateSeller({ password, sellerId, isActivated: !currentStatus })
+    } catch (error) {
+      console.error('Failed to toggle activation:', error)
     }
     setUpdatingId(null)
   }
@@ -152,6 +164,7 @@ export default function AdminSellersPage() {
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Email</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Phone</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Plan</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Status</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Joined</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase">Actions</th>
                     </tr>
@@ -176,16 +189,38 @@ export default function AdminSellersPage() {
                             <option value="gros">Gros</option>
                           </select>
                         </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            seller.isActivated
+                              ? 'bg-green-500/20 text-green-400'
+                              : 'bg-slate-600 text-slate-300'
+                          }`}>
+                            {seller.isActivated ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 text-slate-400 text-sm">
                           {new Date(seller.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4">
-                          <button
-                            onClick={() => handleDelete(seller._id, seller.name)}
-                            className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 text-sm font-medium"
-                          >
-                            Delete
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleActivate(seller._id, !!seller.isActivated)}
+                              disabled={updatingId === seller._id}
+                              className={`px-3 py-1.5 rounded-lg text-sm font-medium disabled:opacity-50 ${
+                                seller.isActivated
+                                  ? 'bg-slate-600 text-slate-300 hover:bg-slate-500'
+                                  : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                              }`}
+                            >
+                              {seller.isActivated ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button
+                              onClick={() => handleDelete(seller._id, seller.name)}
+                              className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 text-sm font-medium"
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}

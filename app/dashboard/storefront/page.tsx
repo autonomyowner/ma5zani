@@ -12,6 +12,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import SlugInput from '@/components/ui/SlugInput';
+import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
 
 export default function StorefrontPage() {
   const router = useRouter();
@@ -179,6 +180,14 @@ export default function StorefrontPage() {
   if (seller === null && isAuthenticated) {
     router.push('/onboarding');
     return null;
+  }
+
+  if (seller && !seller.isActivated) {
+    return (
+      <DashboardLayout seller={seller} title={isRTL ? 'متجرك الإلكتروني' : 'Your Online Store'}>
+        <FounderOfferGate />
+      </DashboardLayout>
+    );
   }
 
   return (

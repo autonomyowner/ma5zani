@@ -10,6 +10,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import FounderOfferGate from '@/components/dashboard/FounderOfferGate'
 
 type Personality = 'friendly' | 'professional' | 'casual'
 
@@ -55,6 +56,14 @@ export default function ChatbotPage() {
   if (seller === null) {
     router.push('/onboarding')
     return null
+  }
+
+  if (seller && !seller.isActivated) {
+    return (
+      <DashboardLayout seller={seller} title={t.chatbot.aiAssistant}>
+        <FounderOfferGate />
+      </DashboardLayout>
+    )
   }
 
   const handleToggle = async () => {

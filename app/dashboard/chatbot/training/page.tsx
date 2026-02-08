@@ -9,6 +9,7 @@ import { useLanguage } from '@/lib/LanguageContext'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import FounderOfferGate from '@/components/dashboard/FounderOfferGate'
 
 type Category = 'shipping' | 'returns' | 'payment' | 'products' | 'general'
 
@@ -178,6 +179,14 @@ export default function TrainingPage() {
   if (seller === null) {
     router.push('/onboarding')
     return null
+  }
+
+  if (seller && !seller.isActivated) {
+    return (
+      <DashboardLayout seller={seller} title={t.chatbot.training}>
+        <FounderOfferGate />
+      </DashboardLayout>
+    )
   }
 
   if (chatbot === null) {

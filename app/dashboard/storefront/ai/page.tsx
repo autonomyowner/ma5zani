@@ -10,6 +10,7 @@ import ChatInterface from './components/ChatInterface';
 import LivePreview from './components/LivePreview';
 import ConfigEditor from './components/ConfigEditor';
 import { GeneratedConfig } from '@/lib/storefront-ai';
+import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
 
 type Tab = 'chat' | 'preview' | 'edit';
 
@@ -129,6 +130,14 @@ export default function AIStorefrontBuilderPage() {
   };
 
   const pageTitle = isRTL ? 'مصمم المتجر بالذكاء الاصطناعي' : 'AI Store Designer';
+
+  if (seller && !seller.isActivated) {
+    return (
+      <DashboardLayout seller={seller} title={pageTitle}>
+        <FounderOfferGate />
+      </DashboardLayout>
+    );
+  }
 
   if (!storefront) {
     return (

@@ -12,6 +12,7 @@ import { StorefrontSection } from '@/components/storefront/sections';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
 
 // Generate unique ID for new sections
 const generateId = () => `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -205,6 +206,14 @@ export default function StorefrontEditorPage() {
   if (seller === null && isAuthenticated) {
     router.push('/onboarding');
     return null;
+  }
+
+  if (seller && !seller.isActivated) {
+    return (
+      <DashboardLayout seller={seller} title={isRTL ? 'محرر القالب' : 'Template Editor'}>
+        <FounderOfferGate />
+      </DashboardLayout>
+    );
   }
 
   if (!storefront) {

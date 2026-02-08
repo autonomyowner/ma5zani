@@ -448,6 +448,24 @@ export const translations = {
       disabled: 'معطّل',
       setupRequired: 'يرجى إنشاء متجر أولاً',
     },
+    // Founder Offer
+    founderOffer: {
+      title: 'عرض المؤسسين',
+      specialOffer: 'عرض خاص — 2000 دج للسنة كاملة',
+      subtitle: 'افتح متجرك الإلكتروني + المساعد الذكي بأقل سعر',
+      features: [
+        'متجر إلكتروني احترافي برابط خاص',
+        'إدارة الطلبات والمخزون',
+        'تحليلات المبيعات',
+        'مساعد ذكي (AI Chatbot) للرد على العملاء',
+      ],
+      paymentTitle: 'طريقة الدفع',
+      paymentMethod: 'CCP / BaridiMob',
+      sendProof: 'أرسل إثبات الدفع عبر واتساب',
+      whatsappNumber: '0658399645',
+      limitedSpots: 'الأماكن محدودة — هذا العرض لن يتكرر',
+      unlockBanner: 'افتح المتجر والمساعد الذكي — 2000 دج/سنة',
+    },
     // Voice AI Support
     voice: {
       callWithAI: 'اتصل بحسام',
@@ -938,6 +956,24 @@ export const translations = {
       enabled: 'Enabled',
       disabled: 'Disabled',
       setupRequired: 'Please create a storefront first',
+    },
+    // Founder Offer
+    founderOffer: {
+      title: 'Founder Offer',
+      specialOffer: 'Special Offer — 2000 DA for 1 year',
+      subtitle: 'Unlock your online store + AI chatbot at the lowest price',
+      features: [
+        'Professional online store with custom link',
+        'Order & inventory management',
+        'Sales analytics',
+        'AI Chatbot to reply to customers',
+      ],
+      paymentTitle: 'Payment Method',
+      paymentMethod: 'CCP / BaridiMob',
+      sendProof: 'Send payment proof via WhatsApp',
+      whatsappNumber: '0658399645',
+      limitedSpots: 'Limited spots — this offer won\'t come back',
+      unlockBanner: 'Unlock storefront & AI chatbot — 2000 DA/year',
     },
     // Voice AI Support
     voice: {

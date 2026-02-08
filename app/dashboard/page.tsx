@@ -90,6 +90,16 @@ export default function DashboardPage() {
       }
     >
       <div className="space-y-4 lg:space-y-8">
+        {seller && !seller.isActivated && (
+          <a
+            href="/dashboard/storefront"
+            className="block p-3 lg:p-4 bg-[#F7941D]/10 border border-[#F7941D]/30 rounded-xl hover:bg-[#F7941D]/15 transition-colors"
+          >
+            <p className="text-sm lg:text-base font-bold text-[#F7941D]">
+              {t.founderOffer.unlockBanner}
+            </p>
+          </a>
+        )}
         <StatsCards stats={displayStats} />
 
         {/* Quick Actions */}

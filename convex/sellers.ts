@@ -47,6 +47,7 @@ export const upsertSeller = mutation({
       name: args.name,
       phone: args.phone,
       plan: args.plan,
+      isActivated: false,
       createdAt: now,
       updatedAt: now,
     });

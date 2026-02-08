@@ -14,6 +14,8 @@ export default defineSchema({
       postalCode: v.string(),
     })),
     plan: v.union(v.literal("basic"), v.literal("plus"), v.literal("gros")),
+    isActivated: v.optional(v.boolean()),
+    activatedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })

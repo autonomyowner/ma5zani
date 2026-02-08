@@ -44,6 +44,29 @@ export const getAllProducts = query({
   },
 });
 
+// Activate/deactivate seller
+export const activateSeller = mutation({
+  args: {
+    password: v.string(),
+    sellerId: v.id("sellers"),
+    isActivated: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    if (args.password !== ADMIN_PASSWORD) {
+      throw new Error("Unauthorized");
+    }
+    const updates: Record<string, unknown> = {
+      isActivated: args.isActivated,
+      updatedAt: Date.now(),
+    };
+    if (args.isActivated) {
+      updates.activatedAt = Date.now();
+    }
+    await ctx.db.patch(args.sellerId, updates);
+    return args.sellerId;
+  },
+});
+
 // Update seller plan
 export const updateSellerPlan = mutation({
   args: {

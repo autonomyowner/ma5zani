@@ -7,11 +7,13 @@ import { Id } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
 
 export default function CategoriesPage() {
   const { language } = useLanguage();
   const isRTL = language === 'ar';
 
+  const seller = useQuery(api.sellers.getCurrentSellerProfile);
   const categories = useQuery(api.categories.getCategories);
   const createCategory = useMutation(api.categories.createCategory);
   const updateCategory = useMutation(api.categories.updateCategory);
@@ -64,6 +66,10 @@ export default function CategoriesPage() {
     setName('');
     setNameAr('');
   };
+
+  if (seller && !seller.isActivated) {
+    return <FounderOfferGate />;
+  }
 
   if (!categories) {
     return (
