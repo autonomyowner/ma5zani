@@ -2,40 +2,38 @@
 
 import { useEffect } from 'react'
 
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || '1343395010814971'
-
 export function MetaPixel() {
   useEffect(() => {
     try {
-      const w = window as unknown as Record<string, unknown>
-      if (w.fbq) return
+      if ((window as any).fbq) return
 
-      const fbq = function (...args: unknown[]) {
-        if ((fbq as unknown as { callMethod?: (...a: unknown[]) => void }).callMethod) {
-          (fbq as unknown as { callMethod: (...a: unknown[]) => void }).callMethod(...args)
-        } else {
-          (fbq as unknown as { queue: unknown[] }).queue.push(args)
+      ;(function(f: any, b: any, e: any, v: any) {
+        var n: any, t: any, s: any
+        if (f.fbq) return
+        n = f.fbq = function() {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments)
         }
-      } as unknown as Record<string, unknown>
+        if (!f._fbq) f._fbq = n
+        n.push = n
+        n.loaded = !0
+        n.version = '2.0'
+        n.queue = []
+        t = b.createElement(e)
+        t.async = !0
+        t.src = v
+        t.onerror = function() {}
+        s = b.getElementsByTagName(e)[0]
+        if (s && s.parentNode) {
+          s.parentNode.insertBefore(t, s)
+        } else {
+          b.head.appendChild(t)
+        }
+      })(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js')
 
-      fbq.push = fbq
-      fbq.loaded = true
-      fbq.version = '2.0'
-      fbq.queue = [] as unknown[]
-
-      w.fbq = fbq
-      if (!w._fbq) w._fbq = fbq
-
-      const script = document.createElement('script')
-      script.async = true
-      script.src = 'https://connect.facebook.net/en_US/fbevents.js'
-      script.onerror = () => {} // Silent fail if blocked
-      document.head.appendChild(script)
-
-      ;(w.fbq as (...args: unknown[]) => void)('init', META_PIXEL_ID)
-      ;(w.fbq as (...args: unknown[]) => void)('track', 'PageView')
+      ;(window as any).fbq('init', '1343395010814971')
+      ;(window as any).fbq('track', 'PageView')
     } catch {
-      // Silent fail - don't break the app for tracking
+      // Silent fail
     }
   }, [])
 
