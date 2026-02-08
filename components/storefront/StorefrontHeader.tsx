@@ -53,8 +53,6 @@ export default function StorefrontHeader({
   const { language, setLanguage } = useLanguage();
   const isRTL = language === 'ar';
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   const isLightHeader = isLightColor(colors.headerBg);
   const textColor = isLightHeader ? colors.primary : colors.text;
   const textMuted = isLightHeader ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)';
@@ -68,18 +66,7 @@ export default function StorefrontHeader({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Lock body scroll when mobile menu is open
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isMobileMenuOpen]);
-
   return (
-    <>
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isScrolled ? 'backdrop-blur-md' : ''
@@ -89,57 +76,53 @@ export default function StorefrontHeader({
         borderBottom: isScrolled ? `1px solid ${borderColor}` : 'none',
       }}
     >
-      <div className="max-w-[1600px] mx-auto px-6 lg:px-12" dir={isRTL ? 'rtl' : 'ltr'}>
-        <div className="flex items-center justify-between h-20 lg:h-24">
-          {/* Left - Navigation Links (Desktop) */}
-          <div className="hidden md:flex items-center gap-10 relative z-10">
+      <div className="max-w-[1600px] mx-auto px-4 md:px-6 lg:px-12" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="flex items-center justify-between h-14 md:h-20 lg:h-24">
+          {/* Left - Navigation */}
+          <div className="flex items-center gap-4 md:gap-10 relative z-10">
             <Link
               href={`/${slug}`}
-              className="text-xs tracking-[0.2em] uppercase transition-colors duration-300 hover:opacity-100"
+              className="transition-colors duration-300 hover:opacity-100 flex items-center gap-1.5"
               style={{ color: textMuted }}
+              aria-label="Home"
             >
-              {isRTL ? 'الرئيسية' : 'Home'}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="md:hidden"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+              <span className="hidden md:inline text-xs tracking-[0.2em] uppercase">{isRTL ? 'الرئيسية' : 'Home'}</span>
             </Link>
             <Link
               href={`/${slug}#products`}
-              className="text-xs tracking-[0.2em] uppercase transition-colors duration-300 hover:opacity-100"
+              className="transition-colors duration-300 hover:opacity-100 flex items-center gap-1.5"
               style={{ color: textMuted }}
+              aria-label="Products"
             >
-              {isRTL ? 'المنتجات' : 'Products'}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="md:hidden"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+              <span className="hidden md:inline text-xs tracking-[0.2em] uppercase">{isRTL ? 'المنتجات' : 'Products'}</span>
             </Link>
           </div>
 
-          {/* Center - Logo */}
+          {/* Center - Store Name / Logo */}
           <Link
             href={`/${slug}`}
-            className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center max-w-[30%] sm:max-w-[40%] md:max-w-none pointer-events-auto"
+            className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2"
           >
             {logoUrl ? (
               <img
                 src={logoUrl}
                 alt={boutiqueName}
-                className="w-10 h-10 lg:w-12 lg:h-12 rounded-full object-cover"
+                className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full object-cover"
               />
             ) : (
-              <>
-                <span
-                  className="text-3xl lg:text-4xl font-light tracking-[0.3em]"
-                  style={{ fontFamily: `'${fonts.display}', serif`, color: textColor }}
-                >
-                  {boutiqueName.charAt(0)}
-                </span>
-                <span
-                  className="text-[10px] tracking-[0.4em] uppercase mt-0.5 truncate max-w-full"
-                  style={{ color: textMuted }}
-                >
-                  {boutiqueName}
-                </span>
-              </>
+              <span
+                className="text-base md:text-lg lg:text-xl font-medium tracking-[0.15em] truncate max-w-[120px] sm:max-w-[180px] md:max-w-none"
+                style={{ fontFamily: `'${fonts.display}', serif`, color: textColor }}
+              >
+                {boutiqueName}
+              </span>
             )}
           </Link>
 
           {/* Right - Actions */}
-          <div className="flex items-center gap-3 sm:gap-6 lg:gap-10 ms-auto relative z-10">
+          <div className="flex items-center gap-3 md:gap-6 lg:gap-10 ms-auto relative z-10">
             {/* Social Links (Desktop) */}
             {socialLinks?.instagram && (
               <a
@@ -156,7 +139,7 @@ export default function StorefrontHeader({
             {/* Language Toggle */}
             <button
               onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-              className="text-xs tracking-[0.15em] uppercase transition-colors duration-300 hover:opacity-100 whitespace-nowrap flex-shrink-0"
+              className="text-[11px] md:text-xs tracking-[0.1em] md:tracking-[0.15em] uppercase transition-colors duration-300 hover:opacity-100 whitespace-nowrap flex-shrink-0"
               style={{ color: textMuted }}
             >
               {language === 'ar' ? 'EN' : 'AR'}
@@ -168,15 +151,16 @@ export default function StorefrontHeader({
               className="relative group flex-shrink-0"
               aria-label="Shopping cart"
             >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="md:hidden" style={{ color: textMuted }}><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
               <span
-                className="text-xs tracking-[0.2em] uppercase transition-colors duration-300 group-hover:opacity-100"
+                className="hidden md:inline text-xs tracking-[0.2em] uppercase transition-colors duration-300 group-hover:opacity-100"
                 style={{ color: textMuted }}
               >
                 {isRTL ? 'السلة' : 'Cart'}
               </span>
               {totalItems > 0 && (
                 <span
-                  className="absolute -top-2 -right-4 w-5 h-5 text-[10px] font-medium flex items-center justify-center rounded-full transition-transform"
+                  className="absolute -top-2 -right-3 md:-right-4 w-4 h-4 md:w-5 md:h-5 text-[9px] md:text-[10px] font-medium flex items-center justify-center rounded-full"
                   style={{
                     backgroundColor: colors.accent,
                     color: isLightColor(colors.accent) ? '#000' : '#fff',
@@ -186,148 +170,9 @@ export default function StorefrontHeader({
                 </span>
               )}
             </button>
-
-            {/* Mobile Menu Button */}
-            <button
-              className="md:hidden flex flex-col gap-1.5 p-2"
-              aria-label="Menu"
-              onClick={() => setIsMobileMenuOpen(true)}
-            >
-              <span className="w-5 h-px" style={{ backgroundColor: textColor }} />
-              <span className="w-5 h-px" style={{ backgroundColor: textColor }} />
-            </button>
           </div>
         </div>
       </div>
     </nav>
-
-      {/* Mobile Menu Drawer */}
-      <div
-        className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-300 ${
-          isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        {/* Backdrop */}
-        <div
-          className="absolute inset-0"
-          style={{ backgroundColor: `${colors.headerBg}cc` }}
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
-
-        {/* Menu Panel */}
-        <div
-          className={`absolute top-0 ${isRTL ? 'left-0' : 'right-0'} h-full w-[85%] max-w-sm transform transition-transform duration-300 ease-out ${
-            isMobileMenuOpen
-              ? 'translate-x-0'
-              : isRTL ? '-translate-x-full' : 'translate-x-full'
-          }`}
-          style={{ backgroundColor: colors.headerBg }}
-        >
-          {/* Close Button */}
-          <div className="flex justify-end p-6">
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="w-10 h-10 flex items-center justify-center"
-              style={{ color: textColor }}
-            >
-              <span className="text-2xl font-light">&times;</span>
-            </button>
-          </div>
-
-          {/* Store Name */}
-          <div className="px-8 mb-10 text-center">
-            {logoUrl ? (
-              <img src={logoUrl} alt={boutiqueName} className="w-16 h-16 rounded-full object-cover mx-auto" />
-            ) : (
-              <span
-                className="text-4xl font-light tracking-[0.3em]"
-                style={{ fontFamily: `'${fonts.display}', serif`, color: textColor }}
-              >
-                {boutiqueName.charAt(0)}
-              </span>
-            )}
-            <p
-              className="text-xs tracking-[0.3em] uppercase mt-3"
-              style={{ color: textMuted }}
-            >
-              {boutiqueName}
-            </p>
-          </div>
-
-          {/* Navigation Links */}
-          <nav className="px-8 space-y-6">
-            <a
-              href={`/${slug}`}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block text-sm tracking-[0.2em] uppercase"
-              style={{ color: textColor }}
-            >
-              {isRTL ? 'الرئيسية' : 'Home'}
-            </a>
-            <a
-              href={`/${slug}#products`}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block text-sm tracking-[0.2em] uppercase"
-              style={{ color: textColor }}
-            >
-              {isRTL ? 'المنتجات' : 'Products'}
-            </a>
-          </nav>
-
-          {/* Language Toggle */}
-          <div className="px-8 mt-10">
-            <button
-              onClick={() => {
-                setLanguage(language === 'ar' ? 'en' : 'ar');
-                setIsMobileMenuOpen(false);
-              }}
-              className="text-sm tracking-[0.2em] uppercase px-4 py-2"
-              style={{ color: textMuted, border: `1px solid ${borderColor}` }}
-            >
-              {language === 'ar' ? 'EN' : 'AR'}
-            </button>
-          </div>
-
-          {/* Social Links */}
-          {socialLinks && (
-            <div className="absolute bottom-12 left-0 right-0 px-8 flex items-center gap-6">
-              {socialLinks.instagram && (
-                <a
-                  href={socialLinks.instagram.startsWith('http') ? socialLinks.instagram : `https://instagram.com/${socialLinks.instagram}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs tracking-[0.2em] uppercase"
-                  style={{ color: textMuted }}
-                >
-                  Instagram
-                </a>
-              )}
-              {socialLinks.facebook && (
-                <a
-                  href={socialLinks.facebook.startsWith('http') ? socialLinks.facebook : `https://facebook.com/${socialLinks.facebook}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs tracking-[0.2em] uppercase"
-                  style={{ color: textMuted }}
-                >
-                  Facebook
-                </a>
-              )}
-              {socialLinks.tiktok && (
-                <a
-                  href={socialLinks.tiktok.startsWith('http') ? socialLinks.tiktok : `https://tiktok.com/@${socialLinks.tiktok}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs tracking-[0.2em] uppercase"
-                  style={{ color: textMuted }}
-                >
-                  TikTok
-                </a>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </>
   );
 }
