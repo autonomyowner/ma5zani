@@ -166,10 +166,10 @@ export default function OnboardingPage() {
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
                     <p className="font-bold text-[#F7941D] text-lg" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
-                      2,000 DA/year
+                      4,000 DA/year
                     </p>
                     <p className="text-sm text-slate-600">
-                      Get full access to ma5zani for just 2,000 DA per year — limited time founder offer!
+                      Get full access to ma5zani for just 4,000 DA per year — limited time founder offer!
                     </p>
                   </div>
                   <span className="bg-[#F7941D] text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
