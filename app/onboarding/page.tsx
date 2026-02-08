@@ -160,6 +160,24 @@ export default function OnboardingPage() {
               >
                 Choose Your Plan
               </h2>
+
+              {/* Special Offer */}
+              <div className="mb-4 p-4 bg-[#F7941D]/10 border-2 border-[#F7941D] rounded-xl">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div>
+                    <p className="font-bold text-[#F7941D] text-lg" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+                      2,000 DA/year
+                    </p>
+                    <p className="text-sm text-slate-600">
+                      Get full access to ma5zani for just 2,000 DA per year — limited time founder offer!
+                    </p>
+                  </div>
+                  <span className="bg-[#F7941D] text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
+                    BEST VALUE
+                  </span>
+                </div>
+              </div>
+
               <div className="grid md:grid-cols-3 gap-4">
                 {plans.map((plan) => (
                   <button
