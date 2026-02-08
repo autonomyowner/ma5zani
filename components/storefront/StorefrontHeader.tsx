@@ -89,7 +89,7 @@ export default function StorefrontHeader({
         borderBottom: isScrolled ? `1px solid ${borderColor}` : 'none',
       }}
     >
-      <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="flex items-center justify-between h-20 lg:h-24">
           {/* Left - Navigation Links (Desktop) */}
           <div className="hidden md:flex items-center gap-10 relative z-10">
@@ -139,7 +139,7 @@ export default function StorefrontHeader({
           </Link>
 
           {/* Right - Actions */}
-          <div className="flex items-center gap-3 sm:gap-6 lg:gap-10 ml-auto relative z-10">
+          <div className="flex items-center gap-3 sm:gap-6 lg:gap-10 ms-auto relative z-10">
             {/* Social Links (Desktop) */}
             {socialLinks?.instagram && (
               <a
