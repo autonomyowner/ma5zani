@@ -7,7 +7,6 @@ import Image from 'next/image'
 import { useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import Card from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
 
 export default function AdminDashboard() {
   const router = useRouter()
@@ -102,7 +101,7 @@ export default function AdminDashboard() {
             <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-outfit)' }}>
               Admin Dashboard
             </h1>
-            <p className="text-slate-400 text-sm">Platform overview and management</p>
+            <p className="text-slate-300 text-sm">Platform overview and management</p>
           </div>
         </header>
 
@@ -110,36 +109,36 @@ export default function AdminDashboard() {
           {/* Stats Grid */}
           <div className="grid md:grid-cols-5 gap-6 mb-8">
             <Card className="p-6 bg-slate-800 border-slate-700">
-              <p className="text-sm text-slate-400 mb-1">Total Sellers</p>
+              <p className="text-sm text-slate-300 mb-1">Total Sellers</p>
               <p className="text-3xl font-bold text-white" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {stats?.totalSellers || 0}
               </p>
             </Card>
             <Card className="p-6 bg-slate-800 border-slate-700">
-              <p className="text-sm text-slate-400 mb-1">Storefronts</p>
-              <p className="text-3xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
+              <p className="text-sm text-slate-300 mb-1">Storefronts</p>
+              <p className="text-3xl font-bold text-[#00AEEF]" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {stats?.totalStorefronts || 0}
               </p>
-              <p className="text-sm text-slate-400">{stats?.publishedStorefronts || 0} published</p>
+              <p className="text-sm text-slate-300">{stats?.publishedStorefronts || 0} published</p>
             </Card>
             <Card className="p-6 bg-slate-800 border-slate-700">
-              <p className="text-sm text-slate-400 mb-1">Total Orders</p>
+              <p className="text-sm text-slate-300 mb-1">Total Orders</p>
               <p className="text-3xl font-bold text-[#00AEEF]" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {stats?.totalOrders || 0}
               </p>
             </Card>
             <Card className="p-6 bg-slate-800 border-slate-700">
-              <p className="text-sm text-slate-400 mb-1">Total Products</p>
+              <p className="text-sm text-slate-300 mb-1">Total Products</p>
               <p className="text-3xl font-bold text-[#F7941D]" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {stats?.totalProducts || 0}
               </p>
             </Card>
             <Card className="p-6 bg-slate-800 border-slate-700">
-              <p className="text-sm text-slate-400 mb-1">Total Revenue</p>
+              <p className="text-sm text-slate-300 mb-1">Total Revenue</p>
               <p className="text-3xl font-bold text-[#22B14C]" style={{ fontFamily: 'var(--font-outfit)' }}>
                 {(stats?.totalRevenue || 0).toLocaleString()}
               </p>
-              <p className="text-sm text-slate-400">DZD</p>
+              <p className="text-sm text-slate-300">DZD</p>
             </Card>
           </div>
 
@@ -170,30 +169,20 @@ export default function AdminDashboard() {
                 Quick Actions
               </h3>
               <div className="space-y-3">
-                <Link href="/admin/sellers">
-                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700">
-                    Manage Sellers
-                  </Button>
+                <Link href="/admin/sellers" className="block w-full px-4 py-3 rounded-xl text-slate-200 hover:text-white hover:bg-slate-700 font-medium text-left transition-colors">
+                  Manage Sellers
                 </Link>
-                <Link href="/admin/storefronts">
-                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700">
-                    View Storefronts ({stats?.publishedStorefronts || 0} live)
-                  </Button>
+                <Link href="/admin/storefronts" className="block w-full px-4 py-3 rounded-xl text-slate-200 hover:text-white hover:bg-slate-700 font-medium text-left transition-colors">
+                  View Storefronts ({stats?.publishedStorefronts || 0} live)
                 </Link>
-                <Link href="/admin/orders">
-                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700">
-                    View All Orders ({stats?.pendingOrders || 0} pending)
-                  </Button>
+                <Link href="/admin/orders" className="block w-full px-4 py-3 rounded-xl text-slate-200 hover:text-white hover:bg-slate-700 font-medium text-left transition-colors">
+                  View All Orders ({stats?.pendingOrders || 0} pending)
                 </Link>
-                <Link href="/admin/products">
-                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700">
-                    View All Products
-                  </Button>
+                <Link href="/admin/products" className="block w-full px-4 py-3 rounded-xl text-slate-200 hover:text-white hover:bg-slate-700 font-medium text-left transition-colors">
+                  View All Products
                 </Link>
-                <Link href="/">
-                  <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-slate-700">
-                    View Live Site
-                  </Button>
+                <Link href="/" className="block w-full px-4 py-3 rounded-xl text-slate-200 hover:text-white hover:bg-slate-700 font-medium text-left transition-colors">
+                  View Live Site
                 </Link>
               </div>
             </Card>

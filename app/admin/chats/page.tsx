@@ -136,7 +136,7 @@ export default function AdminChats() {
             <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-outfit)' }}>
               Support Chats
             </h1>
-            <p className="text-slate-400 text-sm">Manage customer conversations</p>
+            <p className="text-slate-300 text-sm">Manage customer conversations</p>
           </div>
         </header>
 
@@ -173,7 +173,7 @@ export default function AdminChats() {
                     {chat.status}
                   </span>
                 </div>
-                <p className="text-sm text-slate-400 truncate">
+                <p className="text-sm text-slate-300 truncate">
                   {chat.lastMessage || 'No messages'}
                 </p>
                 <p className="text-xs text-slate-400 mt-1">
@@ -197,7 +197,7 @@ export default function AdminChats() {
                     <h3 className="font-medium text-white">
                       {selectedChat?.recipientName || 'Anonymous'}
                     </h3>
-                    <p className="text-sm text-slate-400">
+                    <p className="text-sm text-slate-300">
                       {selectedChat?.recipientEmail || selectedChat?.sessionId}
                     </p>
                   </div>

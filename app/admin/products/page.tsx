@@ -8,7 +8,6 @@ import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
 import Card from '@/components/ui/Card'
-import Badge from '@/components/ui/Badge'
 
 export default function AdminProductsPage() {
   const router = useRouter()
@@ -126,7 +125,7 @@ export default function AdminProductsPage() {
             <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-outfit)' }}>
               All Products
             </h1>
-            <p className="text-slate-400 text-sm">{products?.length || 0} total products</p>
+            <p className="text-slate-300 text-sm">{products?.length || 0} total products</p>
           </div>
         </header>
 
@@ -157,7 +156,7 @@ export default function AdminProductsPage() {
                           <span className="font-medium text-white">{product.name}</span>
                         </td>
                         <td className="px-6 py-4 text-slate-300">{getSellerName(product.sellerId)}</td>
-                        <td className="px-6 py-4 text-slate-400">{product.sku}</td>
+                        <td className="px-6 py-4 text-slate-300">{product.sku}</td>
                         <td className="px-6 py-4 text-white font-medium">{product.price.toLocaleString()} DZD</td>
                         <td className="px-6 py-4">
                           <span className={`font-bold ${product.stock === 0 ? 'text-red-400' : product.stock <= 10 ? 'text-[#F7941D]' : 'text-white'}`}>
@@ -165,9 +164,14 @@ export default function AdminProductsPage() {
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <Badge variant={getStatusVariant(product.status)}>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                            product.status === 'active' ? 'bg-green-600 text-green-100' :
+                            product.status === 'low_stock' ? 'bg-yellow-600 text-yellow-100' :
+                            product.status === 'out_of_stock' ? 'bg-red-600 text-red-100' :
+                            'bg-slate-600 text-slate-200'
+                          }`}>
                             {product.status.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                          </Badge>
+                          </span>
                         </td>
                         <td className="px-6 py-4">
                           <button

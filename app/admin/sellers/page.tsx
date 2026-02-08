@@ -145,7 +145,7 @@ export default function AdminSellersPage() {
             <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-outfit)' }}>
               Manage Sellers
             </h1>
-            <p className="text-slate-400 text-sm">{sellers?.length || 0} registered sellers</p>
+            <p className="text-slate-300 text-sm">{sellers?.length || 0} registered sellers</p>
           </div>
         </header>
 
@@ -198,7 +198,7 @@ export default function AdminSellersPage() {
                             {seller.isActivated ? 'Active' : 'Inactive'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-slate-400 text-sm">
+                        <td className="px-6 py-4 text-slate-300 text-sm">
                           {new Date(seller.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4">

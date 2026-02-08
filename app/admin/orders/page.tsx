@@ -146,7 +146,7 @@ export default function AdminOrdersPage() {
             <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-outfit)' }}>
               All Orders
             </h1>
-            <p className="text-slate-400 text-sm">{orders?.length || 0} total orders</p>
+            <p className="text-slate-300 text-sm">{orders?.length || 0} total orders</p>
           </div>
         </header>
 
@@ -154,7 +154,7 @@ export default function AdminOrdersPage() {
           {/* Filters */}
           <div className="bg-slate-800 rounded-2xl border border-slate-700 p-4 mb-6">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-medium text-slate-400 mr-2">Filter:</span>
+              <span className="text-sm font-medium text-slate-200 mr-2">Filter:</span>
               <button
                 onClick={() => setFilterStatus('all')}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
@@ -209,7 +209,7 @@ export default function AdminOrdersPage() {
                         <td className="px-6 py-4">
                           <div>
                             <p className="text-white">{order.customerName}</p>
-                            <p className="text-sm text-slate-400">{order.productName}</p>
+                            <p className="text-sm text-slate-300">{order.productName}</p>
                           </div>
                         </td>
                         <td className="px-6 py-4 text-slate-300">{order.wilaya}</td>

@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
 import Card from '@/components/ui/Card'
 
 export default function AdminLoginPage() {
@@ -55,20 +54,25 @@ export default function AdminLoginPage() {
           <p className="text-slate-400 mt-2">ma5zani Management Dashboard</p>
         </div>
 
-        <Card className="p-8">
+        <Card className="p-8 bg-slate-800 border border-slate-700">
           <form onSubmit={handleLogin} className="space-y-6">
-            <Input
-              id="password"
-              type="password"
-              label="Admin Password"
-              placeholder="Enter admin password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="w-full">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-2" style={{ fontFamily: 'var(--font-outfit), sans-serif' }}>
+                Admin Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                placeholder="Enter admin password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full px-4 py-3 rounded-xl border-2 border-slate-600 bg-slate-700 text-white placeholder:text-slate-400 transition-all duration-200 hover:border-slate-500 focus:border-[#00AEEF] focus:ring-0 focus:outline-none"
+              />
+            </div>
 
             {error && (
-              <p className="text-red-500 text-sm">{error}</p>
+              <p className="text-red-400 text-sm font-medium">{error}</p>
             )}
 
             <Button type="submit" variant="primary" className="w-full" disabled={isChecking}>
