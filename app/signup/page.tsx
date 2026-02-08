@@ -6,11 +6,13 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { authClient } from '@/lib/auth-client'
 import { trackEvent, sendServerEvent, generateEventId, META_EVENTS } from '@/lib/meta-pixel'
+import { useLanguage } from '@/lib/LanguageContext'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 
 export default function SignupPage() {
   const router = useRouter()
+  const { t, language, setLanguage, dir } = useLanguage()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -23,7 +25,7 @@ export default function SignupPage() {
     setIsLoading(true)
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters')
+      setError(t.auth.signup.passwordError)
       setIsLoading(false)
       return
     }
@@ -36,7 +38,7 @@ export default function SignupPage() {
       })
 
       if (error) {
-        setError(error.message || 'Failed to sign up')
+        setError(error.message || t.auth.signup.failedSignUp)
       } else {
         // Track Lead event on successful signup
         const eventId = generateEventId();
@@ -51,7 +53,7 @@ export default function SignupPage() {
       }
     } catch (err: unknown) {
       console.error('Sign up error:', err)
-      setError('An unexpected error occurred')
+      setError(t.auth.signup.unexpectedError)
     } finally {
       setIsLoading(false)
     }
@@ -66,12 +68,12 @@ export default function SignupPage() {
       })
     } catch (err: unknown) {
       console.error('Google sign in error:', err)
-      setError('Failed to sign in with Google')
+      setError(t.auth.signup.failedGoogle)
     }
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 py-12 px-6 relative overflow-hidden">
+    <main dir={dir} className="min-h-screen bg-slate-50 py-12 px-6 relative overflow-hidden">
       {/* Background Decorations */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-[#00AEEF]/5" />
@@ -79,6 +81,16 @@ export default function SignupPage() {
       </div>
 
       <div className="max-w-md mx-auto">
+        {/* Language Toggle */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+            className="px-3 py-1.5 text-sm font-medium text-slate-600 hover:text-[#0054A6] bg-white rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
+          >
+            {language === 'ar' ? 'EN' : 'عربي'}
+          </button>
+        </div>
+
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex flex-col items-center gap-2">
@@ -101,12 +113,12 @@ export default function SignupPage() {
         <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
           <h1
             className="text-2xl font-bold text-[#0054A6] text-center mb-2"
-            style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
+            style={{ fontFamily: language === 'ar' ? 'var(--font-cairo), sans-serif' : 'var(--font-outfit), sans-serif' }}
           >
-            Create your account
+            {t.auth.signup.title}
           </h1>
           <p className="text-slate-600 text-center mb-6">
-            Start selling with ma5zani today
+            {t.auth.signup.subtitle}
           </p>
 
           {/* Google OAuth Button */}
@@ -133,7 +145,7 @@ export default function SignupPage() {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            <span className="text-slate-700 font-medium">Continue with Google</span>
+            <span className="text-slate-700 font-medium">{t.auth.signup.continueWithGoogle}</span>
           </button>
 
           <div className="relative mb-6">
@@ -141,7 +153,7 @@ export default function SignupPage() {
               <div className="w-full border-t border-slate-200" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-slate-500">or</span>
+              <span className="px-4 bg-white text-slate-500">{t.auth.signup.or}</span>
             </div>
           </div>
 
@@ -149,8 +161,8 @@ export default function SignupPage() {
             <Input
               id="name"
               type="text"
-              label="Full name"
-              placeholder="Your name"
+              label={t.auth.signup.fullName}
+              placeholder={t.auth.signup.fullNamePlaceholder}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -158,8 +170,8 @@ export default function SignupPage() {
             <Input
               id="email"
               type="email"
-              label="Email"
-              placeholder="you@example.com"
+              label={t.auth.signup.email}
+              placeholder={t.auth.signup.emailPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -167,8 +179,8 @@ export default function SignupPage() {
             <Input
               id="password"
               type="password"
-              label="Password"
-              placeholder="At least 8 characters"
+              label={t.auth.signup.password}
+              placeholder={t.auth.signup.passwordPlaceholder}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -187,21 +199,21 @@ export default function SignupPage() {
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? 'Creating account...' : 'Create account'}
+              {isLoading ? t.auth.signup.creatingAccount : t.auth.signup.createAccount}
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-600">
-            Already have an account?{' '}
+            {t.auth.signup.alreadyHaveAccount}{' '}
             <Link href="/login" className="text-[#0054A6] hover:text-[#00AEEF] font-medium">
-              Sign in
+              {t.auth.signup.signIn}
             </Link>
           </p>
         </div>
 
         <p className="mt-8 text-center text-sm text-slate-500">
           <Link href="/" className="hover:text-[#0054A6] transition-colors">
-            Back to home
+            {t.auth.signup.backToHome}
           </Link>
         </p>
       </div>
