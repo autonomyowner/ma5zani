@@ -1,7 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-const ADMIN_PASSWORD = "ma5zani2026";
+const ADMIN_PASSWORD = "csgo2026";
 
 // Verify admin password
 export const verifyAdmin = query({

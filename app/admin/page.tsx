@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
     setError('')
 
     // Simple password check
-    if (password === 'ma5zani2026') {
+    if (password === 'csgo2026') {
       sessionStorage.setItem('adminPassword', password)
       router.push('/admin/dashboard')
     } else {

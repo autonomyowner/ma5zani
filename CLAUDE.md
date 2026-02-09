@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ma5zani is an e-commerce fulfillment platform for Algerian sellers. It's a bilingual (Arabic/English) Next.js application with RTL support, using Convex for real-time backend, Clerk for authentication, and Cloudflare R2 for image storage.
+ma5zani is an e-commerce fulfillment platform for Algerian sellers. It's a trilingual (Arabic/English/French) Next.js application with RTL support, using Convex for real-time backend, Clerk for authentication, and Cloudflare R2 for image storage.
 
 **Production URL**: https://www.ma5zani.com
 
@@ -20,6 +20,8 @@ vercel --prod        # Deploy to Vercel production
 ```
 
 **Development**: Run both `npm run dev` and `npx convex dev` in separate terminals for full functionality.
+
+**Windows builds**: Use `set NODE_OPTIONS=--max-old-space-size=4096 && npm run build` to avoid segfaults during production builds.
 
 ## Architecture
 
@@ -101,11 +103,19 @@ Images are stored in Cloudflare R2, not Convex storage:
 
 ### Internationalization (i18n)
 
-- `useLanguage()` hook provides `{ language, setLanguage, t }`
-- Access translations via `t.section.key` pattern
-- All UI text in `lib/translations.ts` (Arabic and English)
-- Default language is Arabic with RTL layout
+Three languages: Arabic (ar), English (en), French (fr). `Language` type defined in `lib/translations.ts`.
+
+- `useLanguage()` hook provides `{ language, setLanguage, t, dir }`
+- Default language is Arabic with RTL layout. English and French are LTR.
 - Language persisted in localStorage as `ma5zani-lang`
+
+**Two translation patterns exist:**
+1. **Dashboard/landing pages**: `t.section.key` from the translations object (e.g., `t.dashboard.orders`)
+2. **Storefront components**: `localText(language, { ar: '...', en: '...', fr: '...' })` for inline trilingual text
+
+When adding new text, use `t.section.key` if translations are in `lib/translations.ts`, or `localText()` for storefront component inline text. All three languages must be provided.
+
+**Key files**: `lib/translations.ts` (~500+ keys per language), `lib/LanguageContext.tsx` (provider), `components/ui/LanguageToggle.tsx` (3-way toggle)
 
 ### Cart System
 
@@ -144,7 +154,7 @@ Storefronts support Meta Pixel for conversion tracking:
 
 Real-time human support chat for customers:
 - Chat functions in `convex/chat.ts` (public user functions + admin functions)
-- Admin functions require password validation (hardcoded fallback: `ma5zani2026`)
+- Admin functions require password validation (hardcoded fallback: `csgo2026`)
 - Anonymous users identified by `sessionId` stored in localStorage
 - Admin panel at `/admin/chats` for managing conversations
 
@@ -153,7 +163,7 @@ Real-time human support chat for customers:
 Password-protected admin panel at `/admin/*`:
 - Login at `/admin` with password stored in sessionStorage
 - Dashboard, sellers, orders, products, and support chats management
-- Admin password: `ma5zani2026` (also set as `ADMIN_PASSWORD` env var in Convex)
+- Admin password: `csgo2026` (also set as `ADMIN_PASSWORD` env var in Convex)
 
 ### AI Chatbot System
 
@@ -202,6 +212,7 @@ The storefront header (`components/storefront/StorefrontHeader.tsx`) uses `dir={
 - `components/ui/` - Reusable primitives (Button, Input, Card, Badge)
 - `components/dashboard/` - Seller dashboard components (DashboardLayout, Sidebar, StatsCards)
 - `components/storefront/` - Public store components (ProductCard, CartDrawer, CheckoutForm)
+- `components/storefront-builder/` - Storefront editor tabs (BrandingSection, ThemeSection, SettingsSection)
 - `components/landing/` - Landing page sections
 
 ### Environment Variables
