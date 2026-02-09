@@ -5,6 +5,7 @@ import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Doc } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 
@@ -14,7 +15,6 @@ interface SocialLinksSectionProps {
 
 export default function SocialLinksSection({ storefront }: SocialLinksSectionProps) {
   const { language } = useLanguage();
-  const isRTL = language === 'ar';
 
   const [instagram, setInstagram] = useState(storefront?.socialLinks?.instagram || '');
   const [facebook, setFacebook] = useState(storefront?.socialLinks?.facebook || '');
@@ -53,7 +53,7 @@ export default function SocialLinksSection({ storefront }: SocialLinksSectionPro
   if (!storefront) {
     return (
       <div className="text-center py-8 text-slate-500">
-        {isRTL ? 'يرجى إنشاء متجرك أولاً' : 'Please create your storefront first'}
+        {localText(language, { ar: 'يرجى إنشاء متجرك أولاً', en: 'Please create your storefront first', fr: 'Veuillez d\'abord créer votre boutique' })}
       </div>
     );
   }
@@ -61,9 +61,7 @@ export default function SocialLinksSection({ storefront }: SocialLinksSectionPro
   return (
     <div className="space-y-6 max-w-xl">
       <p className="text-slate-500 text-sm">
-        {isRTL
-          ? 'أضف روابط حساباتك على وسائل التواصل الاجتماعي لعرضها في متجرك.'
-          : 'Add your social media links to display them on your storefront.'}
+        {localText(language, { ar: 'أضف روابط حساباتك على وسائل التواصل الاجتماعي لعرضها في متجرك.', en: 'Add your social media links to display them on your storefront.', fr: 'Ajoutez vos liens de réseaux sociaux pour les afficher sur votre boutique.' })}
       </p>
 
       {/* Instagram */}
@@ -117,12 +115,8 @@ export default function SocialLinksSection({ storefront }: SocialLinksSectionPro
       {/* Save Button */}
       <Button onClick={handleSave} disabled={saving}>
         {saving
-          ? isRTL
-            ? 'جاري الحفظ...'
-            : 'Saving...'
-          : isRTL
-          ? 'حفظ الروابط'
-          : 'Save Links'}
+          ? localText(language, { ar: 'جاري الحفظ...', en: 'Saving...', fr: 'Enregistrement...' })
+          : localText(language, { ar: 'حفظ الروابط', en: 'Save Links', fr: 'Enregistrer les liens' })}
       </Button>
     </div>
   );

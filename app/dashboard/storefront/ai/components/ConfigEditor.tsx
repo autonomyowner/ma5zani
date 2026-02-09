@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import { GeneratedConfig } from '@/lib/storefront-ai';
 import Button from '@/components/ui/Button';
 
@@ -69,18 +70,18 @@ export default function ConfigEditor({ config, onConfigChange }: ConfigEditorPro
   };
 
   const colorLabels = {
-    primary: isRTL ? 'اللون الأساسي' : 'Primary',
-    accent: isRTL ? 'لون التمييز' : 'Accent',
-    background: isRTL ? 'الخلفية' : 'Background',
-    text: isRTL ? 'النص' : 'Text',
-    headerBg: isRTL ? 'خلفية الهيدر' : 'Header',
-    footerBg: isRTL ? 'خلفية الفوتر' : 'Footer',
+    primary: localText(language, { ar: 'اللون الأساسي', en: 'Primary', fr: 'Primaire' }),
+    accent: localText(language, { ar: 'لون التمييز', en: 'Accent', fr: 'Accent' }),
+    background: localText(language, { ar: 'الخلفية', en: 'Background', fr: 'Arrière-plan' }),
+    text: localText(language, { ar: 'النص', en: 'Text', fr: 'Texte' }),
+    headerBg: localText(language, { ar: 'خلفية الهيدر', en: 'Header', fr: 'En-tête' }),
+    footerBg: localText(language, { ar: 'خلفية الفوتر', en: 'Footer', fr: 'Pied de page' }),
   };
 
   const fontLabels = {
-    display: isRTL ? 'خط العناوين' : 'Display',
-    body: isRTL ? 'خط النص' : 'Body',
-    arabic: isRTL ? 'الخط العربي' : 'Arabic',
+    display: localText(language, { ar: 'خط العناوين', en: 'Display', fr: 'Affichage' }),
+    body: localText(language, { ar: 'خط النص', en: 'Body', fr: 'Corps' }),
+    arabic: localText(language, { ar: 'الخط العربي', en: 'Arabic', fr: 'Arabe' }),
   };
 
   const fontOptions = {
@@ -89,16 +90,16 @@ export default function ConfigEditor({ config, onConfigChange }: ConfigEditorPro
     arabic: ['Tajawal', 'Cairo', 'Almarai', 'Amiri', 'Changa', 'El Messiri'],
   };
 
-  const sectionLabels: Record<string, { en: string; ar: string }> = {
-    hero: { en: 'Hero Banner', ar: 'البانر الرئيسي' },
-    announcement: { en: 'Announcement', ar: 'الإعلان' },
-    featured: { en: 'Featured Products', ar: 'منتجات مميزة' },
-    features: { en: 'Features', ar: 'المميزات' },
-    categories: { en: 'Categories', ar: 'التصنيفات' },
-    grid: { en: 'Product Grid', ar: 'شبكة المنتجات' },
-    collection: { en: 'Collection', ar: 'المجموعة' },
-    newsletter: { en: 'Newsletter', ar: 'النشرة البريدية' },
-    about: { en: 'About', ar: 'حول' },
+  const sectionLabels: Record<string, { en: string; ar: string; fr: string }> = {
+    hero: { en: 'Hero Banner', ar: 'البانر الرئيسي', fr: 'Bannière principale' },
+    announcement: { en: 'Announcement', ar: 'الإعلان', fr: 'Annonce' },
+    featured: { en: 'Featured Products', ar: 'منتجات مميزة', fr: 'Produits en vedette' },
+    features: { en: 'Features', ar: 'المميزات', fr: 'Caractéristiques' },
+    categories: { en: 'Categories', ar: 'التصنيفات', fr: 'Catégories' },
+    grid: { en: 'Product Grid', ar: 'شبكة المنتجات', fr: 'Grille de produits' },
+    collection: { en: 'Collection', ar: 'المجموعة', fr: 'Collection' },
+    newsletter: { en: 'Newsletter', ar: 'النشرة البريدية', fr: 'Newsletter' },
+    about: { en: 'About', ar: 'حول', fr: 'À propos' },
   };
 
   return (
@@ -106,10 +107,10 @@ export default function ConfigEditor({ config, onConfigChange }: ConfigEditorPro
       {/* Header */}
       <div className="px-4 py-3 border-b border-slate-200">
         <h2 className="font-semibold text-slate-900">
-          {isRTL ? 'تعديل التصميم' : 'Edit Design'}
+          {localText(language, { ar: 'تعديل التصميم', en: 'Edit Design', fr: 'Modifier le design' })}
         </h2>
         <p className="text-sm text-slate-500">
-          {isRTL ? 'عدّل الألوان والخطوط والأقسام' : 'Customize colors, fonts, and sections'}
+          {localText(language, { ar: 'عدّل الألوان والخطوط والأقسام', en: 'Customize colors, fonts, and sections', fr: 'Personnalisez les couleurs, polices et sections' })}
         </p>
       </div>
 
@@ -126,16 +127,10 @@ export default function ConfigEditor({ config, onConfigChange }: ConfigEditorPro
             }`}
           >
             {tab === 'colors'
-              ? isRTL
-                ? 'الألوان'
-                : 'Colors'
+              ? localText(language, { ar: 'الألوان', en: 'Colors', fr: 'Couleurs' })
               : tab === 'fonts'
-                ? isRTL
-                  ? 'الخطوط'
-                  : 'Fonts'
-                : isRTL
-                  ? 'الأقسام'
-                  : 'Sections'}
+                ? localText(language, { ar: 'الخطوط', en: 'Fonts', fr: 'Polices' })
+                : localText(language, { ar: 'الأقسام', en: 'Sections', fr: 'Sections' })}
           </button>
         ))}
       </div>
@@ -146,9 +141,7 @@ export default function ConfigEditor({ config, onConfigChange }: ConfigEditorPro
         {activeTab === 'colors' && (
           <div className="space-y-4">
             <p className="text-sm text-slate-500 mb-4">
-              {isRTL
-                ? 'اضغط على أي لون لتغييره'
-                : 'Click any color to change it'}
+              {localText(language, { ar: 'اضغط على أي لون لتغييره', en: 'Click any color to change it', fr: 'Cliquez sur une couleur pour la modifier' })}
             </p>
             <div className="grid grid-cols-2 gap-4">
               {(Object.keys(config.colors) as Array<keyof GeneratedConfig['colors']>).map((key) => (
@@ -190,17 +183,17 @@ export default function ConfigEditor({ config, onConfigChange }: ConfigEditorPro
                   }}
                   className="font-semibold"
                 >
-                  {isRTL ? 'عينة الهيدر' : 'Header Preview'}
+                  {localText(language, { ar: 'عينة الهيدر', en: 'Header Preview', fr: 'Aperçu de l\'en-tête' })}
                 </span>
               </div>
               <p style={{ color: config.colors.text }} className="mb-2">
-                {isRTL ? 'هذا نص تجريبي لمعاينة الألوان' : 'Sample text to preview colors'}
+                {localText(language, { ar: 'هذا نص تجريبي لمعاينة الألوان', en: 'Sample text to preview colors', fr: 'Texte exemple pour prévisualiser les couleurs' })}
               </p>
               <button
                 className="px-4 py-2 rounded font-medium"
                 style={{ backgroundColor: config.colors.accent, color: '#ffffff' }}
               >
-                {isRTL ? 'زر الإجراء' : 'Action Button'}
+                {localText(language, { ar: 'زر الإجراء', en: 'Action Button', fr: 'Bouton d\'action' })}
               </button>
             </div>
           </div>
@@ -242,9 +235,7 @@ export default function ConfigEditor({ config, onConfigChange }: ConfigEditorPro
         {activeTab === 'sections' && (
           <div className="space-y-2">
             <p className="text-sm text-slate-500 mb-4">
-              {isRTL
-                ? 'اسحب لإعادة الترتيب، اضغط للتفعيل/الإيقاف'
-                : 'Drag to reorder, toggle to enable/disable'}
+              {localText(language, { ar: 'اسحب لإعادة الترتيب، اضغط للتفعيل/الإيقاف', en: 'Drag to reorder, toggle to enable/disable', fr: 'Glissez pour réorganiser, basculez pour activer/désactiver' })}
             </p>
             {config.sections
               .sort((a, b) => a.order - b.order)
@@ -315,9 +306,7 @@ export default function ConfigEditor({ config, onConfigChange }: ConfigEditorPro
       {/* Footer info */}
       <div className="px-4 py-3 border-t border-slate-200 bg-slate-50">
         <p className="text-xs text-slate-500 text-center">
-          {isRTL
-            ? 'التغييرات ستظهر في المعاينة فوراً'
-            : 'Changes will appear in preview instantly'}
+          {localText(language, { ar: 'التغييرات ستظهر في المعاينة فوراً', en: 'Changes will appear in preview instantly', fr: 'Les modifications apparaîtront instantanément dans l\'aperçu' })}
         </p>
       </div>
     </div>

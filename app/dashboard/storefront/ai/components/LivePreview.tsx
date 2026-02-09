@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import { Doc } from '@/convex/_generated/dataModel';
 import { GeneratedConfig, getGoogleFontsUrl } from '@/lib/storefront-ai';
 import Button from '@/components/ui/Button';
@@ -309,7 +310,7 @@ export default function LivePreview({ config, storefront, onEditClick }: LivePre
   ${config.sections
     .filter((s) => s.enabled)
     .sort((a, b) => a.order - b.order)
-    .map((section) => renderSection(section, config, isRTL))
+    .map((section) => renderSection(section, config, isRTL, language))
     .join('')}
 
   <div class="footer">
@@ -329,12 +330,10 @@ export default function LivePreview({ config, storefront, onEditClick }: LivePre
             {'\uD83C\uDFA8'}
           </div>
           <h3 className="text-lg font-semibold text-slate-900 mb-2">
-            {isRTL ? 'المعاينة ستظهر هنا' : 'Preview will appear here'}
+            {localText(language, { ar: 'المعاينة ستظهر هنا', en: 'Preview will appear here', fr: 'L\'aperçu apparaîtra ici' })}
           </h3>
           <p className="text-slate-500 max-w-sm">
-            {isRTL
-              ? 'استخدم المحادثة لوصف متجرك وسيظهر التصميم هنا'
-              : 'Use the chat to describe your store and the design will appear here'}
+            {localText(language, { ar: 'استخدم المحادثة لوصف متجرك وسيظهر التصميم هنا', en: 'Use the chat to describe your store and the design will appear here', fr: 'Utilisez la discussion pour décrire votre boutique et le design apparaîtra ici' })}
           </p>
         </div>
       </div>
@@ -347,12 +346,12 @@ export default function LivePreview({ config, storefront, onEditClick }: LivePre
       <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50">
         <div>
           <h2 className="font-semibold text-slate-900">
-            {isRTL ? 'معاينة التصميم' : 'Design Preview'}
+            {localText(language, { ar: 'معاينة التصميم', en: 'Design Preview', fr: 'Aperçu du design' })}
           </h2>
           <p className="text-xs text-slate-500">{config.aestheticDirection}</p>
         </div>
         <Button variant="outline" size="sm" onClick={onEditClick}>
-          {isRTL ? 'تعديل يدوي' : 'Manual Edit'}
+          {localText(language, { ar: 'تعديل يدوي', en: 'Manual Edit', fr: 'Modification manuelle' })}
         </Button>
       </div>
 
@@ -360,10 +359,10 @@ export default function LivePreview({ config, storefront, onEditClick }: LivePre
       <div className="px-4 py-2 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between text-xs">
         <div className="flex items-center gap-4">
           <span className="text-slate-500">
-            {isRTL ? 'الخط:' : 'Font:'} <span className="text-slate-700">{config.fonts.display}</span>
+            {localText(language, { ar: 'الخط:', en: 'Font:', fr: 'Police :' })} <span className="text-slate-700">{config.fonts.display}</span>
           </span>
           <span className="text-slate-500">
-            {isRTL ? 'الأقسام:' : 'Sections:'}{' '}
+            {localText(language, { ar: 'الأقسام:', en: 'Sections:', fr: 'Sections :' })}{' '}
             <span className="text-slate-700">{config.sections.filter((s) => s.enabled).length}</span>
           </span>
         </div>
@@ -398,7 +397,8 @@ export default function LivePreview({ config, storefront, onEditClick }: LivePre
 function renderSection(
   section: GeneratedConfig['sections'][0],
   config: GeneratedConfig,
-  isRTL: boolean
+  isRTL: boolean,
+  language: string
 ): string {
   const title = isRTL ? section.content.titleAr || section.content.title : section.content.title;
   const subtitle = isRTL
@@ -423,7 +423,7 @@ function renderSection(
     case 'announcement':
       return `
         <div class="announcement">
-          ${title || (isRTL ? 'شحن مجاني لجميع الولايات!' : 'Free shipping to all wilayas!')}
+          ${title || (language === 'ar' ? 'شحن مجاني لجميع الولايات!' : language === 'fr' ? 'Livraison gratuite vers toutes les wilayas !' : 'Free shipping to all wilayas!')}
         </div>
       `;
 
@@ -460,8 +460,8 @@ function renderSection(
               <div class="product-card">
                 <div class="product-image">${'\uD83D\uDCE6'}</div>
                 <div class="product-info">
-                  <div class="product-name">${isRTL ? `منتج ${i}` : `Product ${i}`}</div>
-                  <div class="product-price">2,500 ${isRTL ? 'دج' : 'DZD'}</div>
+                  <div class="product-name">${language === 'ar' ? `منتج ${i}` : language === 'fr' ? `Produit ${i}` : `Product ${i}`}</div>
+                  <div class="product-price">2,500 ${language === 'ar' ? 'دج' : 'DZD'}</div>
                 </div>
               </div>
             `
@@ -487,8 +487,8 @@ function renderSection(
           ${title ? `<h2 class="section-title">${title}</h2>` : ''}
           ${subtitle ? `<p class="section-subtitle">${subtitle}</p>` : ''}
           <div class="newsletter-form">
-            <input type="email" placeholder="${isRTL ? 'بريدك الإلكتروني' : 'Your email'}" class="newsletter-input">
-            <button class="newsletter-btn">${ctaText || (isRTL ? 'اشترك' : 'Subscribe')}</button>
+            <input type="email" placeholder="${language === 'ar' ? 'بريدك الإلكتروني' : language === 'fr' ? 'Votre email' : 'Your email'}" class="newsletter-input">
+            <button class="newsletter-btn">${ctaText || (language === 'ar' ? 'اشترك' : language === 'fr' ? 'S\'abonner' : 'Subscribe')}</button>
           </div>
         </div>
       `;

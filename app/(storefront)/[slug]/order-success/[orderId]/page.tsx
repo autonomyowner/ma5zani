@@ -7,6 +7,7 @@ import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import StorefrontLayout from '@/components/storefront/StorefrontLayout';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import { isLightColor } from '@/lib/colors';
 
 export default function OrderSuccessPage() {
@@ -26,7 +27,7 @@ export default function OrderSuccessPage() {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
         <div className="animate-pulse" style={{ color: '#f5f5dc' }}>
-          {isRTL ? 'جاري التحميل...' : 'Loading...'}
+          {localText(language, { ar: 'جاري التحميل...', en: 'Loading...', fr: 'Chargement...' })}
         </div>
       </div>
     );
@@ -38,10 +39,10 @@ export default function OrderSuccessPage() {
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0a0a' }}>
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2" style={{ color: '#f5f5dc' }}>
-            {isRTL ? 'المتجر غير موجود' : 'Store Not Found'}
+            {localText(language, { ar: 'المتجر غير موجود', en: 'Store Not Found', fr: 'Boutique introuvable' })}
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.5)' }}>
-            {isRTL ? 'هذا المتجر غير موجود أو غير منشور.' : "This store doesn't exist or is not published."}
+            {localText(language, { ar: 'هذا المتجر غير موجود أو غير منشور.', en: "This store doesn't exist or is not published.", fr: 'Cette boutique n\'existe pas ou n\'est pas publiee.' })}
           </p>
         </div>
       </div>
@@ -55,7 +56,7 @@ export default function OrderSuccessPage() {
   const cardBg = isLightBg ? '#ffffff' : '#141414';
   const borderColor = isLightBg ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
   const textMuted = isLightBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
-  const currency = isRTL ? 'دج' : 'DZD';
+  const currency = localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' });
 
   return (
     <StorefrontLayout storefront={storefront}>
@@ -85,12 +86,10 @@ export default function OrderSuccessPage() {
           className="text-2xl font-bold mb-2"
           style={{ color: textColor, fontFamily: 'var(--font-outfit), sans-serif' }}
         >
-          {isRTL ? 'تم تقديم الطلب بنجاح!' : 'Order Placed Successfully!'}
+          {localText(language, { ar: 'تم تقديم الطلب بنجاح!', en: 'Order Placed Successfully!', fr: 'Commande passee avec succes !' })}
         </h1>
         <p className="mb-8" style={{ color: textMuted }}>
-          {isRTL
-            ? 'شكراً لطلبك. سنتواصل معك قريباً لتأكيد التوصيل.'
-            : "Thank you for your order. We'll contact you soon to confirm delivery."}
+          {localText(language, { ar: 'شكراً لطلبك. سنتواصل معك قريباً لتأكيد التوصيل.', en: "Thank you for your order. We'll contact you soon to confirm delivery.", fr: 'Merci pour votre commande. Nous vous contacterons bientot pour confirmer la livraison.' })}
         </p>
 
         {/* Order Details */}
@@ -104,35 +103,35 @@ export default function OrderSuccessPage() {
             }}
           >
             <h2 className="font-semibold mb-4" style={{ color: textColor }}>
-              {isRTL ? 'تفاصيل الطلب' : 'Order Details'}
+              {localText(language, { ar: 'تفاصيل الطلب', en: 'Order Details', fr: 'Details de la commande' })}
             </h2>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between">
-                <span style={{ color: textMuted }}>{isRTL ? 'رقم الطلب' : 'Order Number'}</span>
+                <span style={{ color: textMuted }}>{localText(language, { ar: 'رقم الطلب', en: 'Order Number', fr: 'Numero de commande' })}</span>
                 <span className="font-medium" style={{ color: textColor }}>{order.orderNumber}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: textMuted }}>{isRTL ? 'المنتج' : 'Product'}</span>
+                <span style={{ color: textMuted }}>{localText(language, { ar: 'المنتج', en: 'Product', fr: 'Produit' })}</span>
                 <span className="font-medium" style={{ color: textColor }}>{order.productName}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: textMuted }}>{isRTL ? 'الكمية' : 'Quantity'}</span>
+                <span style={{ color: textMuted }}>{localText(language, { ar: 'الكمية', en: 'Quantity', fr: 'Quantite' })}</span>
                 <span className="font-medium" style={{ color: textColor }}>{order.quantity}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: textMuted }}>{isRTL ? 'المجموع' : 'Total'}</span>
+                <span style={{ color: textMuted }}>{localText(language, { ar: 'المجموع', en: 'Total', fr: 'Total' })}</span>
                 <span className="font-bold" style={{ color: accentColor }}>
                   {order.amount.toLocaleString()} {currency}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: textMuted }}>{isRTL ? 'التوصيل إلى' : 'Delivery to'}</span>
+                <span style={{ color: textMuted }}>{localText(language, { ar: 'التوصيل إلى', en: 'Delivery to', fr: 'Livraison a' })}</span>
                 <span className="font-medium" style={{ color: textColor }}>{order.wilaya}</span>
               </div>
               <div className="flex justify-between">
-                <span style={{ color: textMuted }}>{isRTL ? 'الدفع' : 'Payment'}</span>
+                <span style={{ color: textMuted }}>{localText(language, { ar: 'الدفع', en: 'Payment', fr: 'Paiement' })}</span>
                 <span className="font-medium" style={{ color: textColor }}>
-                  {isRTL ? 'الدفع عند الاستلام' : 'Cash on Delivery'}
+                  {localText(language, { ar: 'الدفع عند الاستلام', en: 'Cash on Delivery', fr: 'Paiement a la livraison' })}
                 </span>
               </div>
             </div>
@@ -148,7 +147,7 @@ export default function OrderSuccessPage() {
             color: isLightColor(accentColor) ? '#0a0a0a' : '#ffffff',
           }}
         >
-          {isRTL ? 'تابع التسوق' : 'Continue Shopping'}
+          {localText(language, { ar: 'تابع التسوق', en: 'Continue Shopping', fr: 'Continuer les achats' })}
         </Link>
       </div>
     </StorefrontLayout>

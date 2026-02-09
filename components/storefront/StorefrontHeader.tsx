@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/CartContext';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText, Language } from '@/lib/translations';
 
 interface StorefrontHeaderProps {
   slug: string;
@@ -87,7 +88,7 @@ export default function StorefrontHeader({
               aria-label="Home"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="md:hidden"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
-              <span className="hidden md:inline text-xs tracking-[0.2em] uppercase">{isRTL ? 'الرئيسية' : 'Home'}</span>
+              <span className="hidden md:inline text-xs tracking-[0.2em] uppercase">{localText(language, { ar: 'الرئيسية', en: 'Home', fr: 'Accueil' })}</span>
             </Link>
             <Link
               href={`/${slug}#products`}
@@ -96,7 +97,7 @@ export default function StorefrontHeader({
               aria-label="Products"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="md:hidden"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-              <span className="hidden md:inline text-xs tracking-[0.2em] uppercase">{isRTL ? 'المنتجات' : 'Products'}</span>
+              <span className="hidden md:inline text-xs tracking-[0.2em] uppercase">{localText(language, { ar: 'المنتجات', en: 'Products', fr: 'Produits' })}</span>
             </Link>
           </div>
 
@@ -138,11 +139,14 @@ export default function StorefrontHeader({
 
             {/* Language Toggle */}
             <button
-              onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+              onClick={() => {
+                const cycle: Record<Language, Language> = { ar: 'en', en: 'fr', fr: 'ar' };
+                setLanguage(cycle[language]);
+              }}
               className="text-[11px] md:text-xs tracking-[0.1em] md:tracking-[0.15em] uppercase transition-colors duration-300 hover:opacity-100 whitespace-nowrap flex-shrink-0"
               style={{ color: textMuted }}
             >
-              {language === 'ar' ? 'EN' : 'AR'}
+              {localText(language, { ar: 'EN', en: 'FR', fr: 'AR' })}
             </button>
 
             {/* Cart Button */}
@@ -156,7 +160,7 @@ export default function StorefrontHeader({
                 className="hidden md:inline text-xs tracking-[0.2em] uppercase transition-colors duration-300 group-hover:opacity-100"
                 style={{ color: textMuted }}
               >
-                {isRTL ? 'السلة' : 'Cart'}
+                {localText(language, { ar: 'السلة', en: 'Cart', fr: 'Panier' })}
               </span>
               {totalItems > 0 && (
                 <span

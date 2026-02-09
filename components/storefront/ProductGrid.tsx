@@ -2,6 +2,7 @@
 
 import { Doc } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import ProductCard from './ProductCard';
 
 interface ProductGridProps {
@@ -52,7 +53,7 @@ export default function ProductGrid({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => onSearchChange(e.target.value)}
-                  placeholder={isRTL ? 'ابحث عن منتج...' : 'Search products...'}
+                  placeholder={localText(language, { ar: 'ابحث عن منتج...', en: 'Search products...', fr: 'Rechercher des produits...' })}
                   className="w-full px-5 py-3 text-sm rounded-full outline-none transition-all duration-200"
                   style={{
                     backgroundColor: isLightBg ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.08)',
@@ -79,8 +80,8 @@ export default function ProductGrid({
           <div className="text-center">
             <p className="text-sm tracking-[0.2em] uppercase" style={{ color: textMuted }}>
               {searchQuery
-                ? (isRTL ? 'لا توجد نتائج' : 'No products found')
-                : (isRTL ? 'لا توجد منتجات متاحة' : 'No products available')}
+                ? localText(language, { ar: 'لا توجد نتائج', en: 'No products found', fr: 'Aucun produit trouve' })
+                : localText(language, { ar: 'لا توجد منتجات متاحة', en: 'No products available', fr: 'Aucun produit disponible' })}
             </p>
           </div>
         </div>
@@ -109,7 +110,7 @@ export default function ProductGrid({
               className="text-xs tracking-[0.4em] uppercase mb-4"
               style={{ color: accentColor }}
             >
-              {isRTL ? 'تشكيلتنا' : 'Our Collection'}
+              {localText(language, { ar: 'تشكيلتنا', en: 'Our Collection', fr: 'Notre collection' })}
             </p>
             <h2
               className="text-3xl md:text-4xl lg:text-5xl font-light"
@@ -135,7 +136,7 @@ export default function ProductGrid({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                placeholder={isRTL ? 'ابحث عن منتج...' : 'Search products...'}
+                placeholder={localText(language, { ar: 'ابحث عن منتج...', en: 'Search products...', fr: 'Rechercher des produits...' })}
                 className="w-full px-5 py-3 text-sm rounded-full outline-none transition-all duration-200"
                 style={{
                   backgroundColor: isLightBg ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.08)',

@@ -5,6 +5,7 @@ import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
 import { useLanguage } from '@/lib/LanguageContext'
+import { localText } from '@/lib/translations'
 
 interface ChatbotWidgetProps {
   storefrontSlug: string
@@ -204,7 +205,7 @@ export default function ChatbotWidget({ storefrontSlug, primaryColor, currentPro
               <div>
                 <h3 className="text-white font-semibold">{chatbot.name}</h3>
                 <p className="text-white/80 text-xs">
-                  {language === 'ar' ? 'متصل الآن' : 'Online now'}
+                  {localText(language, { ar: 'متصل الآن', en: 'Online now', fr: 'En ligne' })}
                 </p>
               </div>
             </div>
@@ -224,7 +225,7 @@ export default function ChatbotWidget({ storefrontSlug, primaryColor, currentPro
             {isLoading ? (
               <div className="flex justify-center py-8">
                 <div className="animate-pulse text-slate-400">
-                  {language === 'ar' ? 'جاري التحميل...' : 'Loading...'}
+                  {localText(language, { ar: 'جاري التحميل...', en: 'Loading...', fr: 'Chargement...' })}
                 </div>
               </div>
             ) : (
@@ -247,7 +248,7 @@ export default function ChatbotWidget({ storefrontSlug, primaryColor, currentPro
                     >
                       {msg.sender === 'seller' && (
                         <p className="text-[10px] text-slate-400 mb-1">
-                          {language === 'ar' ? 'فريق الدعم' : 'Support Team'}
+                          {localText(language, { ar: 'فريق الدعم', en: 'Support Team', fr: 'Equipe support' })}
                         </p>
                       )}
                       <p className="text-sm whitespace-pre-wrap">{msg.content}</p>

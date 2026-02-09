@@ -7,6 +7,7 @@ import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { getR2PublicUrl } from '@/lib/r2';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import { useCart } from '@/lib/CartContext';
 import StorefrontLayout from '@/components/storefront/StorefrontLayout';
 import WilayaSelect from '@/components/storefront/WilayaSelect';
@@ -78,7 +79,7 @@ export default function ProductDetailPage() {
     setError('');
 
     if (!customerName || !customerPhone || !wilaya || !deliveryAddress) {
-      setError(isRTL ? 'يرجى ملء جميع الحقول' : 'Please fill all fields');
+      setError(localText(language, { ar: 'يرجى ملء جميع الحقول', en: 'Please fill all fields', fr: 'Veuillez remplir tous les champs' }));
       return;
     }
 
@@ -123,7 +124,7 @@ export default function ProductDetailPage() {
       router.push(`/${slug}/order-success/${result.orderIds[0]}`);
     } catch (err) {
       console.error('Order error:', err);
-      setError(err instanceof Error ? err.message : (isRTL ? 'فشل إرسال الطلب' : 'Failed to place order'));
+      setError(err instanceof Error ? err.message : localText(language, { ar: 'فشل إرسال الطلب', en: 'Failed to place order', fr: 'Echec de la commande' }));
     } finally {
       setSubmitting(false);
     }
@@ -168,16 +169,16 @@ export default function ProductDetailPage() {
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center px-4">
           <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mb-2">
-            {isRTL ? 'المنتج غير موجود' : 'Product Not Found'}
+            {localText(language, { ar: 'المنتج غير موجود', en: 'Product Not Found', fr: 'Produit introuvable' })}
           </h1>
           <p className="text-slate-500 mb-6">
-            {isRTL ? 'هذا المنتج غير متوفر' : 'This product doesn\'t exist or is not available.'}
+            {localText(language, { ar: 'هذا المنتج غير متوفر', en: "This product doesn't exist or is not available.", fr: "Ce produit n'existe pas ou n'est pas disponible." })}
           </p>
           <Link
             href={`/${slug}`}
             className="inline-block px-6 py-3 bg-[#0054A6] text-white rounded-xl font-medium hover:opacity-90"
           >
-            {isRTL ? 'العودة للمتجر' : 'Back to Store'}
+            {localText(language, { ar: 'العودة للمتجر', en: 'Back to Store', fr: 'Retour a la boutique' })}
           </Link>
         </div>
       </div>
@@ -226,7 +227,7 @@ export default function ProductDetailPage() {
           <li>/</li>
           {category && (
             <>
-              <li>{isRTL ? category.nameAr : category.name}</li>
+              <li>{language === 'ar' ? category.nameAr : category.name}</li>
               <li>/</li>
             </>
           )}
@@ -240,7 +241,7 @@ export default function ProductDetailPage() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          <span className="text-sm">{isRTL ? 'العودة' : 'Back'}</span>
+          <span className="text-sm">{localText(language, { ar: 'العودة', en: 'Back', fr: 'Retour' })}</span>
         </Link>
       </div>
 
@@ -276,7 +277,7 @@ export default function ProductDetailPage() {
                 className="absolute top-3 left-3 sm:top-4 sm:left-4 px-2 py-1 sm:px-3 sm:py-1.5 text-xs sm:text-sm font-semibold text-white rounded-lg"
                 style={{ backgroundColor: accentColor }}
               >
-                {isRTL ? 'تخفيض' : 'Sale'}
+                {localText(language, { ar: 'تخفيض', en: 'Sale', fr: 'Promo' })}
               </span>
             )}
 
@@ -284,7 +285,7 @@ export default function ProductDetailPage() {
             {isOutOfStock && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                 <span className="px-4 py-2 sm:px-6 sm:py-3 bg-white text-slate-900 font-semibold rounded-lg text-sm sm:text-lg">
-                  {isRTL ? 'نفذ المخزون' : 'Out of Stock'}
+                  {localText(language, { ar: 'نفذ المخزون', en: 'Out of Stock', fr: 'Rupture de stock' })}
                 </span>
               </div>
             )}
@@ -356,7 +357,7 @@ export default function ProductDetailPage() {
           {/* Category */}
           {category && (
             <p className="text-xs sm:text-sm mb-1 sm:mb-2" style={{ color: textMuted }}>
-              {isRTL ? category.nameAr : category.name}
+              {language === 'ar' ? category.nameAr : category.name}
             </p>
           )}
 
@@ -371,7 +372,7 @@ export default function ProductDetailPage() {
               className="text-2xl sm:text-3xl font-bold"
               style={{ color: accentColor }}
             >
-              {displayPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+              {displayPrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
             </span>
             {isOnSale && (
               <span className="text-base sm:text-xl text-slate-400 line-through">
@@ -393,10 +394,10 @@ export default function ProductDetailPage() {
             />
             <span className="text-xs sm:text-sm" style={{ color: textMuted }}>
               {isOutOfStock
-                ? (isRTL ? 'نفذ المخزون' : 'Out of stock')
+                ? localText(language, { ar: 'نفذ المخزون', en: 'Out of stock', fr: 'Rupture de stock' })
                 : product.status === 'low_stock'
-                ? (isRTL ? `متبقي ${product.stock} فقط` : `Only ${product.stock} left`)
-                : (isRTL ? `${product.stock} متوفر` : `${product.stock} in stock`)}
+                ? localText(language, { ar: `متبقي ${product.stock} فقط`, en: `Only ${product.stock} left`, fr: `Plus que ${product.stock} en stock` })
+                : localText(language, { ar: `${product.stock} متوفر`, en: `${product.stock} in stock`, fr: `${product.stock} en stock` })}
             </span>
           </div>
 
@@ -404,7 +405,7 @@ export default function ProductDetailPage() {
           {product.description && (
             <div className="mb-6 sm:mb-8">
               <h3 className="font-medium mb-2 text-sm sm:text-base" style={{ color: txtColor }}>
-                {isRTL ? 'الوصف' : 'Description'}
+                {localText(language, { ar: 'الوصف', en: 'Description', fr: 'Description' })}
               </h3>
               <p className="leading-relaxed text-sm sm:text-base" style={{ color: textMuted }}>{product.description}</p>
             </div>
@@ -418,7 +419,7 @@ export default function ProductDetailPage() {
               style={{ backgroundColor: formBg, border: `1px solid ${borderClr}` }}
             >
               <h3 className="font-semibold mb-4 text-sm sm:text-base" style={{ color: txtColor }}>
-                {isRTL ? 'اطلب الآن' : 'Order Now'}
+                {localText(language, { ar: 'اطلب الآن', en: 'Order Now', fr: 'Commander maintenant' })}
               </h3>
 
               {error && (
@@ -431,7 +432,7 @@ export default function ProductDetailPage() {
                 {/* Quantity */}
                 <div>
                   <label className="block text-xs sm:text-sm font-medium mb-1" style={{ color: textMuted }}>
-                    {isRTL ? 'الكمية' : 'Quantity'}
+                    {localText(language, { ar: 'الكمية', en: 'Quantity', fr: 'Quantite' })}
                   </label>
                   <div className="flex items-center rounded-xl w-fit" style={{ border: `1px solid ${borderClr}`, backgroundColor: inputBg }}>
                     <button
@@ -457,7 +458,7 @@ export default function ProductDetailPage() {
                 {/* Customer Name */}
                 <div>
                   <label className="block text-xs sm:text-sm font-medium mb-1" style={{ color: textMuted }}>
-                    {isRTL ? 'الاسم الكامل *' : 'Full Name *'}
+                    {localText(language, { ar: 'الاسم الكامل *', en: 'Full Name *', fr: 'Nom complet *' })}
                   </label>
                   <input
                     type="text"
@@ -465,7 +466,7 @@ export default function ProductDetailPage() {
                     onChange={(e) => setCustomerName(e.target.value)}
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-current/20"
                     style={{ backgroundColor: inputBg, border: `1px solid ${borderClr}`, color: inputText }}
-                    placeholder={isRTL ? 'اسمك الكامل' : 'Your full name'}
+                    placeholder={localText(language, { ar: 'اسمك الكامل', en: 'Your full name', fr: 'Votre nom complet' })}
                     required
                   />
                 </div>
@@ -473,7 +474,7 @@ export default function ProductDetailPage() {
                 {/* Phone */}
                 <div>
                   <label className="block text-xs sm:text-sm font-medium mb-1" style={{ color: textMuted }}>
-                    {isRTL ? 'رقم الهاتف *' : 'Phone Number *'}
+                    {localText(language, { ar: 'رقم الهاتف *', en: 'Phone Number *', fr: 'Numero de telephone *' })}
                   </label>
                   <input
                     type="tel"
@@ -490,7 +491,7 @@ export default function ProductDetailPage() {
                 {/* Wilaya */}
                 <div>
                   <label className="block text-xs sm:text-sm font-medium mb-1" style={{ color: textMuted }}>
-                    {isRTL ? 'الولاية *' : 'Wilaya *'}
+                    {localText(language, { ar: 'الولاية *', en: 'Wilaya *', fr: 'Wilaya *' })}
                   </label>
                   <WilayaSelect
                     value={wilaya}
@@ -504,14 +505,14 @@ export default function ProductDetailPage() {
                 {/* Address */}
                 <div>
                   <label className="block text-xs sm:text-sm font-medium mb-1" style={{ color: textMuted }}>
-                    {isRTL ? 'عنوان التوصيل *' : 'Delivery Address *'}
+                    {localText(language, { ar: 'عنوان التوصيل *', en: 'Delivery Address *', fr: 'Adresse de livraison *' })}
                   </label>
                   <textarea
                     value={deliveryAddress}
                     onChange={(e) => setDeliveryAddress(e.target.value)}
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-current/20"
                     style={{ backgroundColor: inputBg, border: `1px solid ${borderClr}`, color: inputText }}
-                    placeholder={isRTL ? 'الشارع، المبنى، الشقة...' : 'Street, building, apartment...'}
+                    placeholder={localText(language, { ar: 'الشارع، المبنى، الشقة...', en: 'Street, building, apartment...', fr: 'Rue, batiment, appartement...' })}
                     rows={2}
                     required
                   />
@@ -521,14 +522,14 @@ export default function ProductDetailPage() {
                 <div className="pt-3 sm:pt-4" style={{ borderTop: `1px solid ${borderClr}` }}>
                   <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <span className="text-sm sm:text-base" style={{ color: textMuted }}>
-                      {isRTL ? 'المجموع' : 'Total'}
+                      {localText(language, { ar: 'المجموع', en: 'Total', fr: 'Total' })}
                     </span>
                     <span className="text-lg sm:text-xl font-bold" style={{ color: accentColor }}>
-                      {totalPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                      {totalPrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm mb-3 sm:mb-4" style={{ color: textMuted }}>
-                    {isRTL ? 'الدفع عند الاستلام' : 'Cash on delivery (COD)'}
+                    {localText(language, { ar: 'الدفع عند الاستلام', en: 'Cash on delivery (COD)', fr: 'Paiement a la livraison' })}
                   </p>
                   <button
                     type="submit"
@@ -537,8 +538,8 @@ export default function ProductDetailPage() {
                     style={{ backgroundColor: accentColor }}
                   >
                     {submitting
-                      ? (isRTL ? 'جاري الإرسال...' : 'Placing Order...')
-                      : (isRTL ? 'اشتري الآن' : 'Buy Now')}
+                      ? localText(language, { ar: 'جاري الإرسال...', en: 'Placing Order...', fr: 'Commande en cours...' })
+                      : localText(language, { ar: 'اشتري الآن', en: 'Buy Now', fr: 'Acheter maintenant' })}
                   </button>
                 </div>
               </form>
@@ -546,14 +547,14 @@ export default function ProductDetailPage() {
           ) : (
             <div className="rounded-xl sm:rounded-2xl p-6 text-center" style={{ backgroundColor: formBg, border: `1px solid ${borderClr}` }}>
               <p className="mb-4 text-sm sm:text-base" style={{ color: textMuted }}>
-                {isRTL ? 'هذا المنتج غير متوفر حالياً' : 'This product is currently out of stock.'}
+                {localText(language, { ar: 'هذا المنتج غير متوفر حالياً', en: 'This product is currently out of stock.', fr: 'Ce produit est actuellement en rupture de stock.' })}
               </p>
               <Link
                 href={`/${slug}`}
                 className="inline-block px-6 py-3 text-white rounded-xl font-medium hover:opacity-90 text-sm sm:text-base"
                 style={{ backgroundColor: accentColor }}
               >
-                {isRTL ? 'تصفح منتجات أخرى' : 'Browse Other Products'}
+                {localText(language, { ar: 'تصفح منتجات أخرى', en: 'Browse Other Products', fr: "Voir d'autres produits" })}
               </Link>
             </div>
           )}
@@ -564,7 +565,7 @@ export default function ProductDetailPage() {
       {relatedProducts.length > 0 && (
         <section className="pt-8 sm:pt-12 px-4 sm:px-0" style={{ borderTop: `1px solid ${borderClr}` }}>
           <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6" style={{ color: txtColor }}>
-            {isRTL ? 'منتجات مشابهة' : 'You may also like'}
+            {localText(language, { ar: 'منتجات مشابهة', en: 'You may also like', fr: 'Vous aimerez aussi' })}
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
             {relatedProducts.map((relatedProduct) => {
@@ -598,7 +599,7 @@ export default function ProductDetailPage() {
                           className="absolute top-2 left-2 px-1.5 py-0.5 text-[10px] sm:text-xs font-semibold text-white rounded"
                           style={{ backgroundColor: accentColor }}
                         >
-                          {isRTL ? 'تخفيض' : 'Sale'}
+                          {localText(language, { ar: 'تخفيض', en: 'Sale', fr: 'Promo' })}
                         </span>
                       )}
                     </div>
@@ -606,7 +607,7 @@ export default function ProductDetailPage() {
                       <h3 className="font-medium text-xs sm:text-sm truncate" style={{ color: txtColor }}>{relatedProduct.name}</h3>
                       <div className="flex items-center gap-1 sm:gap-2 mt-1">
                         <span className="text-xs sm:text-sm font-semibold" style={{ color: accentColor }}>
-                          {relatedDisplayPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                          {relatedDisplayPrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
                         </span>
                         {relatedIsOnSale && (
                           <span className="text-[10px] sm:text-xs text-slate-400 line-through">
@@ -635,7 +636,7 @@ export default function ProductDetailPage() {
           <div className="flex items-center justify-between px-4 py-3">
             <div>
               <p className="text-lg font-bold" style={{ color: accentColor }}>
-                {displayPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                {displayPrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
               </p>
               {isOnSale && (
                 <p className="text-xs text-slate-400 line-through">
@@ -661,8 +662,8 @@ export default function ProductDetailPage() {
               }}
             >
               {getItemQuantity(product._id) > 0
-                ? (isRTL ? `في السلة (${getItemQuantity(product._id)})` : `In Cart (${getItemQuantity(product._id)})`)
-                : (isRTL ? 'أضف للسلة' : 'Add to Cart')}
+                ? localText(language, { ar: `في السلة (${getItemQuantity(product._id)})`, en: `In Cart (${getItemQuantity(product._id)})`, fr: `Dans le panier (${getItemQuantity(product._id)})` })
+                : localText(language, { ar: 'أضف للسلة', en: 'Add to Cart', fr: 'Ajouter au panier' })}
             </button>
           </div>
         </div>

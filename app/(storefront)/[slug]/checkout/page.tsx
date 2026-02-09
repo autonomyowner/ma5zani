@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation';
 import { useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import StorefrontLayout from '@/components/storefront/StorefrontLayout';
 import CheckoutForm from '@/components/storefront/CheckoutForm';
 
@@ -64,10 +65,10 @@ export default function CheckoutPage() {
             className="text-2xl font-light mb-4"
             style={{ color: '#f5f5dc' }}
           >
-            {isRTL ? 'المتجر غير موجود' : 'Store Not Found'}
+            {localText(language, { ar: 'المتجر غير موجود', en: 'Store Not Found', fr: 'Boutique introuvable' })}
           </h1>
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            {isRTL ? 'هذا المتجر غير موجود أو غير منشور' : "This store doesn't exist or is not published."}
+            {localText(language, { ar: 'هذا المتجر غير موجود أو غير منشور', en: "This store doesn't exist or is not published.", fr: 'Cette boutique n\'existe pas ou n\'est pas publiee.' })}
           </p>
         </div>
       </div>

@@ -70,6 +70,15 @@ export function SupportChat() {
       online: 'Online',
       voiceCallActive: 'Voice call active...',
     },
+    fr: {
+      title: 'Support Ma5zani',
+      placeholder: 'Tapez votre message...',
+      send: 'Envoyer',
+      greeting: "Bonjour ! Comment pouvons-nous vous aider aujourd'hui ? Notre équipe vous répondra dans les plus brefs délais.",
+      waiting: 'En attente de réponse...',
+      online: 'En ligne',
+      voiceCallActive: 'Appel vocal en cours...',
+    },
   }
 
   const texts = t[language]

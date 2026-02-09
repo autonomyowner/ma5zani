@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import Button from '@/components/ui/Button';
 import BrandingSection from './BrandingSection';
 import ThemeSection from './ThemeSection';
@@ -19,13 +20,12 @@ export default function StorefrontEditor() {
   const storefront = useQuery(api.storefronts.getMyStorefront);
   const publishStorefront = useMutation(api.storefronts.publishStorefront);
 
-  const isRTL = language === 'ar';
 
-  const tabs: { id: Tab; labelEn: string; labelAr: string }[] = [
-    { id: 'branding', labelEn: 'Branding', labelAr: 'العلامة التجارية' },
-    { id: 'theme', labelEn: 'Theme', labelAr: 'المظهر' },
-    { id: 'social', labelEn: 'Social Links', labelAr: 'روابط التواصل' },
-    { id: 'settings', labelEn: 'Settings', labelAr: 'الإعدادات' },
+  const tabs: { id: Tab; labelEn: string; labelAr: string; labelFr: string }[] = [
+    { id: 'branding', labelEn: 'Branding', labelAr: 'العلامة التجارية', labelFr: 'Marque' },
+    { id: 'theme', labelEn: 'Theme', labelAr: 'المظهر', labelFr: 'Thème' },
+    { id: 'social', labelEn: 'Social Links', labelAr: 'روابط التواصل', labelFr: 'Réseaux sociaux' },
+    { id: 'settings', labelEn: 'Settings', labelAr: 'الإعدادات', labelFr: 'Paramètres' },
   ];
 
   const handlePublish = async () => {
@@ -56,7 +56,7 @@ export default function StorefrontEditor() {
             className="text-2xl font-bold text-slate-900"
             style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
           >
-            {isRTL ? 'منشئ المتجر' : 'Storefront Builder'}
+            {localText(language, { ar: 'منشئ المتجر', en: 'Storefront Builder', fr: 'Constructeur de boutique' })}
           </h1>
           {storefront && (
             <p className="text-slate-500 mt-1">
@@ -73,19 +73,15 @@ export default function StorefrontEditor() {
               rel="noopener noreferrer"
               className="text-[#0054A6] hover:underline text-sm"
             >
-              {isRTL ? 'معاينة' : 'Preview'}
+              {localText(language, { ar: 'معاينة', en: 'Preview', fr: 'Aperçu' })}
             </a>
             <Button
               onClick={handlePublish}
               variant={storefront.isPublished ? 'secondary' : 'primary'}
             >
               {storefront.isPublished
-                ? isRTL
-                  ? 'إلغاء النشر'
-                  : 'Unpublish'
-                : isRTL
-                ? 'نشر المتجر'
-                : 'Publish'}
+                ? localText(language, { ar: 'إلغاء النشر', en: 'Unpublish', fr: 'Dépublier' })
+                : localText(language, { ar: 'نشر المتجر', en: 'Publish', fr: 'Publier' })}
             </Button>
           </div>
         )}
@@ -106,12 +102,8 @@ export default function StorefrontEditor() {
             }`}
           ></span>
           {storefront.isPublished
-            ? isRTL
-              ? 'منشور'
-              : 'Published'
-            : isRTL
-            ? 'مسودة'
-            : 'Draft'}
+            ? localText(language, { ar: 'منشور', en: 'Published', fr: 'Publié' })
+            : localText(language, { ar: 'مسودة', en: 'Draft', fr: 'Brouillon' })}
         </div>
       )}
 
@@ -128,7 +120,7 @@ export default function StorefrontEditor() {
                   : 'border-transparent text-slate-500 hover:text-slate-700'
               }`}
             >
-              {isRTL ? tab.labelAr : tab.labelEn}
+              {language === 'ar' ? tab.labelAr : language === 'fr' ? tab.labelFr : tab.labelEn}
             </button>
           ))}
         </nav>

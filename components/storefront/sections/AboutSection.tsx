@@ -2,6 +2,7 @@
 
 import { getR2PublicUrl } from '@/lib/r2';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 
 interface AboutSectionProps {
   content: {
@@ -90,7 +91,7 @@ export default function AboutSection({ content, primaryColor, accentColor = '#c9
               className="text-xs tracking-[0.4em] uppercase mb-6"
               style={{ color: accentColor }}
             >
-              {isRTL ? 'قصتنا' : 'Our Story'}
+              {localText(language, { ar: 'قصتنا', en: 'Our Story', fr: 'Notre histoire' })}
             </p>
 
             {/* Title */}
@@ -135,7 +136,7 @@ export default function AboutSection({ content, primaryColor, accentColor = '#c9
             >
               <div className="h-px w-8" style={{ backgroundColor: borderColor }} />
               <span className="text-xs tracking-[0.3em] uppercase">
-                {isRTL ? 'الجزائر' : 'Est. Algeria'}
+                {localText(language, { ar: 'الجزائر', en: 'Est. Algeria', fr: 'Est. Algerie' })}
               </span>
               <div className="h-px w-8" style={{ backgroundColor: borderColor }} />
             </div>

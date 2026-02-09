@@ -6,6 +6,7 @@ import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useCart } from '@/lib/CartContext';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import { getR2PublicUrl } from '@/lib/r2';
 import WilayaSelect from './WilayaSelect';
 
@@ -74,19 +75,19 @@ export default function CheckoutForm({
     setError('');
 
     if (!customerName || !customerPhone || !wilaya || !deliveryAddress) {
-      setError(isRTL ? 'يرجى ملء جميع الحقول' : 'Please fill all fields');
+      setError(localText(language, { ar: 'يرجى ملء جميع الحقول', en: 'Please fill all fields', fr: 'Veuillez remplir tous les champs' }));
       return;
     }
 
     // Algerian phone validation: must start with 05, 06, or 07 and be 10 digits
     const phoneDigits = customerPhone.replace(/\s+/g, '');
     if (!/^0[567]\d{8}$/.test(phoneDigits)) {
-      setError(isRTL ? 'رقم الهاتف غير صالح (يجب أن يبدأ بـ 05/06/07 ويتكون من 10 أرقام)' : 'Invalid phone number (must start with 05/06/07 and be 10 digits)');
+      setError(localText(language, { ar: 'رقم الهاتف غير صالح (يجب أن يبدأ بـ 05/06/07 ويتكون من 10 أرقام)', en: 'Invalid phone number (must start with 05/06/07 and be 10 digits)', fr: 'Numero de telephone invalide (doit commencer par 05/06/07 et contenir 10 chiffres)' }));
       return;
     }
 
     if (items.length === 0) {
-      setError(isRTL ? 'سلتك فارغة' : 'Your cart is empty');
+      setError(localText(language, { ar: 'سلتك فارغة', en: 'Your cart is empty', fr: 'Votre panier est vide' }));
       return;
     }
 
@@ -130,7 +131,7 @@ export default function CheckoutForm({
       router.push(`/${slug}/order-success/${result.orderIds[0]}`);
     } catch (err) {
       console.error('Order error:', err);
-      setError(err instanceof Error ? err.message : (isRTL ? 'فشل إرسال الطلب' : 'Failed to place order'));
+      setError(err instanceof Error ? err.message : localText(language, { ar: 'فشل إرسال الطلب', en: 'Failed to place order', fr: 'Echec de la commande' }));
     } finally {
       setSubmitting(false);
     }
@@ -147,7 +148,7 @@ export default function CheckoutForm({
             className="text-sm tracking-[0.2em] uppercase mb-8"
             style={{ color: textMuted }}
           >
-            {isRTL ? 'سلتك فارغة' : 'Your cart is empty'}
+            {localText(language, { ar: 'سلتك فارغة', en: 'Your cart is empty', fr: 'Votre panier est vide' })}
           </p>
           <a
             href={`/${slug}`}
@@ -157,7 +158,7 @@ export default function CheckoutForm({
               color: isLightColor(accentColor) ? '#0a0a0a' : '#ffffff',
             }}
           >
-            {isRTL ? 'تابع التسوق' : 'Continue Shopping'}
+            {localText(language, { ar: 'تابع التسوق', en: 'Continue Shopping', fr: 'Continuer les achats' })}
           </a>
         </div>
       </section>
@@ -176,7 +177,7 @@ export default function CheckoutForm({
             className="text-xs tracking-[0.4em] uppercase mb-4"
             style={{ color: accentColor }}
           >
-            {isRTL ? 'إتمام الطلب' : 'Checkout'}
+            {localText(language, { ar: 'إتمام الطلب', en: 'Checkout', fr: 'Commande' })}
           </p>
           <h1
             className="text-3xl md:text-4xl lg:text-5xl font-light"
@@ -185,7 +186,7 @@ export default function CheckoutForm({
               fontFamily: 'var(--font-display, serif)',
             }}
           >
-            {isRTL ? 'تفاصيل الطلب' : 'Order Details'}
+            {localText(language, { ar: 'تفاصيل الطلب', en: 'Order Details', fr: 'Details de la commande' })}
           </h1>
           <div
             className="h-px mx-auto mt-8"
@@ -209,7 +210,7 @@ export default function CheckoutForm({
               className="text-xs tracking-[0.3em] uppercase mb-8"
               style={{ color: textMuted }}
             >
-              {isRTL ? 'ملخص الطلب' : 'Order Summary'}
+              {localText(language, { ar: 'ملخص الطلب', en: 'Order Summary', fr: 'Resume de la commande' })}
             </h2>
 
             <div className="space-y-6 mb-8">
@@ -249,10 +250,10 @@ export default function CheckoutForm({
                       {item.name}
                     </h3>
                     <p className="text-xs mb-2" style={{ color: textMuted }}>
-                      {isRTL ? `الكمية: ${item.quantity}` : `Qty: ${item.quantity}`}
+                      {localText(language, { ar: `الكمية: ${item.quantity}`, en: `Qty: ${item.quantity}`, fr: `Qte: ${item.quantity}` })}
                     </p>
                     <p className="text-sm font-medium" style={{ color: accentColor }}>
-                      {((item.salePrice ?? item.price) * item.quantity).toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                      {((item.salePrice ?? item.price) * item.quantity).toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
                     </p>
                   </div>
                 </div>
@@ -265,18 +266,18 @@ export default function CheckoutForm({
                 className="text-xs tracking-[0.15em] uppercase"
                 style={{ color: textMuted }}
               >
-                {isRTL ? 'المجموع' : 'Total'}
+                {localText(language, { ar: 'المجموع', en: 'Total', fr: 'Total' })}
               </span>
               <span
                 className="text-2xl font-light"
                 style={{ color: textColor }}
               >
-                {totalPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                {totalPrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
               </span>
             </div>
 
             <p className="text-xs tracking-wide text-center" style={{ color: textMuted }}>
-              {isRTL ? 'الدفع عند الاستلام' : 'Cash on Delivery'}
+              {localText(language, { ar: 'الدفع عند الاستلام', en: 'Cash on Delivery', fr: 'Paiement a la livraison' })}
             </p>
           </div>
 
@@ -292,7 +293,7 @@ export default function CheckoutForm({
               className="text-xs tracking-[0.3em] uppercase mb-8"
               style={{ color: textMuted }}
             >
-              {isRTL ? 'معلومات التوصيل' : 'Delivery Information'}
+              {localText(language, { ar: 'معلومات التوصيل', en: 'Delivery Information', fr: 'Informations de livraison' })}
             </h2>
 
             {error && (
@@ -314,7 +315,7 @@ export default function CheckoutForm({
                   className="block text-xs tracking-[0.15em] uppercase mb-3"
                   style={{ color: textMuted }}
                 >
-                  {isRTL ? 'الاسم الكامل *' : 'Full Name *'}
+                  {localText(language, { ar: 'الاسم الكامل *', en: 'Full Name *', fr: 'Nom complet *' })}
                 </label>
                 <input
                   type="text"
@@ -326,7 +327,7 @@ export default function CheckoutForm({
                     border: `1px solid ${inputBorder}`,
                     color: textColor,
                   }}
-                  placeholder={isRTL ? 'اسمك الكامل' : 'Your full name'}
+                  placeholder={localText(language, { ar: 'اسمك الكامل', en: 'Your full name', fr: 'Votre nom complet' })}
                   required
                 />
               </div>
@@ -336,7 +337,7 @@ export default function CheckoutForm({
                   className="block text-xs tracking-[0.15em] uppercase mb-3"
                   style={{ color: textMuted }}
                 >
-                  {isRTL ? 'رقم الهاتف *' : 'Phone Number *'}
+                  {localText(language, { ar: 'رقم الهاتف *', en: 'Phone Number *', fr: 'Numero de telephone *' })}
                 </label>
                 <input
                   type="tel"
@@ -359,7 +360,7 @@ export default function CheckoutForm({
                   className="block text-xs tracking-[0.15em] uppercase mb-3"
                   style={{ color: textMuted }}
                 >
-                  {isRTL ? 'الولاية *' : 'Wilaya *'}
+                  {localText(language, { ar: 'الولاية *', en: 'Wilaya *', fr: 'Wilaya *' })}
                 </label>
                 <WilayaSelect
                   value={wilaya}
@@ -375,7 +376,7 @@ export default function CheckoutForm({
                   className="block text-xs tracking-[0.15em] uppercase mb-3"
                   style={{ color: textMuted }}
                 >
-                  {isRTL ? 'عنوان التوصيل *' : 'Delivery Address *'}
+                  {localText(language, { ar: 'عنوان التوصيل *', en: 'Delivery Address *', fr: 'Adresse de livraison *' })}
                 </label>
                 <textarea
                   value={deliveryAddress}
@@ -386,7 +387,7 @@ export default function CheckoutForm({
                     border: `1px solid ${inputBorder}`,
                     color: textColor,
                   }}
-                  placeholder={isRTL ? 'الشارع، المبنى، الشقة...' : 'Street, building, apartment...'}
+                  placeholder={localText(language, { ar: 'الشارع، المبنى، الشقة...', en: 'Street, building, apartment...', fr: 'Rue, batiment, appartement...' })}
                   rows={3}
                   required
                 />
@@ -402,8 +403,8 @@ export default function CheckoutForm({
                 }}
               >
                 {submitting
-                  ? (isRTL ? '⏳ جاري الإرسال...' : '⏳ Placing Order...')
-                  : (isRTL ? 'تأكيد الطلب' : 'Place Order')}
+                  ? localText(language, { ar: '⏳ جاري الإرسال...', en: '⏳ Placing Order...', fr: '⏳ Commande en cours...' })
+                  : localText(language, { ar: 'تأكيد الطلب', en: 'Place Order', fr: 'Confirmer la commande' })}
               </button>
             </form>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 
 interface NewsletterSectionProps {
   content: {
@@ -22,12 +23,16 @@ export default function NewsletterSection({ content, primaryColor, accentColor }
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const title = isRTL
+  const title = language === 'ar'
     ? (content.titleAr || content.title || 'اشترك في النشرة البريدية')
+    : language === 'fr'
+    ? (content.title || 'Abonnez-vous a notre newsletter')
     : (content.title || 'Subscribe to our newsletter');
 
-  const subtitle = isRTL
+  const subtitle = language === 'ar'
     ? (content.subtitleAr || content.subtitle || 'احصل على آخر العروض والتحديثات')
+    : language === 'fr'
+    ? (content.subtitle || 'Recevez les dernieres offres et mises a jour')
     : (content.subtitle || 'Get the latest deals and updates');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -67,7 +72,7 @@ export default function NewsletterSection({ content, primaryColor, accentColor }
             style={{ backgroundColor: 'rgba(255,255,255,0.2)' }}
           >
             <p style={{ color: content.textColor || '#ffffff' }}>
-              {isRTL ? 'شكراً لاشتراكك!' : 'Thanks for subscribing!'}
+              {localText(language, { ar: 'شكراً لاشتراكك!', en: 'Thanks for subscribing!', fr: 'Merci pour votre inscription !' })}
             </p>
           </div>
         ) : (
@@ -76,7 +81,7 @@ export default function NewsletterSection({ content, primaryColor, accentColor }
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder={isRTL ? 'بريدك الإلكتروني' : 'Your email address'}
+              placeholder={localText(language, { ar: 'بريدك الإلكتروني', en: 'Your email address', fr: 'Votre adresse email' })}
               className="px-4 py-3 rounded-xl text-slate-900 w-full sm:w-72 outline-none focus:ring-2"
               style={{ '--tw-ring-color': accentColor } as React.CSSProperties}
               required
@@ -89,7 +94,7 @@ export default function NewsletterSection({ content, primaryColor, accentColor }
                 color: '#ffffff',
               }}
             >
-              {isRTL ? 'اشترك' : 'Subscribe'}
+              {localText(language, { ar: 'اشترك', en: 'Subscribe', fr: 'S\'abonner' })}
             </button>
           </form>
         )}

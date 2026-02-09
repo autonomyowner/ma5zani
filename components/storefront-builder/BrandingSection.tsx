@@ -5,6 +5,7 @@ import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Doc } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import { getR2PublicUrl } from '@/lib/r2';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -16,7 +17,6 @@ interface BrandingSectionProps {
 
 export default function BrandingSection({ storefront }: BrandingSectionProps) {
   const { language } = useLanguage();
-  const isRTL = language === 'ar';
 
   const [slug, setSlug] = useState(storefront?.slug || '');
   const [boutiqueName, setBoutiqueName] = useState(storefront?.boutiqueName || '');
@@ -76,7 +76,7 @@ export default function BrandingSection({ storefront }: BrandingSectionProps) {
 
   const handleSave = async () => {
     if (!boutiqueName.trim() || !slug.trim()) {
-      alert(isRTL ? 'يرجى ملء جميع الحقول المطلوبة' : 'Please fill all required fields');
+      alert(localText(language, { ar: 'يرجى ملء جميع الحقول المطلوبة', en: 'Please fill all required fields', fr: 'Veuillez remplir tous les champs obligatoires' }));
       return;
     }
 
@@ -114,7 +114,7 @@ export default function BrandingSection({ storefront }: BrandingSectionProps) {
       {/* Logo */}
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-2">
-          {isRTL ? 'شعار المتجر' : 'Store Logo'}
+          {localText(language, { ar: 'شعار المتجر', en: 'Store Logo', fr: 'Logo de la boutique' })}
         </label>
         <div className="flex items-center gap-4">
           {logoKey ? (
@@ -134,7 +134,7 @@ export default function BrandingSection({ storefront }: BrandingSectionProps) {
           ) : (
             <div className="w-20 h-20 bg-slate-100 rounded-xl border-2 border-dashed border-slate-300 flex items-center justify-center">
               <span className="text-slate-400 text-xs text-center">
-                {isRTL ? 'لا يوجد شعار' : 'No logo'}
+                {localText(language, { ar: 'لا يوجد شعار', en: 'No logo', fr: 'Pas de logo' })}
               </span>
             </div>
           )}
@@ -156,15 +156,11 @@ export default function BrandingSection({ storefront }: BrandingSectionProps) {
               }`}
             >
               {uploading
-                ? isRTL
-                  ? 'جاري الرفع...'
-                  : 'Uploading...'
-                : isRTL
-                ? 'رفع شعار'
-                : 'Upload Logo'}
+                ? localText(language, { ar: 'جاري الرفع...', en: 'Uploading...', fr: 'Téléchargement...' })
+                : localText(language, { ar: 'رفع شعار', en: 'Upload Logo', fr: 'Télécharger le logo' })}
             </label>
             <p className="text-xs text-slate-400 mt-1">
-              {isRTL ? 'PNG, JPG حتى 2MB' : 'PNG, JPG up to 2MB'}
+              {localText(language, { ar: 'PNG, JPG حتى 2MB', en: 'PNG, JPG up to 2MB', fr: 'PNG, JPG jusqu\'à 2 Mo' })}
             </p>
           </div>
         </div>
@@ -173,7 +169,7 @@ export default function BrandingSection({ storefront }: BrandingSectionProps) {
       {/* Store URL */}
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-2">
-          {isRTL ? 'رابط المتجر' : 'Store URL'} *
+          {localText(language, { ar: 'رابط المتجر', en: 'Store URL', fr: 'URL de la boutique' })} *
         </label>
         <SlugInput value={slug} onChange={setSlug} />
       </div>
@@ -181,28 +177,24 @@ export default function BrandingSection({ storefront }: BrandingSectionProps) {
       {/* Boutique Name */}
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-2">
-          {isRTL ? 'اسم المتجر' : 'Store Name'} *
+          {localText(language, { ar: 'اسم المتجر', en: 'Store Name', fr: 'Nom de la boutique' })} *
         </label>
         <Input
           value={boutiqueName}
           onChange={(e) => setBoutiqueName(e.target.value)}
-          placeholder={isRTL ? 'متجر الأناقة' : 'My Fashion Store'}
+          placeholder={localText(language, { ar: 'متجر الأناقة', en: 'My Fashion Store', fr: 'Ma boutique de mode' })}
         />
       </div>
 
       {/* Description */}
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-2">
-          {isRTL ? 'وصف المتجر' : 'Store Description'}
+          {localText(language, { ar: 'وصف المتجر', en: 'Store Description', fr: 'Description de la boutique' })}
         </label>
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder={
-            isRTL
-              ? 'نقدم أفضل المنتجات بأسعار تنافسية...'
-              : 'We offer the best products at competitive prices...'
-          }
+          placeholder={localText(language, { ar: 'نقدم أفضل المنتجات بأسعار تنافسية...', en: 'We offer the best products at competitive prices...', fr: 'Nous offrons les meilleurs produits à des prix compétitifs...' })}
           rows={3}
           className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0054A6] focus:border-transparent"
         />
@@ -211,16 +203,10 @@ export default function BrandingSection({ storefront }: BrandingSectionProps) {
       {/* Save Button */}
       <Button onClick={handleSave} disabled={saving}>
         {saving
-          ? isRTL
-            ? 'جاري الحفظ...'
-            : 'Saving...'
+          ? localText(language, { ar: 'جاري الحفظ...', en: 'Saving...', fr: 'Enregistrement...' })
           : storefront
-          ? isRTL
-            ? 'حفظ التغييرات'
-            : 'Save Changes'
-          : isRTL
-          ? 'إنشاء المتجر'
-          : 'Create Storefront'}
+          ? localText(language, { ar: 'حفظ التغييرات', en: 'Save Changes', fr: 'Enregistrer les modifications' })
+          : localText(language, { ar: 'إنشاء المتجر', en: 'Create Storefront', fr: 'Créer la boutique' })}
       </Button>
     </div>
   );

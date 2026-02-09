@@ -5,6 +5,7 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import { getR2PublicUrl } from '@/lib/r2';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -79,12 +80,10 @@ export default function StorefrontProductsPage() {
           className="text-2xl font-bold text-slate-900"
           style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
         >
-          {isRTL ? 'منتجات المتجر' : 'Storefront Products'}
+          {localText(language, { ar: 'منتجات المتجر', en: 'Storefront Products', fr: 'Produits de la boutique' })}
         </h1>
         <p className="text-slate-500 mt-1">
-          {isRTL
-            ? 'اختر المنتجات التي تريد عرضها في متجرك'
-            : 'Select which products to display on your storefront'}
+          {localText(language, { ar: 'اختر المنتجات التي تريد عرضها في متجرك', en: 'Select which products to display on your storefront', fr: 'Sélectionnez les produits à afficher sur votre boutique' })}
         </p>
       </div>
 
@@ -93,9 +92,7 @@ export default function StorefrontProductsPage() {
         <div className="divide-y divide-slate-100">
           {products.length === 0 ? (
             <div className="p-8 text-center text-slate-500">
-              {isRTL
-                ? 'لا توجد منتجات. أضف منتجات من صفحة المنتجات أولاً.'
-                : 'No products. Add products from the Products page first.'}
+              {localText(language, { ar: 'لا توجد منتجات. أضف منتجات من صفحة المنتجات أولاً.', en: 'No products. Add products from the Products page first.', fr: 'Aucun produit. Ajoutez des produits depuis la page Produits.' })}
             </div>
           ) : (
             products.map((product) => (
@@ -133,7 +130,7 @@ export default function StorefrontProductsPage() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">
-                        {isRTL ? 'لا صورة' : 'No image'}
+                        {localText(language, { ar: 'لا صورة', en: 'No image', fr: 'Pas d\'image' })}
                       </div>
                     )}
                   </div>
@@ -143,11 +140,11 @@ export default function StorefrontProductsPage() {
                     <h3 className="font-medium text-slate-900 truncate">{product.name}</h3>
                     <div className="flex items-center gap-3 mt-1">
                       <span className="text-sm text-slate-500">
-                        {product.price.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                        {product.price.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
                       </span>
                       {product.salePrice && (
                         <span className="text-sm text-green-600 font-medium">
-                          {product.salePrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                          {product.salePrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
                         </span>
                       )}
                       <span
@@ -159,7 +156,7 @@ export default function StorefrontProductsPage() {
                             : 'bg-red-100 text-red-700'
                         }`}
                       >
-                        {product.stock} {isRTL ? 'في المخزون' : 'in stock'}
+                        {product.stock} {localText(language, { ar: 'في المخزون', en: 'in stock', fr: 'en stock' })}
                       </span>
                     </div>
                   </div>
@@ -170,7 +167,7 @@ export default function StorefrontProductsPage() {
                     onClick={() => handleEdit(product)}
                     className="text-sm"
                   >
-                    {isRTL ? 'تعديل' : 'Edit'}
+                    {localText(language, { ar: 'تعديل', en: 'Edit', fr: 'Modifier' })}
                   </Button>
                 </div>
 
@@ -180,7 +177,7 @@ export default function StorefrontProductsPage() {
                     {/* Images */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        {isRTL ? 'صور المنتج' : 'Product Images'}
+                        {localText(language, { ar: 'صور المنتج', en: 'Product Images', fr: 'Images du produit' })}
                       </label>
                       <ImageUpload
                         value={editData.imageKeys}
@@ -193,7 +190,7 @@ export default function StorefrontProductsPage() {
                     {/* Category */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        {isRTL ? 'الفئة' : 'Category'}
+                        {localText(language, { ar: 'الفئة', en: 'Category', fr: 'Catégorie' })}
                       </label>
                       <select
                         value={editData.categoryId || ''}
@@ -207,10 +204,10 @@ export default function StorefrontProductsPage() {
                         }
                         className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0054A6]"
                       >
-                        <option value="">{isRTL ? 'بدون فئة' : 'No category'}</option>
+                        <option value="">{localText(language, { ar: 'بدون فئة', en: 'No category', fr: 'Sans catégorie' })}</option>
                         {categories?.map((cat) => (
                           <option key={cat._id} value={cat._id}>
-                            {isRTL ? cat.nameAr : cat.name}
+                            {language === 'ar' ? cat.nameAr : cat.name}
                           </option>
                         ))}
                       </select>
@@ -219,9 +216,9 @@ export default function StorefrontProductsPage() {
                     {/* Sale Price */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 mb-2">
-                        {isRTL ? 'سعر التخفيض' : 'Sale Price'}{' '}
+                        {localText(language, { ar: 'سعر التخفيض', en: 'Sale Price', fr: 'Prix soldé' })}{' '}
                         <span className="text-slate-400 font-normal">
-                          ({isRTL ? 'اختياري' : 'optional'})
+                          ({localText(language, { ar: 'اختياري', en: 'optional', fr: 'optionnel' })})
                         </span>
                       </label>
                       <Input
@@ -233,17 +230,17 @@ export default function StorefrontProductsPage() {
                             salePrice: e.target.value ? Number(e.target.value) : undefined,
                           })
                         }
-                        placeholder={`${isRTL ? 'السعر الأصلي:' : 'Original:'} ${product.price}`}
+                        placeholder={`${localText(language, { ar: 'السعر الأصلي:', en: 'Original:', fr: 'Original :' })} ${product.price}`}
                       />
                     </div>
 
                     {/* Actions */}
                     <div className="flex gap-3">
                       <Button onClick={handleSaveEdit}>
-                        {isRTL ? 'حفظ' : 'Save'}
+                        {localText(language, { ar: 'حفظ', en: 'Save', fr: 'Enregistrer' })}
                       </Button>
                       <Button variant="secondary" onClick={() => setEditingProduct(null)}>
-                        {isRTL ? 'إلغاء' : 'Cancel'}
+                        {localText(language, { ar: 'إلغاء', en: 'Cancel', fr: 'Annuler' })}
                       </Button>
                     </div>
                   </div>

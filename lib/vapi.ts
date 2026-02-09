@@ -65,15 +65,16 @@ Ma5zani is an e-commerce fulfillment solution for Algerian sellers:
 export const houssamFirstMessage = {
   ar: 'مرحبا! أنا حسام، مساعدك الذكي في مخزني. كيفاش نقدر نعاونك؟',
   en: "Hi, I'm Houssam, your AI assistant at Ma5zani. How can I help you?",
+  fr: "Bonjour ! Je suis Houssam, votre assistant IA chez Ma5zani. Comment puis-je vous aider ?",
 }
 
 // Get first message based on language
-export function getFirstMessage(language: 'ar' | 'en'): string {
+export function getFirstMessage(language: 'ar' | 'en' | 'fr'): string {
   return houssamFirstMessage[language]
 }
 
 // Start a call with Houssam
-export async function startHoussamCall(language: 'ar' | 'en' = 'ar'): Promise<void> {
+export async function startHoussamCall(language: 'ar' | 'en' | 'fr' = 'ar'): Promise<void> {
   const vapi = getVapiClient()
 
   // Use inline assistant configuration for Vapi

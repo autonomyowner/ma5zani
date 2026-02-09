@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/lib/CartContext';
 import { getR2PublicUrl } from '@/lib/r2';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 
 interface CartDrawerProps {
   slug: string;
@@ -90,10 +91,10 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
                 color: colors.text,
               }}
             >
-              {isRTL ? 'سلتك' : 'Your Cart'}
+              {localText(language, { ar: 'سلتك', en: 'Your Cart', fr: 'Votre panier' })}
             </h2>
             <p className="text-xs mt-1" style={{ color: textMuted }}>
-              {totalItems} {totalItems === 1 ? (isRTL ? 'منتج' : 'item') : (isRTL ? 'منتجات' : 'items')}
+              {totalItems} {totalItems === 1 ? localText(language, { ar: 'منتج', en: 'item', fr: 'article' }) : localText(language, { ar: 'منتجات', en: 'items', fr: 'articles' })}
             </p>
           </div>
           <button
@@ -110,7 +111,7 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <p className="text-sm tracking-wide mb-6" style={{ color: textMuted }}>
-                {isRTL ? 'سلتك فارغة' : 'Your cart is empty'}
+                {localText(language, { ar: 'سلتك فارغة', en: 'Your cart is empty', fr: 'Votre panier est vide' })}
               </p>
               <button
                 onClick={closeCart}
@@ -120,7 +121,7 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
                   color: textMuted,
                 }}
               >
-                {isRTL ? 'تابع التسوق' : 'Continue Shopping'}
+                {localText(language, { ar: 'تابع التسوق', en: 'Continue Shopping', fr: 'Continuer les achats' })}
               </button>
             </div>
           ) : (
@@ -164,10 +165,10 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
                       {item.name}
                     </h3>
                     <p className="text-xs mt-1" style={{ color: textMuted }}>
-                      {(item.salePrice ?? item.price).toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                      {(item.salePrice ?? item.price).toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
                       {item.quantity > 1 && (
                         <span style={{ color: textMuted }}>
-                          {' '}× {item.quantity} = {((item.salePrice ?? item.price) * item.quantity).toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                          {' '}× {item.quantity} = {((item.salePrice ?? item.price) * item.quantity).toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
                         </span>
                       )}
                     </p>
@@ -206,7 +207,7 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
                         className="text-xs tracking-wider uppercase transition-colors hover:opacity-70"
                         style={{ color: textMuted }}
                       >
-                        {isRTL ? 'إزالة' : 'Remove'}
+                        {localText(language, { ar: 'إزالة', en: 'Remove', fr: 'Retirer' })}
                       </button>
                     </div>
                   </div>
@@ -225,18 +226,18 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
             {/* Total */}
             <div className="flex items-center justify-between">
               <span className="text-xs tracking-[0.15em] uppercase" style={{ color: textMuted }}>
-                {isRTL ? 'المجموع' : 'Total'}
+                {localText(language, { ar: 'المجموع', en: 'Total', fr: 'Total' })}
               </span>
               <span
                 className="text-lg font-medium"
                 style={{ color: colors.text }}
               >
-                {totalPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+                {totalPrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
               </span>
             </div>
 
             <p className="text-xs tracking-wide text-center" style={{ color: textMuted }}>
-              {isRTL ? 'الدفع عند الاستلام' : 'Cash on Delivery'}
+              {localText(language, { ar: 'الدفع عند الاستلام', en: 'Cash on Delivery', fr: 'Paiement a la livraison' })}
             </p>
 
             {/* Checkout Button */}
@@ -249,7 +250,7 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
                 color: isLightColor(colors.accent) ? '#0a0a0a' : '#ffffff',
               }}
             >
-              {isRTL ? 'إتمام الطلب' : 'Proceed to Checkout'}
+              {localText(language, { ar: 'إتمام الطلب', en: 'Proceed to Checkout', fr: 'Passer la commande' })}
             </Link>
 
             {/* Continue Shopping */}
@@ -258,7 +259,7 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
               className="w-full py-3 text-center text-xs tracking-[0.15em] uppercase transition-colors"
               style={{ color: textMuted }}
             >
-              {isRTL ? 'تابع التسوق' : 'Continue Shopping'}
+              {localText(language, { ar: 'تابع التسوق', en: 'Continue Shopping', fr: 'Continuer les achats' })}
             </button>
           </div>
         )}

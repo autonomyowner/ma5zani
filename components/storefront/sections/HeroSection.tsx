@@ -2,6 +2,7 @@
 
 import { getR2PublicUrl } from '@/lib/r2';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 
 interface HeroSectionProps {
   content: {
@@ -110,7 +111,7 @@ export default function HeroSection({ content, primaryColor, accentColor, fonts 
             className="text-xs tracking-[0.5em] uppercase mb-6"
             style={{ color: accentColor }}
           >
-            {isRTL ? 'اكتشف التميز' : 'Discover Excellence'}
+            {localText(language, { ar: 'اكتشف التميز', en: 'Discover Excellence', fr: 'Decouvrez l\'excellence' })}
           </p>
         )}
 
@@ -173,7 +174,7 @@ export default function HeroSection({ content, primaryColor, accentColor, fonts 
                 color: textColor,
               }}
             >
-              {isRTL ? 'قصتنا' : 'Our Story'}
+              {localText(language, { ar: 'قصتنا', en: 'Our Story', fr: 'Notre histoire' })}
             </a>
           </div>
         )}
@@ -195,7 +196,7 @@ export default function HeroSection({ content, primaryColor, accentColor, fonts 
             className="text-[10px] tracking-[0.3em] uppercase"
             style={{ color: textMuted }}
           >
-            {isRTL ? 'تصفح' : 'Scroll'}
+            {localText(language, { ar: 'تصفح', en: 'Scroll', fr: 'Defiler' })}
           </span>
           <div
             className="w-px h-10"
@@ -212,7 +213,7 @@ export default function HeroSection({ content, primaryColor, accentColor, fonts 
           className="text-[10px] tracking-[0.5em] uppercase -rotate-90 block origin-center whitespace-nowrap"
           style={{ color: textMuted }}
         >
-          {isRTL ? 'منتجات مميزة' : 'Premium Products'}
+          {localText(language, { ar: 'منتجات مميزة', en: 'Premium Products', fr: 'Produits premium' })}
         </span>
       </div>
 
@@ -221,7 +222,7 @@ export default function HeroSection({ content, primaryColor, accentColor, fonts 
           className="text-[10px] tracking-[0.5em] uppercase rotate-90 block origin-center whitespace-nowrap"
           style={{ color: textMuted }}
         >
-          {isRTL ? 'الجزائر' : 'Algeria'}
+          {localText(language, { ar: 'الجزائر', en: 'Algeria', fr: 'Algerie' })}
         </span>
       </div>
     </section>

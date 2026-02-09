@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { getVapiClient, startHoussamCall, endCall, CallStatus, SpeakingStatus } from '@/lib/vapi'
 
 interface VoiceCallButtonProps {
-  language: 'ar' | 'en'
+  language: 'ar' | 'en' | 'fr'
   onCallStatusChange?: (isActive: boolean) => void
 }
 
@@ -26,6 +26,15 @@ const translations = {
     listening: 'Listening...',
     speaking: 'Speaking...',
     micPermission: 'Please allow microphone access',
+  },
+  fr: {
+    callWithAI: 'Appeler Houssam',
+    connecting: 'Connexion...',
+    endCall: 'Raccrocher',
+    callActive: 'Appel en cours',
+    listening: 'Écoute...',
+    speaking: 'Parle...',
+    micPermission: 'Veuillez autoriser l\'accès au microphone',
   },
 }
 
@@ -70,6 +79,8 @@ export function VoiceCallButton({ language, onCallStatusChange }: VoiceCallButto
       if (err.message.includes('ejection') || err.message.includes('ended')) {
         errorMsg = language === 'ar'
           ? 'الخدمة غير متاحة حالياً'
+          : language === 'fr'
+          ? 'Service indisponible'
           : 'Service unavailable'
       }
       setError(errorMsg)

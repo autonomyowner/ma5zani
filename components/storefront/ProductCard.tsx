@@ -7,6 +7,7 @@ import { Doc } from '@/convex/_generated/dataModel';
 import { useCart } from '@/lib/CartContext';
 import { getR2PublicUrl } from '@/lib/r2';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 
 interface ProductCardProps {
   product: Doc<'products'>;
@@ -109,8 +110,8 @@ export default function ProductCard({
               }}
             >
               {quantity > 0
-                ? (isRTL ? `في السلة (${quantity})` : `In Cart (${quantity})`)
-                : (isRTL ? 'أضف للسلة' : 'Add to Cart')}
+                ? localText(language, { ar: `في السلة (${quantity})`, en: `In Cart (${quantity})`, fr: `Dans le panier (${quantity})` })
+                : localText(language, { ar: 'أضف للسلة', en: 'Add to Cart', fr: 'Ajouter au panier' })}
             </button>
           </div>
 
@@ -123,7 +124,7 @@ export default function ProductCard({
                 color: isLightColor(accentColor) ? '#0a0a0a' : '#ffffff',
               }}
             >
-              {isRTL ? 'تخفيض' : 'Sale'}
+              {localText(language, { ar: 'تخفيض', en: 'Sale', fr: 'Promo' })}
             </div>
           )}
 
@@ -140,7 +141,7 @@ export default function ProductCard({
                   color: textColor,
                 }}
               >
-                {isRTL ? 'نفذ المخزون' : 'Sold Out'}
+                {localText(language, { ar: 'نفذ المخزون', en: 'Sold Out', fr: 'Epuise' })}
               </span>
             </div>
           )}
@@ -195,7 +196,7 @@ export default function ProductCard({
               className="text-sm font-medium"
               style={{ color: textColor }}
             >
-              {displayPrice.toLocaleString()} {isRTL ? 'دج' : 'DZD'}
+              {displayPrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
             </span>
             {isOnSale && (
               <span

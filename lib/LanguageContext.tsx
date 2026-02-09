@@ -21,7 +21,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     // Check localStorage for saved preference
     try {
       const saved = localStorage.getItem('ma5zani-lang') as Language
-      if (saved && (saved === 'ar' || saved === 'en')) {
+      if (saved && (saved === 'ar' || saved === 'en' || saved === 'fr')) {
         setLanguage(saved)
       }
     } catch {

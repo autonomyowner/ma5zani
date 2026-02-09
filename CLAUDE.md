@@ -58,7 +58,7 @@ app/
 ### Convex Data Model
 
 ```typescript
-sellers: { clerkId, email, name, phone?, businessAddress?, plan }
+sellers: { clerkId, email, name, phone?, businessAddress?, plan, isActivated?, activatedAt? }
 products: { sellerId, name, sku, stock, price, status, imageKeys?, categoryId?, showOnStorefront?, salePrice? }
 orders: { sellerId, productId, orderNumber, customerName, wilaya, amount, status, source?, storefrontId?, fulfillmentStatus? }
 storefronts: { sellerId, slug, boutiqueName, logoKey?, theme, settings, metaPixelId?, isPublished }
@@ -169,6 +169,26 @@ Each seller can enable an AI-powered chatbot for their storefront:
 - AI generates responses using product catalog + trained knowledge as context
 - Sellers can takeover conversations (handoff) and return control to bot
 - Support chat (ma5zani's) only shows on home/dashboard, not on storefronts
+
+### Founder Offer / Activation Gate
+
+Storefront and AI chatbot features are locked behind `seller.isActivated`. Flow:
+1. New sellers get `isActivated: false` on signup
+2. Seller pays 4,000 DA/year, sends proof via WhatsApp
+3. Admin activates seller via `/admin/sellers` (toggles `isActivated` + sets `activatedAt`)
+4. Gated pages: `/dashboard/storefront/*`, `/dashboard/chatbot/*` — show `FounderOfferGate` component if not activated
+5. Dashboard shows orange unlock banner for non-activated sellers
+6. Pricing is hardcoded in: `lib/translations.ts` (founderOffer section), `app/onboarding/page.tsx`, `components/landing/Pricing.tsx`
+
+### Storefront Templates
+
+Templates are in `lib/templates/`. Each template defines sections, colors, and footer config:
+- `shopify.ts` - Full-featured layout (hero, features, categories, grid) — the default
+- `minimal.ts` - Simple product-only layout
+- `themes.ts` - 6 color-themed variants that reuse shopify sections with different palettes (Elegant Dark, Ocean Breeze, Rose Gold, Forest, Sunset, Slate Pro)
+- `index.ts` - Registry of all templates, `TemplateConfig` interface, `getTemplate()` helper
+
+The storefront header (`components/storefront/StorefrontHeader.tsx`) uses `dir={isRTL ? 'rtl' : 'ltr'}` on the container for proper flex direction in Arabic. On mobile it shows SVG line icons instead of text labels.
 
 ### Important Patterns
 

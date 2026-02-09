@@ -5,6 +5,7 @@ import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Doc } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import Button from '@/components/ui/Button';
 
 interface SettingsSectionProps {
@@ -13,7 +14,6 @@ interface SettingsSectionProps {
 
 export default function SettingsSection({ storefront }: SettingsSectionProps) {
   const { language } = useLanguage();
-  const isRTL = language === 'ar';
 
   const [autoFulfillment, setAutoFulfillment] = useState(
     storefront?.settings?.autoFulfillment || false
@@ -50,7 +50,7 @@ export default function SettingsSection({ storefront }: SettingsSectionProps) {
   if (!storefront) {
     return (
       <div className="text-center py-8 text-slate-500">
-        {isRTL ? 'يرجى إنشاء متجرك أولاً' : 'Please create your storefront first'}
+        {localText(language, { ar: 'يرجى إنشاء متجرك أولاً', en: 'Please create your storefront first', fr: 'Veuillez d\'abord créer votre boutique' })}
       </div>
     );
   }
@@ -68,12 +68,10 @@ export default function SettingsSection({ storefront }: SettingsSectionProps) {
         />
         <label htmlFor="autoFulfillment" className="flex-1 cursor-pointer">
           <div className="font-medium text-slate-900">
-            {isRTL ? 'التسليم التلقائي' : 'Auto Fulfillment'}
+            {localText(language, { ar: 'التسليم التلقائي', en: 'Auto Fulfillment', fr: 'Traitement automatique' })}
           </div>
           <p className="text-sm text-slate-500 mt-1">
-            {isRTL
-              ? 'إرسال الطلبات تلقائياً إلى مخزني للتوصيل عند استلامها.'
-              : 'Automatically submit orders to ma5zani for fulfillment when received.'}
+            {localText(language, { ar: 'إرسال الطلبات تلقائياً إلى مخزني للتوصيل عند استلامها.', en: 'Automatically submit orders to ma5zani for fulfillment when received.', fr: 'Envoyer automatiquement les commandes à ma5zani pour le traitement à la réception.' })}
           </p>
         </label>
       </div>
@@ -89,12 +87,10 @@ export default function SettingsSection({ storefront }: SettingsSectionProps) {
         />
         <label htmlFor="showOutOfStock" className="flex-1 cursor-pointer">
           <div className="font-medium text-slate-900">
-            {isRTL ? 'عرض المنتجات النافدة' : 'Show Out of Stock Products'}
+            {localText(language, { ar: 'عرض المنتجات النافدة', en: 'Show Out of Stock Products', fr: 'Afficher les produits en rupture de stock' })}
           </div>
           <p className="text-sm text-slate-500 mt-1">
-            {isRTL
-              ? 'عرض المنتجات غير المتوفرة في المتجر مع إشارة "نفد المخزون".'
-              : 'Display out of stock products with an "Out of Stock" badge.'}
+            {localText(language, { ar: 'عرض المنتجات غير المتوفرة في المتجر مع إشارة "نفد المخزون".', en: 'Display out of stock products with an "Out of Stock" badge.', fr: 'Afficher les produits en rupture de stock avec un badge "Rupture de stock".' })}
           </p>
         </label>
       </div>
@@ -102,12 +98,8 @@ export default function SettingsSection({ storefront }: SettingsSectionProps) {
       {/* Save Button */}
       <Button onClick={handleSave} disabled={saving}>
         {saving
-          ? isRTL
-            ? 'جاري الحفظ...'
-            : 'Saving...'
-          : isRTL
-          ? 'حفظ الإعدادات'
-          : 'Save Settings'}
+          ? localText(language, { ar: 'جاري الحفظ...', en: 'Saving...', fr: 'Enregistrement...' })
+          : localText(language, { ar: 'حفظ الإعدادات', en: 'Save Settings', fr: 'Enregistrer les paramètres' })}
       </Button>
     </div>
   );

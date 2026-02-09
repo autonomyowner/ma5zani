@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import Button from '@/components/ui/Button';
 import ChatInterface from './components/ChatInterface';
@@ -62,7 +63,7 @@ export default function AIStorefrontBuilderPage() {
       setActiveTab('preview');
 
       // Add assistant response to history
-      const summary = `${isRTL ? 'تم إنشاء تصميم جديد:' : 'Generated new design:'} ${data.config.aestheticDirection}`;
+      const summary = `${localText(language, { ar: 'تم إنشاء تصميم جديد:', en: 'Generated new design:', fr: 'Nouveau design généré :' })} ${data.config.aestheticDirection}`;
       setConversationHistory((prev) => [...prev, { role: 'assistant', content: summary }]);
 
       if (data.warnings && data.warnings.length > 0) {
@@ -73,7 +74,7 @@ export default function AIStorefrontBuilderPage() {
       setError(message);
       setConversationHistory((prev) => [
         ...prev,
-        { role: 'assistant', content: isRTL ? `خطأ: ${message}` : `Error: ${message}` },
+        { role: 'assistant', content: localText(language, { ar: `خطأ: ${message}`, en: `Error: ${message}`, fr: `Erreur : ${message}` }) },
       ]);
     } finally {
       setIsGenerating(false);
@@ -111,7 +112,7 @@ export default function AIStorefrontBuilderPage() {
       });
 
       // Show success
-      const successMsg = isRTL ? 'تم تطبيق التصميم بنجاح!' : 'Design applied successfully!';
+      const successMsg = localText(language, { ar: 'تم تطبيق التصميم بنجاح!', en: 'Design applied successfully!', fr: 'Design appliqué avec succès !' });
       setConversationHistory((prev) => [...prev, { role: 'assistant', content: successMsg }]);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to apply design';
@@ -129,7 +130,7 @@ export default function AIStorefrontBuilderPage() {
     setActiveTab('chat');
   };
 
-  const pageTitle = isRTL ? 'مصمم المتجر بالذكاء الاصطناعي' : 'AI Store Designer';
+  const pageTitle = localText(language, { ar: 'مصمم المتجر بالذكاء الاصطناعي', en: 'AI Store Designer', fr: 'Designer IA de boutique' });
 
   if (seller && !seller.isActivated) {
     return (
@@ -145,18 +146,16 @@ export default function AIStorefrontBuilderPage() {
         <div className="flex items-center justify-center h-96">
           <div className="text-center">
             <h2 className="text-xl font-semibold text-slate-900 mb-2">
-              {isRTL ? 'يرجى إنشاء متجر أولاً' : 'Please create a storefront first'}
+              {localText(language, { ar: 'يرجى إنشاء متجر أولاً', en: 'Please create a storefront first', fr: 'Veuillez d\'abord créer une boutique' })}
             </h2>
             <p className="text-slate-500 mb-4">
-              {isRTL
-                ? 'يجب أن يكون لديك متجر لاستخدام مصمم الذكاء الاصطناعي'
-                : 'You need a storefront to use the AI designer'}
+              {localText(language, { ar: 'يجب أن يكون لديك متجر لاستخدام مصمم الذكاء الاصطناعي', en: 'You need a storefront to use the AI designer', fr: 'Vous devez avoir une boutique pour utiliser le designer IA' })}
             </p>
             <a
               href="/dashboard/storefront"
               className="inline-flex items-center justify-center px-4 py-2 bg-[#F7941D] text-white rounded-lg hover:bg-[#D35400] transition-colors"
             >
-              {isRTL ? 'إنشاء متجر' : 'Create Storefront'}
+              {localText(language, { ar: 'إنشاء متجر', en: 'Create Storefront', fr: 'Créer une boutique' })}
             </a>
           </div>
         </div>
@@ -171,28 +170,22 @@ export default function AIStorefrontBuilderPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900" style={{ fontFamily: 'var(--font-outfit)' }}>
-              {isRTL ? 'مصمم المتجر بالذكاء الاصطناعي' : 'AI Store Designer'}
+              {localText(language, { ar: 'مصمم المتجر بالذكاء الاصطناعي', en: 'AI Store Designer', fr: 'Designer IA de boutique' })}
             </h1>
             <p className="text-slate-500 mt-1">
-              {isRTL
-                ? 'صِف متجرك ودع الذكاء الاصطناعي يصمم لك'
-                : 'Describe your store and let AI design it for you'}
+              {localText(language, { ar: 'صِف متجرك ودع الذكاء الاصطناعي يصمم لك', en: 'Describe your store and let AI design it for you', fr: 'Décrivez votre boutique et laissez l\'IA la concevoir' })}
             </p>
           </div>
 
           {generatedConfig && (
             <div className="flex gap-2">
               <Button variant="outline" onClick={handleReset} disabled={isSaving}>
-                {isRTL ? 'إعادة' : 'Reset'}
+                {localText(language, { ar: 'إعادة', en: 'Reset', fr: 'Réinitialiser' })}
               </Button>
               <Button onClick={handleApply} disabled={isSaving || isGenerating}>
                 {isSaving
-                  ? isRTL
-                    ? 'جاري التطبيق...'
-                    : 'Applying...'
-                  : isRTL
-                    ? 'تطبيق التصميم'
-                    : 'Apply Design'}
+                  ? localText(language, { ar: 'جاري التطبيق...', en: 'Applying...', fr: 'Application en cours...' })
+                  : localText(language, { ar: 'تطبيق التصميم', en: 'Apply Design', fr: 'Appliquer le design' })}
               </Button>
             </div>
           )}
@@ -218,16 +211,10 @@ export default function AIStorefrontBuilderPage() {
               }`}
             >
               {tab === 'chat'
-                ? isRTL
-                  ? 'المحادثة'
-                  : 'Chat'
+                ? localText(language, { ar: 'المحادثة', en: 'Chat', fr: 'Discussion' })
                 : tab === 'preview'
-                  ? isRTL
-                    ? 'المعاينة'
-                    : 'Preview'
-                  : isRTL
-                    ? 'التعديل'
-                    : 'Edit'}
+                  ? localText(language, { ar: 'المعاينة', en: 'Preview', fr: 'Aperçu' })
+                  : localText(language, { ar: 'التعديل', en: 'Edit', fr: 'Modifier' })}
             </button>
           ))}
         </div>

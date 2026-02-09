@@ -2,6 +2,7 @@
 
 import { getR2PublicUrl } from '@/lib/r2';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 
 interface CollectionItem {
   title: string;
@@ -86,7 +87,7 @@ export default function FeaturedCollection({ content, primaryColor, accentColor 
                       color: '#ffffff',
                     }}
                   >
-                    {isRTL ? 'تسوق الآن' : 'Shop Now'}
+                    {localText(language, { ar: 'تسوق الآن', en: 'Shop Now', fr: 'Acheter maintenant' })}
                   </span>
                 </div>
               </a>

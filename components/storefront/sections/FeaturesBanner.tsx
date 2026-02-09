@@ -1,6 +1,7 @@
 'use client';
 
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 
 interface FeatureItem {
   title: string;
@@ -94,7 +95,7 @@ export default function FeaturesBanner({ content, primaryColor, accentColor = '#
               className="text-xs tracking-[0.4em] uppercase mb-4"
               style={{ color: accentColor }}
             >
-              {isRTL ? 'لماذا نحن' : 'Why Choose Us'}
+              {localText(language, { ar: 'لماذا نحن', en: 'Why Choose Us', fr: 'Pourquoi nous choisir' })}
             </p>
             <h2
               className="text-3xl md:text-4xl font-light"

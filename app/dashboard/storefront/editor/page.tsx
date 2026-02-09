@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText, type Language } from '@/lib/translations';
 import { useCurrentSeller } from '@/hooks/useCurrentSeller';
 import { getR2PublicUrl } from '@/lib/r2';
 import { templates, sectionTypeLabels, availableSectionTypes, getTemplate } from '@/lib/templates';
@@ -16,6 +17,32 @@ import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
 
 // Generate unique ID for new sections
 const generateId = () => `section-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+// French labels for section types (supplements sectionTypeLabels which only has en/ar)
+const sectionTypeLabelsFr: Record<string, string> = {
+  hero: 'Banniere principale',
+  announcement: "Barre d'annonces",
+  featured: 'Produits en vedette',
+  categories: 'Categories',
+  grid: 'Grille de produits',
+  features: 'Caracteristiques',
+  collection: 'Collection en vedette',
+  newsletter: 'Newsletter',
+  about: 'A propos',
+};
+
+// Helper to get a section type label in the current language
+const getSectionLabel = (type: string, lang: Language): string => {
+  const labels = sectionTypeLabels[type];
+  if (!labels) return type;
+  return localText(lang, { ar: labels.ar, en: labels.en, fr: sectionTypeLabelsFr[type] || labels.en });
+};
+
+// Helper to get a template name in the current language
+// Templates have name (en) and nameAr but no French, so we fall back to English for French
+const getTemplateName = (template: { name: string; nameAr: string }, lang: Language): string => {
+  return localText(lang, { ar: template.nameAr, en: template.name, fr: template.name });
+};
 
 export default function StorefrontEditorPage() {
   const router = useRouter();
@@ -158,7 +185,7 @@ export default function StorefrontEditorPage() {
       setPreviewKey(prev => prev + 1);
     } catch (error) {
       console.error('Save error:', error);
-      alert(isRTL ? 'فشل الحفظ' : 'Failed to save');
+      alert(localText(language, { ar: 'فشل الحفظ', en: 'Failed to save', fr: 'Echec de la sauvegarde' }));
     } finally {
       setSaving(false);
     }
@@ -191,7 +218,7 @@ export default function StorefrontEditorPage() {
       updateSectionContent(sectionId, 'imageKey', key);
     } catch (error) {
       console.error('Upload error:', error);
-      alert(isRTL ? 'فشل رفع الصورة' : 'Failed to upload image');
+      alert(localText(language, { ar: 'فشل رفع الصورة', en: 'Failed to upload image', fr: "Echec du telechargement de l'image" }));
     }
   };
 
@@ -210,7 +237,7 @@ export default function StorefrontEditorPage() {
 
   if (seller && !seller.isActivated) {
     return (
-      <DashboardLayout seller={seller} title={isRTL ? 'محرر القالب' : 'Template Editor'}>
+      <DashboardLayout seller={seller} title={localText(language, { ar: 'محرر القالب', en: 'Template Editor', fr: 'Editeur de boutique' })}>
         <FounderOfferGate />
       </DashboardLayout>
     );
@@ -224,8 +251,8 @@ export default function StorefrontEditorPage() {
   return (
     <DashboardLayout
       seller={seller}
-      title={isRTL ? 'محرر القالب' : 'Template Editor'}
-      subtitle={isRTL ? 'خصص مظهر متجرك' : 'Customize your store appearance'}
+      title={localText(language, { ar: 'محرر القالب', en: 'Template Editor', fr: 'Editeur de boutique' })}
+      subtitle={localText(language, { ar: 'خصص مظهر متجرك', en: 'Customize your store appearance', fr: "Personnaliser l'apparence de votre boutique" })}
       headerActions={
         <div className="flex gap-2">
           <a
@@ -234,10 +261,10 @@ export default function StorefrontEditorPage() {
             rel="noopener noreferrer"
             className="px-3 py-1.5 border border-slate-200 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
           >
-            {isRTL ? 'معاينة' : 'Preview'}
+            {localText(language, { ar: 'معاينة', en: 'Preview', fr: 'Apercu' })}
           </a>
           <Button onClick={handleSave} disabled={saving}>
-            {saving ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : (isRTL ? 'حفظ' : 'Save')}
+            {saving ? localText(language, { ar: 'جاري الحفظ...', en: 'Saving...', fr: 'Enregistrement...' }) : localText(language, { ar: 'حفظ', en: 'Save', fr: 'Enregistrer' })}
           </Button>
         </div>
       }
@@ -247,9 +274,9 @@ export default function StorefrontEditorPage() {
         {/* Mobile Tab Bar */}
         <div className="flex gap-1 bg-slate-100 rounded-xl p-1 mb-3 flex-shrink-0">
           {([
-            { key: 'sections' as const, label: isRTL ? 'الأقسام' : 'Sections' },
-            { key: 'edit' as const, label: isRTL ? 'تحرير' : 'Edit' },
-            { key: 'colors' as const, label: isRTL ? 'الألوان' : 'Colors' },
+            { key: 'sections' as const, label: localText(language, { ar: 'الأقسام', en: 'Sections', fr: 'Sections' }) },
+            { key: 'edit' as const, label: localText(language, { ar: 'تحرير', en: 'Edit', fr: 'Modifier' }) },
+            { key: 'colors' as const, label: localText(language, { ar: 'الألوان', en: 'Colors', fr: 'Couleurs' }) },
           ]).map((tab) => (
             <button
               key={tab.key}
@@ -273,7 +300,7 @@ export default function StorefrontEditorPage() {
               {/* Template Selector - horizontal scroll */}
               <div className="p-4 border-b border-slate-100">
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  {isRTL ? 'القوالب' : 'Templates'}
+                  {localText(language, { ar: 'القوالب', en: 'Templates', fr: 'Modeles' })}
                 </label>
                 <div className="flex gap-2 overflow-x-auto pb-1">
                   {Object.values(templates).map((template) => (
@@ -284,7 +311,7 @@ export default function StorefrontEditorPage() {
                     >
                       <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.primary }} />
                       <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.accent }} />
-                      <span>{isRTL ? template.nameAr : template.name}</span>
+                      <span>{getTemplateName(template, language)}</span>
                     </button>
                   ))}
                 </div>
@@ -294,20 +321,20 @@ export default function StorefrontEditorPage() {
               <div className="flex-1 overflow-y-auto p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-sm font-medium text-slate-700">
-                    {isRTL ? 'الأقسام' : 'Sections'}
+                    {localText(language, { ar: 'الأقسام', en: 'Sections', fr: 'Sections' })}
                   </h3>
                   <button
                     onClick={() => setShowAddSection(!showAddSection)}
                     className="text-xs text-[#0054A6] hover:underline"
                   >
-                    {isRTL ? '+ إضافة' : '+ Add'}
+                    {localText(language, { ar: '+ إضافة', en: '+ Add', fr: '+ Ajouter' })}
                   </button>
                 </div>
 
                 {showAddSection && (
                   <div className="mb-3 p-3 bg-slate-50 rounded-lg border border-slate-200">
                     <p className="text-xs text-slate-500 mb-2">
-                      {isRTL ? 'اختر نوع القسم' : 'Choose section type'}
+                      {localText(language, { ar: 'اختر نوع القسم', en: 'Choose section type', fr: 'Choisir le type de section' })}
                     </p>
                     <div className="space-y-1">
                       {availableSectionTypes.map((type) => (
@@ -316,7 +343,7 @@ export default function StorefrontEditorPage() {
                           onClick={() => addSection(type)}
                           className="w-full text-left px-3 py-2.5 text-sm rounded hover:bg-white transition-colors min-h-[44px]"
                         >
-                          {isRTL ? sectionTypeLabels[type]?.ar : sectionTypeLabels[type]?.en}
+                          {getSectionLabel(type, language)}
                         </button>
                       ))}
                     </div>
@@ -372,7 +399,7 @@ export default function StorefrontEditorPage() {
                           </button>
 
                           <span className={`flex-1 text-sm truncate ${!section.enabled ? 'opacity-50' : ''}`}>
-                            {isRTL ? sectionTypeLabels[section.type]?.ar : sectionTypeLabels[section.type]?.en}
+                            {getSectionLabel(section.type, language)}
                           </span>
 
                           <button
@@ -406,7 +433,7 @@ export default function StorefrontEditorPage() {
                       </svg>
                     </button>
                     <h3 className="font-semibold text-slate-900">
-                      {isRTL ? sectionTypeLabels[selectedSection.type]?.ar : sectionTypeLabels[selectedSection.type]?.en}
+                      {getSectionLabel(selectedSection.type, language)}
                     </h3>
                   </div>
                   <div className="flex-1 overflow-y-auto p-4">
@@ -415,6 +442,7 @@ export default function StorefrontEditorPage() {
                       onUpdate={(field, value) => updateSectionContent(selectedSection.id, field, value)}
                       onImageUpload={(file) => handleImageUpload(selectedSection.id, file)}
                       isRTL={isRTL}
+                      language={language}
                       primaryColor={colors.primary}
                     />
                   </div>
@@ -422,12 +450,12 @@ export default function StorefrontEditorPage() {
               ) : (
                 <div className="flex-1 flex items-center justify-center text-slate-400 p-8">
                   <div className="text-center">
-                    <p className="mb-3">{isRTL ? 'اختر قسماً للتحرير' : 'Select a section to edit'}</p>
+                    <p className="mb-3">{localText(language, { ar: 'اختر قسماً للتحرير', en: 'Select a section to edit', fr: 'Selectionnez une section a modifier' })}</p>
                     <button
                       onClick={() => setActiveTab('sections')}
                       className="text-sm text-[#0054A6] hover:underline"
                     >
-                      {isRTL ? 'عرض الأقسام' : 'View sections'}
+                      {localText(language, { ar: 'عرض الأقسام', en: 'View sections', fr: 'Voir les sections' })}
                     </button>
                   </div>
                 </div>
@@ -439,16 +467,16 @@ export default function StorefrontEditorPage() {
           {activeTab === 'colors' && (
             <div className="bg-white rounded-2xl border border-slate-200 p-4">
               <h3 className="text-sm font-medium text-slate-700 mb-4">
-                {isRTL ? 'الألوان' : 'Colors'}
+                {localText(language, { ar: 'الألوان', en: 'Colors', fr: 'Couleurs' })}
               </h3>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { key: 'primary', label: isRTL ? 'رئيسي' : 'Primary' },
-                  { key: 'accent', label: isRTL ? 'ثانوي' : 'Accent' },
-                  { key: 'background', label: isRTL ? 'خلفية' : 'Background' },
-                  { key: 'text', label: isRTL ? 'نص' : 'Text' },
-                  { key: 'headerBg', label: isRTL ? 'رأس الصفحة' : 'Header' },
-                  { key: 'footerBg', label: isRTL ? 'تذييل' : 'Footer' },
+                  { key: 'primary', label: localText(language, { ar: 'رئيسي', en: 'Primary', fr: 'Principale' }) },
+                  { key: 'accent', label: localText(language, { ar: 'ثانوي', en: 'Accent', fr: 'Accent' }) },
+                  { key: 'background', label: localText(language, { ar: 'خلفية', en: 'Background', fr: 'Arriere-plan' }) },
+                  { key: 'text', label: localText(language, { ar: 'نص', en: 'Text', fr: 'Texte' }) },
+                  { key: 'headerBg', label: localText(language, { ar: 'رأس الصفحة', en: 'Header', fr: 'En-tete' }) },
+                  { key: 'footerBg', label: localText(language, { ar: 'تذييل', en: 'Footer', fr: 'Pied de page' }) },
                 ].map(({ key, label }) => (
                   <div key={key} className="flex items-center gap-3">
                     <input
@@ -473,14 +501,14 @@ export default function StorefrontEditorPage() {
             rel="noopener noreferrer"
             className="flex-1 py-3 border border-slate-200 rounded-xl text-sm text-slate-600 text-center font-medium"
           >
-            {isRTL ? 'معاينة' : 'Preview'}
+            {localText(language, { ar: 'معاينة', en: 'Preview', fr: 'Apercu' })}
           </a>
           <button
             onClick={handleSave}
             disabled={saving}
             className="flex-1 py-3 bg-[#0054A6] text-white rounded-xl text-sm font-medium disabled:opacity-50"
           >
-            {saving ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : (isRTL ? 'حفظ' : 'Save')}
+            {saving ? localText(language, { ar: 'جاري الحفظ...', en: 'Saving...', fr: 'Enregistrement...' }) : localText(language, { ar: 'حفظ', en: 'Save', fr: 'Enregistrer' })}
           </button>
         </div>
       </div>
@@ -492,7 +520,7 @@ export default function StorefrontEditorPage() {
           {/* Template Selector */}
           <div className="p-4 border-b border-slate-100">
             <label className="block text-sm font-medium text-slate-700 mb-2">
-              {isRTL ? 'القوالب' : 'Templates'}
+              {localText(language, { ar: 'القوالب', en: 'Templates', fr: 'Modeles' })}
             </label>
             <div className="flex flex-wrap gap-2">
               {Object.values(templates).map((template) => (
@@ -503,7 +531,7 @@ export default function StorefrontEditorPage() {
                 >
                   <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.primary }} />
                   <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.accent }} />
-                  <span>{isRTL ? template.nameAr : template.name}</span>
+                  <span>{getTemplateName(template, language)}</span>
                 </button>
               ))}
             </div>
@@ -513,13 +541,13 @@ export default function StorefrontEditorPage() {
           <div className="flex-1 overflow-y-auto p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-medium text-slate-700">
-                {isRTL ? 'الأقسام' : 'Sections'}
+                {localText(language, { ar: 'الأقسام', en: 'Sections', fr: 'Sections' })}
               </h3>
               <button
                 onClick={() => setShowAddSection(!showAddSection)}
                 className="text-xs text-[#0054A6] hover:underline"
               >
-                {isRTL ? '+ إضافة' : '+ Add'}
+                {localText(language, { ar: '+ إضافة', en: '+ Add', fr: '+ Ajouter' })}
               </button>
             </div>
 
@@ -527,7 +555,7 @@ export default function StorefrontEditorPage() {
             {showAddSection && (
               <div className="mb-3 p-2 bg-slate-50 rounded-lg border border-slate-200">
                 <p className="text-xs text-slate-500 mb-2">
-                  {isRTL ? 'اختر نوع القسم' : 'Choose section type'}
+                  {localText(language, { ar: 'اختر نوع القسم', en: 'Choose section type', fr: 'Choisir le type de section' })}
                 </p>
                 <div className="space-y-1">
                   {availableSectionTypes.map((type) => (
@@ -536,7 +564,7 @@ export default function StorefrontEditorPage() {
                       onClick={() => addSection(type)}
                       className="w-full text-left px-2 py-1.5 text-sm rounded hover:bg-white transition-colors"
                     >
-                      {isRTL ? sectionTypeLabels[type]?.ar : sectionTypeLabels[type]?.en}
+                      {getSectionLabel(type, language)}
                     </button>
                   ))}
                 </div>
@@ -596,7 +624,7 @@ export default function StorefrontEditorPage() {
 
                       {/* Section Name */}
                       <span className={`flex-1 text-sm truncate ${!section.enabled ? 'opacity-50' : ''}`}>
-                        {isRTL ? sectionTypeLabels[section.type]?.ar : sectionTypeLabels[section.type]?.en}
+                        {getSectionLabel(section.type, language)}
                       </span>
 
                       {/* Delete */}
@@ -617,13 +645,13 @@ export default function StorefrontEditorPage() {
           {/* Colors Section */}
           <div className="p-4 border-t border-slate-100">
             <h3 className="text-sm font-medium text-slate-700 mb-3">
-              {isRTL ? 'الألوان' : 'Colors'}
+              {localText(language, { ar: 'الألوان', en: 'Colors', fr: 'Couleurs' })}
             </h3>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { key: 'primary', label: isRTL ? 'رئيسي' : 'Primary' },
-                { key: 'accent', label: isRTL ? 'ثانوي' : 'Accent' },
-                { key: 'background', label: isRTL ? 'خلفية' : 'Bg' },
+                { key: 'primary', label: localText(language, { ar: 'رئيسي', en: 'Primary', fr: 'Principale' }) },
+                { key: 'accent', label: localText(language, { ar: 'ثانوي', en: 'Accent', fr: 'Accent' }) },
+                { key: 'background', label: localText(language, { ar: 'خلفية', en: 'Bg', fr: 'Fond' }) },
               ].map(({ key, label }) => (
                 <div key={key} className="text-center">
                   <input
@@ -646,7 +674,7 @@ export default function StorefrontEditorPage() {
               {/* Editor Header */}
               <div className="p-4 border-b border-slate-100">
                 <h3 className="font-semibold text-slate-900">
-                  {isRTL ? sectionTypeLabels[selectedSection.type]?.ar : sectionTypeLabels[selectedSection.type]?.en}
+                  {getSectionLabel(selectedSection.type, language)}
                 </h3>
               </div>
 
@@ -657,13 +685,14 @@ export default function StorefrontEditorPage() {
                   onUpdate={(field, value) => updateSectionContent(selectedSection.id, field, value)}
                   onImageUpload={(file) => handleImageUpload(selectedSection.id, file)}
                   isRTL={isRTL}
+                  language={language}
                   primaryColor={colors.primary}
                 />
               </div>
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-slate-400">
-              <p>{isRTL ? 'اختر قسماً للتحرير' : 'Select a section to edit'}</p>
+              <p>{localText(language, { ar: 'اختر قسماً للتحرير', en: 'Select a section to edit', fr: 'Selectionnez une section a modifier' })}</p>
             </div>
           )}
         </div>
@@ -678,17 +707,18 @@ interface SectionEditorProps {
   onUpdate: (field: string, value: unknown) => void;
   onImageUpload: (file: File) => void;
   isRTL: boolean;
+  language: Language;
   primaryColor: string;
 }
 
-function SectionEditor({ section, onUpdate, onImageUpload, isRTL, primaryColor }: SectionEditorProps) {
-  const renderField = (field: string, label: string, labelAr: string, type: 'text' | 'textarea' | 'color' | 'number' = 'text') => {
+function SectionEditor({ section, onUpdate, onImageUpload, isRTL, language, primaryColor }: SectionEditorProps) {
+  const renderField = (field: string, label: string, labelAr: string, type: 'text' | 'textarea' | 'color' | 'number' = 'text', labelFr?: string) => {
     const value = section.content[field as keyof typeof section.content] || '';
 
     return (
       <div key={field} className="mb-4">
         <label className="block text-sm font-medium text-slate-700 mb-1">
-          {isRTL ? labelAr : label}
+          {localText(language, { ar: labelAr, en: label, fr: labelFr || label })}
         </label>
         {type === 'textarea' ? (
           <textarea
@@ -737,7 +767,7 @@ function SectionEditor({ section, onUpdate, onImageUpload, isRTL, primaryColor }
     return (
       <div className="mb-4">
         <label className="block text-sm font-medium text-slate-700 mb-2">
-          {isRTL ? 'صورة الخلفية' : 'Background Image'}
+          {localText(language, { ar: 'صورة الخلفية', en: 'Background Image', fr: "Image d'arriere-plan" })}
         </label>
         <div className="flex items-start gap-3">
           {imageUrl ? (
@@ -752,7 +782,7 @@ function SectionEditor({ section, onUpdate, onImageUpload, isRTL, primaryColor }
             </div>
           ) : (
             <div className="w-24 h-16 bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs">
-              {isRTL ? 'صورة' : 'Image'}
+              {localText(language, { ar: 'صورة', en: 'Image', fr: 'Image' })}
             </div>
           )}
           <div>
@@ -770,7 +800,7 @@ function SectionEditor({ section, onUpdate, onImageUpload, isRTL, primaryColor }
               htmlFor={`image-upload-${section.id}`}
               className="inline-block px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-sm font-medium cursor-pointer hover:bg-slate-200"
             >
-              {isRTL ? 'رفع' : 'Upload'}
+              {localText(language, { ar: 'رفع', en: 'Upload', fr: 'Telecharger' })}
             </label>
           </div>
         </div>
@@ -783,47 +813,47 @@ function SectionEditor({ section, onUpdate, onImageUpload, isRTL, primaryColor }
     case 'hero':
       return (
         <div>
-          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)')}
-          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)')}
-          {renderField('subtitle', 'Subtitle (English)', 'العنوان الفرعي (إنجليزي)', 'textarea')}
-          {renderField('subtitleAr', 'Subtitle (Arabic)', 'العنوان الفرعي (عربي)', 'textarea')}
-          {renderField('ctaText', 'Button Text (English)', 'نص الزر (إنجليزي)')}
-          {renderField('ctaTextAr', 'Button Text (Arabic)', 'نص الزر (عربي)')}
-          {renderField('ctaLink', 'Button Link', 'رابط الزر')}
+          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)', 'text', 'Titre (anglais)')}
+          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)', 'text', 'Titre (arabe)')}
+          {renderField('subtitle', 'Subtitle (English)', 'العنوان الفرعي (إنجليزي)', 'textarea', 'Sous-titre (anglais)')}
+          {renderField('subtitleAr', 'Subtitle (Arabic)', 'العنوان الفرعي (عربي)', 'textarea', 'Sous-titre (arabe)')}
+          {renderField('ctaText', 'Button Text (English)', 'نص الزر (إنجليزي)', 'text', 'Texte du bouton (anglais)')}
+          {renderField('ctaTextAr', 'Button Text (Arabic)', 'نص الزر (عربي)', 'text', 'Texte du bouton (arabe)')}
+          {renderField('ctaLink', 'Button Link', 'رابط الزر', 'text', 'Lien du bouton')}
           {renderImageUpload()}
-          {renderField('backgroundColor', 'Overlay Color', 'لون الغطاء', 'color')}
-          {renderField('textColor', 'Text Color', 'لون النص', 'color')}
+          {renderField('backgroundColor', 'Overlay Color', 'لون الغطاء', 'color', 'Couleur de superposition')}
+          {renderField('textColor', 'Text Color', 'لون النص', 'color', 'Couleur du texte')}
         </div>
       );
 
     case 'announcement':
       return (
         <div>
-          {renderField('title', 'Text (English)', 'النص (إنجليزي)')}
-          {renderField('titleAr', 'Text (Arabic)', 'النص (عربي)')}
-          {renderField('backgroundColor', 'Background Color', 'لون الخلفية', 'color')}
-          {renderField('textColor', 'Text Color', 'لون النص', 'color')}
+          {renderField('title', 'Text (English)', 'النص (إنجليزي)', 'text', 'Texte (anglais)')}
+          {renderField('titleAr', 'Text (Arabic)', 'النص (عربي)', 'text', 'Texte (arabe)')}
+          {renderField('backgroundColor', 'Background Color', 'لون الخلفية', 'color', "Couleur d'arriere-plan")}
+          {renderField('textColor', 'Text Color', 'لون النص', 'color', 'Couleur du texte')}
         </div>
       );
 
     case 'featured':
       return (
         <div>
-          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)')}
-          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)')}
-          {renderField('productCount', 'Number of Products', 'عدد المنتجات', 'number')}
-          {renderField('backgroundColor', 'Background Color', 'لون الخلفية', 'color')}
+          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)', 'text', 'Titre (anglais)')}
+          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)', 'text', 'Titre (arabe)')}
+          {renderField('productCount', 'Number of Products', 'عدد المنتجات', 'number', 'Nombre de produits')}
+          {renderField('backgroundColor', 'Background Color', 'لون الخلفية', 'color', "Couleur d'arriere-plan")}
         </div>
       );
 
     case 'features':
       return (
         <div>
-          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)')}
-          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)')}
-          {renderField('backgroundColor', 'Background Color', 'لون الخلفية', 'color')}
+          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)', 'text', 'Titre (anglais)')}
+          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)', 'text', 'Titre (arabe)')}
+          {renderField('backgroundColor', 'Background Color', 'لون الخلفية', 'color', "Couleur d'arriere-plan")}
           <p className="text-sm text-slate-500 mt-4">
-            {isRTL ? 'سيتم عرض 4 مميزات افتراضية' : 'Default 4 features will be displayed'}
+            {localText(language, { ar: 'سيتم عرض 4 مميزات افتراضية', en: 'Default 4 features will be displayed', fr: '4 caracteristiques par defaut seront affichees' })}
           </p>
         </div>
       );
@@ -831,30 +861,30 @@ function SectionEditor({ section, onUpdate, onImageUpload, isRTL, primaryColor }
     case 'grid':
       return (
         <div>
-          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)')}
-          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)')}
-          {renderField('productsPerRow', 'Products Per Row', 'المنتجات في الصف', 'number')}
+          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)', 'text', 'Titre (anglais)')}
+          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)', 'text', 'Titre (arabe)')}
+          {renderField('productsPerRow', 'Products Per Row', 'المنتجات في الصف', 'number', 'Produits par ligne')}
         </div>
       );
 
     case 'newsletter':
       return (
         <div>
-          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)')}
-          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)')}
-          {renderField('subtitle', 'Subtitle (English)', 'العنوان الفرعي (إنجليزي)', 'textarea')}
-          {renderField('subtitleAr', 'Subtitle (Arabic)', 'العنوان الفرعي (عربي)', 'textarea')}
-          {renderField('backgroundColor', 'Background Color', 'لون الخلفية', 'color')}
+          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)', 'text', 'Titre (anglais)')}
+          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)', 'text', 'Titre (arabe)')}
+          {renderField('subtitle', 'Subtitle (English)', 'العنوان الفرعي (إنجليزي)', 'textarea', 'Sous-titre (anglais)')}
+          {renderField('subtitleAr', 'Subtitle (Arabic)', 'العنوان الفرعي (عربي)', 'textarea', 'Sous-titre (arabe)')}
+          {renderField('backgroundColor', 'Background Color', 'لون الخلفية', 'color', "Couleur d'arriere-plan")}
         </div>
       );
 
     case 'about':
       return (
         <div>
-          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)')}
-          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)')}
-          {renderField('subtitle', 'Content (English)', 'المحتوى (إنجليزي)', 'textarea')}
-          {renderField('subtitleAr', 'Content (Arabic)', 'المحتوى (عربي)', 'textarea')}
+          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)', 'text', 'Titre (anglais)')}
+          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)', 'text', 'Titre (arabe)')}
+          {renderField('subtitle', 'Content (English)', 'المحتوى (إنجليزي)', 'textarea', 'Contenu (anglais)')}
+          {renderField('subtitleAr', 'Content (Arabic)', 'المحتوى (عربي)', 'textarea', 'Contenu (arabe)')}
           {renderImageUpload()}
         </div>
       );
@@ -863,7 +893,7 @@ function SectionEditor({ section, onUpdate, onImageUpload, isRTL, primaryColor }
       return (
         <div>
           <p className="text-sm text-slate-500">
-            {isRTL ? 'سيتم عرض الأقسام من منتجاتك تلقائياً' : 'Categories from your products will be displayed automatically'}
+            {localText(language, { ar: 'سيتم عرض الأقسام من منتجاتك تلقائياً', en: 'Categories from your products will be displayed automatically', fr: 'Les categories de vos produits seront affichees automatiquement' })}
           </p>
         </div>
       );
@@ -871,10 +901,10 @@ function SectionEditor({ section, onUpdate, onImageUpload, isRTL, primaryColor }
     case 'collection':
       return (
         <div>
-          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)')}
-          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)')}
+          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)', 'text', 'Titre (anglais)')}
+          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)', 'text', 'Titre (arabe)')}
           <p className="text-sm text-slate-500 mt-4">
-            {isRTL ? 'أضف المجموعات من إعدادات المتجر' : 'Add collections from store settings'}
+            {localText(language, { ar: 'أضف المجموعات من إعدادات المتجر', en: 'Add collections from store settings', fr: 'Ajoutez des collections depuis les parametres de la boutique' })}
           </p>
         </div>
       );
@@ -882,8 +912,8 @@ function SectionEditor({ section, onUpdate, onImageUpload, isRTL, primaryColor }
     default:
       return (
         <div>
-          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)')}
-          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)')}
+          {renderField('title', 'Title (English)', 'العنوان (إنجليزي)', 'text', 'Titre (anglais)')}
+          {renderField('titleAr', 'Title (Arabic)', 'العنوان (عربي)', 'text', 'Titre (arabe)')}
         </div>
       );
   }

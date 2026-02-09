@@ -5,6 +5,7 @@ import { useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Doc } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import Button from '@/components/ui/Button';
 
 interface ThemeSectionProps {
@@ -22,7 +23,6 @@ const presetColors = [
 
 export default function ThemeSection({ storefront }: ThemeSectionProps) {
   const { language } = useLanguage();
-  const isRTL = language === 'ar';
 
   const [primaryColor, setPrimaryColor] = useState(storefront?.theme?.primaryColor || '#0054A6');
   const [accentColor, setAccentColor] = useState(storefront?.theme?.accentColor || '#F7941D');
@@ -60,7 +60,7 @@ export default function ThemeSection({ storefront }: ThemeSectionProps) {
   if (!storefront) {
     return (
       <div className="text-center py-8 text-slate-500">
-        {isRTL ? 'يرجى إنشاء متجرك أولاً' : 'Please create your storefront first'}
+        {localText(language, { ar: 'يرجى إنشاء متجرك أولاً', en: 'Please create your storefront first', fr: 'Veuillez d\'abord créer votre boutique' })}
       </div>
     );
   }
@@ -70,7 +70,7 @@ export default function ThemeSection({ storefront }: ThemeSectionProps) {
       {/* Presets */}
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-3">
-          {isRTL ? 'ألوان جاهزة' : 'Color Presets'}
+          {localText(language, { ar: 'ألوان جاهزة', en: 'Color Presets', fr: 'Palettes de couleurs' })}
         </label>
         <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
           {presetColors.map((preset) => (
@@ -100,7 +100,7 @@ export default function ThemeSection({ storefront }: ThemeSectionProps) {
       {/* Primary Color */}
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-2">
-          {isRTL ? 'اللون الرئيسي' : 'Primary Color'}
+          {localText(language, { ar: 'اللون الرئيسي', en: 'Primary Color', fr: 'Couleur primaire' })}
         </label>
         <div className="flex items-center gap-3">
           <input
@@ -122,7 +122,7 @@ export default function ThemeSection({ storefront }: ThemeSectionProps) {
       {/* Accent Color */}
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-2">
-          {isRTL ? 'لون التمييز' : 'Accent Color'}
+          {localText(language, { ar: 'لون التمييز', en: 'Accent Color', fr: 'Couleur d\'accent' })}
         </label>
         <div className="flex items-center gap-3">
           <input
@@ -144,7 +144,7 @@ export default function ThemeSection({ storefront }: ThemeSectionProps) {
       {/* Preview */}
       <div>
         <label className="block text-sm font-medium text-slate-700 mb-2">
-          {isRTL ? 'معاينة' : 'Preview'}
+          {localText(language, { ar: 'معاينة', en: 'Preview', fr: 'Aperçu' })}
         </label>
         <div className="p-6 rounded-xl border border-slate-200 bg-slate-50">
           <div
@@ -154,13 +154,13 @@ export default function ThemeSection({ storefront }: ThemeSectionProps) {
             {storefront.boutiqueName}
           </div>
           <p className="text-slate-600 text-sm mb-4">
-            {isRTL ? 'وصف المتجر هنا...' : 'Store description here...'}
+            {localText(language, { ar: 'وصف المتجر هنا...', en: 'Store description here...', fr: 'Description de la boutique ici...' })}
           </p>
           <button
             className="px-6 py-2 rounded-xl text-white font-medium"
             style={{ backgroundColor: accentColor }}
           >
-            {isRTL ? 'تسوق الآن' : 'Shop Now'}
+            {localText(language, { ar: 'تسوق الآن', en: 'Shop Now', fr: 'Acheter maintenant' })}
           </button>
         </div>
       </div>
@@ -168,12 +168,8 @@ export default function ThemeSection({ storefront }: ThemeSectionProps) {
       {/* Save Button */}
       <Button onClick={handleSave} disabled={saving}>
         {saving
-          ? isRTL
-            ? 'جاري الحفظ...'
-            : 'Saving...'
-          : isRTL
-          ? 'حفظ الألوان'
-          : 'Save Colors'}
+          ? localText(language, { ar: 'جاري الحفظ...', en: 'Saving...', fr: 'Enregistrement...' })
+          : localText(language, { ar: 'حفظ الألوان', en: 'Save Colors', fr: 'Enregistrer les couleurs' })}
       </Button>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { Doc, Id } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import { isLightColor } from '@/lib/colors';
 
 interface CategoryNavProps {
@@ -45,7 +46,7 @@ export default function CategoryNav({
             border: selectedCategory === null ? 'none' : `1px solid ${borderColor}`,
           }}
         >
-          {isRTL ? 'جميع المنتجات' : 'All Products'}
+          {localText(language, { ar: 'جميع المنتجات', en: 'All Products', fr: 'Tous les produits' })}
         </button>
         {categories.map((category) => (
           <button

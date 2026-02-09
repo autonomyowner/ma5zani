@@ -6,6 +6,7 @@ import Script from 'next/script';
 import { Doc } from '@/convex/_generated/dataModel';
 import { getR2PublicUrl } from '@/lib/r2';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import StorefrontHeader from './StorefrontHeader';
 import CartDrawer from './CartDrawer';
 import ChatbotWidget from './ChatbotWidget';
@@ -71,7 +72,7 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
 
   // Footer configuration
   const footer = storefront.footer || { showPoweredBy: true };
-  const footerCustomText = isRTL ? footer.customTextAr : footer.customText;
+  const footerCustomText = language === 'ar' ? footer.customTextAr : footer.customText;
 
   // Initialize Meta Pixel
   useEffect(() => {
@@ -241,7 +242,7 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
                 className="text-xs tracking-[0.3em] uppercase mb-6"
                 style={{ color: textMuted }}
               >
-                {isRTL ? 'روابط سريعة' : 'Quick Links'}
+                {localText(language, { ar: 'روابط سريعة', en: 'Quick Links', fr: 'Liens rapides' })}
               </h4>
               <ul className="space-y-4">
                 <li>
@@ -250,7 +251,7 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
                     className="text-sm transition-colors duration-300 hover:opacity-100"
                     style={{ color: textMuted }}
                   >
-                    {isRTL ? 'الرئيسية' : 'Home'}
+                    {localText(language, { ar: 'الرئيسية', en: 'Home', fr: 'Accueil' })}
                   </Link>
                 </li>
                 <li>
@@ -259,7 +260,7 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
                     className="text-sm transition-colors duration-300 hover:opacity-100"
                     style={{ color: textMuted }}
                   >
-                    {isRTL ? 'المنتجات' : 'Products'}
+                    {localText(language, { ar: 'المنتجات', en: 'Products', fr: 'Produits' })}
                   </Link>
                 </li>
               </ul>
@@ -271,7 +272,7 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
                 className="text-xs tracking-[0.3em] uppercase mb-6"
                 style={{ color: textMuted }}
               >
-                {isRTL ? 'تواصل' : 'Contact'}
+                {localText(language, { ar: 'تواصل', en: 'Contact', fr: 'Contact' })}
               </h4>
               <ul className="space-y-4">
                 {storefront.socialLinks?.instagram && (
@@ -288,7 +289,7 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
                   </li>
                 )}
                 <li className="text-sm" style={{ color: textMuted }}>
-                  {isRTL ? 'الجزائر' : 'Algeria'}
+                  {localText(language, { ar: 'الجزائر', en: 'Algeria', fr: 'Algerie' })}
                 </li>
               </ul>
             </div>
@@ -327,7 +328,7 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
                   className="text-[10px] tracking-[0.2em] uppercase"
                   style={{ color: textSubtle }}
                 >
-                  {isRTL ? 'التوصيل لجميع الولايات' : 'Delivery to all wilayas'}
+                  {localText(language, { ar: 'التوصيل لجميع الولايات', en: 'Delivery to all wilayas', fr: 'Livraison dans toutes les wilayas' })}
                 </span>
                 <span
                   className="w-1 h-1 rounded-full"
@@ -337,7 +338,7 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
                   className="text-[10px] tracking-[0.2em] uppercase"
                   style={{ color: textSubtle }}
                 >
-                  {isRTL ? 'الجزائر' : 'Algeria'}
+                  {localText(language, { ar: 'الجزائر', en: 'Algeria', fr: 'Algerie' })}
                 </span>
               </div>
             </div>

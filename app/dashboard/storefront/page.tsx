@@ -6,6 +6,7 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import { useCurrentSeller } from '@/hooks/useCurrentSeller';
 import { getR2PublicUrl } from '@/lib/r2';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -87,7 +88,7 @@ export default function StorefrontPage() {
       setLogoKey(key);
     } catch (error) {
       console.error('Upload error:', error);
-      alert(isRTL ? 'فشل رفع الصورة' : 'Failed to upload image');
+      alert(localText(language, { ar: 'فشل رفع الصورة', en: 'Failed to upload image', fr: 'Échec du téléchargement de l\'image' }));
     } finally {
       setUploading(false);
     }
@@ -95,7 +96,7 @@ export default function StorefrontPage() {
 
   const handleSave = async () => {
     if (!boutiqueName.trim() || !slug.trim()) {
-      alert(isRTL ? 'يرجى إدخال اسم المتجر والرابط' : 'Please enter store name and URL');
+      alert(localText(language, { ar: 'يرجى إدخال اسم المتجر والرابط', en: 'Please enter store name and URL', fr: 'Veuillez entrer le nom et le lien de la boutique' }));
       return;
     }
 
@@ -160,7 +161,7 @@ export default function StorefrontPage() {
       });
     } catch (error) {
       console.error('Save pixel error:', error);
-      alert(isRTL ? 'فشل حفظ البكسل' : 'Failed to save pixel');
+      alert(localText(language, { ar: 'فشل حفظ البكسل', en: 'Failed to save pixel', fr: 'Échec de l\'enregistrement du pixel' }));
     } finally {
       setSavingPixel(false);
     }
@@ -184,7 +185,7 @@ export default function StorefrontPage() {
 
   if (seller && !seller.isActivated) {
     return (
-      <DashboardLayout seller={seller} title={isRTL ? 'متجرك الإلكتروني' : 'Your Online Store'}>
+      <DashboardLayout seller={seller} title={localText(language, { ar: 'متجرك الإلكتروني', en: 'Your Online Store', fr: 'Votre boutique en ligne' })}>
         <FounderOfferGate />
       </DashboardLayout>
     );
@@ -193,8 +194,8 @@ export default function StorefrontPage() {
   return (
     <DashboardLayout
       seller={seller}
-      title={isRTL ? 'متجرك الإلكتروني' : 'Your Online Store'}
-      subtitle={isRTL ? 'أنشئ صفحة متجرك الخاصة وشارك الرابط مع عملائك' : 'Create your store page and share the link with customers'}
+      title={localText(language, { ar: 'متجرك الإلكتروني', en: 'Your Online Store', fr: 'Votre boutique en ligne' })}
+      subtitle={localText(language, { ar: 'أنشئ صفحة متجرك الخاصة وشارك الرابط مع عملائك', en: 'Create your store page and share the link with customers', fr: 'Créez votre page boutique et partagez le lien avec vos clients' })}
       headerActions={
         storefront && storefront.isPublished ? (
           <a
@@ -203,7 +204,7 @@ export default function StorefrontPage() {
             rel="noopener noreferrer"
             className="px-3 lg:px-4 py-1.5 lg:py-2 bg-[#22B14C] text-white rounded-xl font-medium hover:opacity-90 text-xs lg:text-sm"
           >
-            {isRTL ? 'عرض المتجر' : 'View Store'}
+            {localText(language, { ar: 'عرض المتجر', en: 'View Store', fr: 'Voir la boutique' })}
           </a>
         ) : undefined
       }
@@ -214,7 +215,7 @@ export default function StorefrontPage() {
         <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
           <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">1</div>
           <h2 className="text-base sm:text-lg font-semibold text-slate-900">
-            {isRTL ? 'معلومات المتجر' : 'Store Info'}
+            {localText(language, { ar: 'معلومات المتجر', en: 'Store Info', fr: 'Infos de la boutique' })}
           </h2>
         </div>
 
@@ -223,30 +224,30 @@ export default function StorefrontPage() {
           <div className="space-y-3 sm:space-y-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                {isRTL ? 'اسم المتجر' : 'Store Name'} *
+                {localText(language, { ar: 'اسم المتجر', en: 'Store Name', fr: 'Nom de la boutique' })} *
               </label>
               <Input
                 value={boutiqueName}
                 onChange={(e) => setBoutiqueName(e.target.value)}
-                placeholder={isRTL ? 'متجر الأناقة' : 'My Fashion Store'}
+                placeholder={localText(language, { ar: 'متجر الأناقة', en: 'My Fashion Store', fr: 'Ma Boutique Mode' })}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                {isRTL ? 'رابط المتجر' : 'Store URL'} *
+                {localText(language, { ar: 'رابط المتجر', en: 'Store URL', fr: 'Lien de la boutique' })} *
               </label>
               <SlugInput value={slug} onChange={setSlug} />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">
-                {isRTL ? 'وصف قصير' : 'Short Description'}
+                {localText(language, { ar: 'وصف قصير', en: 'Short Description', fr: 'Description courte' })}
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder={isRTL ? 'نقدم أفضل المنتجات...' : 'We offer the best products...'}
+                placeholder={localText(language, { ar: 'نقدم أفضل المنتجات...', en: 'We offer the best products...', fr: 'Nous offrons les meilleurs produits...' })}
                 rows={2}
                 className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0054A6]"
               />
@@ -257,7 +258,7 @@ export default function StorefrontPage() {
           <div className="space-y-3 sm:space-y-4">
             <div>
               <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-2">
-                {isRTL ? 'شعار المتجر' : 'Store Logo'}
+                {localText(language, { ar: 'شعار المتجر', en: 'Store Logo', fr: 'Logo de la boutique' })}
               </label>
               <div className="flex items-center gap-3">
                 {logoKey ? (
@@ -267,13 +268,13 @@ export default function StorefrontPage() {
                   </div>
                 ) : (
                   <div className="w-14 h-14 sm:w-16 sm:h-16 bg-slate-100 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-xs flex-shrink-0">
-                    {isRTL ? 'شعار' : 'Logo'}
+                    {localText(language, { ar: 'شعار', en: 'Logo', fr: 'Logo' })}
                   </div>
                 )}
                 <div>
                   <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" id="logo-upload" disabled={uploading} />
                   <label htmlFor="logo-upload" className="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-slate-100 text-slate-700 rounded-lg text-xs sm:text-sm font-medium cursor-pointer hover:bg-slate-200">
-                    {uploading ? (isRTL ? 'جاري...' : 'Uploading...') : (isRTL ? 'رفع' : 'Upload')}
+                    {uploading ? localText(language, { ar: 'جاري...', en: 'Uploading...', fr: 'Envoi...' }) : localText(language, { ar: 'رفع', en: 'Upload', fr: 'Envoyer' })}
                   </label>
                 </div>
               </div>
@@ -282,7 +283,7 @@ export default function StorefrontPage() {
             <div className="grid grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-1">
-                  {isRTL ? 'اللون الرئيسي' : 'Primary'}
+                  {localText(language, { ar: 'اللون الرئيسي', en: 'Primary', fr: 'Principale' })}
                 </label>
                 <div className="flex items-center gap-2">
                   <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-8 h-8 sm:w-10 sm:h-10 rounded border cursor-pointer flex-shrink-0" />
@@ -291,7 +292,7 @@ export default function StorefrontPage() {
               </div>
               <div>
                 <label className="block text-xs sm:text-sm font-medium text-slate-700 mb-1">
-                  {isRTL ? 'لون الأزرار' : 'Buttons'}
+                  {localText(language, { ar: 'لون الأزرار', en: 'Buttons', fr: 'Boutons' })}
                 </label>
                 <div className="flex items-center gap-2">
                   <input type="color" value={accentColor} onChange={(e) => setAccentColor(e.target.value)} className="w-8 h-8 sm:w-10 sm:h-10 rounded border cursor-pointer flex-shrink-0" />
@@ -304,7 +305,7 @@ export default function StorefrontPage() {
 
         <div className="mt-4 sm:mt-6 pt-4 border-t border-slate-100">
           <Button onClick={handleSave} disabled={saving} className="w-full sm:w-auto">
-            {saving ? (isRTL ? 'جاري الحفظ...' : 'Saving...') : (isRTL ? 'حفظ التغييرات' : 'Save Changes')}
+            {saving ? localText(language, { ar: 'جاري الحفظ...', en: 'Saving...', fr: 'Enregistrement en cours...' }) : localText(language, { ar: 'حفظ التغييرات', en: 'Save Changes', fr: 'Enregistrer les modifications' })}
           </Button>
         </div>
       </div>
@@ -315,21 +316,21 @@ export default function StorefrontPage() {
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">2</div>
             <h2 className="text-base sm:text-lg font-semibold text-slate-900">
-              {isRTL ? 'اختر المنتجات' : 'Products'}
+              {localText(language, { ar: 'اختر المنتجات', en: 'Products', fr: 'Produits' })}
             </h2>
           </div>
           <a href="/dashboard/products" className="text-xs sm:text-sm text-[#0054A6] hover:underline whitespace-nowrap">
-            {isRTL ? '+ إضافة' : '+ Add'}
+            {localText(language, { ar: '+ إضافة', en: '+ Add', fr: '+ Ajouter' })}
           </a>
         </div>
 
         {products && products.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-slate-500 mb-4">
-              {isRTL ? 'لا توجد منتجات. أضف منتجاتك أولاً.' : 'No products yet. Add your products first.'}
+              {localText(language, { ar: 'لا توجد منتجات. أضف منتجاتك أولاً.', en: 'No products yet. Add your products first.', fr: 'Pas encore de produits. Ajoutez vos produits d\'abord.' })}
             </p>
             <a href="/dashboard/products" className="inline-block px-6 py-2 bg-[#0054A6] text-white rounded-xl font-medium hover:opacity-90">
-              {isRTL ? 'إضافة منتجات' : 'Add Products'}
+              {localText(language, { ar: 'إضافة منتجات', en: 'Add Products', fr: 'Ajouter des produits' })}
             </a>
           </div>
         ) : (
@@ -338,7 +339,7 @@ export default function StorefrontPage() {
             {storefrontProducts.length > 0 && (
               <div className="mb-4">
                 <p className="text-sm text-green-600 font-medium mb-2">
-                  {isRTL ? `${storefrontProducts.length} منتج في متجرك` : `${storefrontProducts.length} product(s) in your store`}
+                  {localText(language, { ar: `${storefrontProducts.length} منتج في متجرك`, en: `${storefrontProducts.length} product(s) in your store`, fr: `${storefrontProducts.length} produit(s) dans votre boutique` })}
                 </p>
               </div>
             )}
@@ -361,18 +362,18 @@ export default function StorefrontPage() {
                     <img src={getR2PublicUrl(product.imageKeys[0])} alt={product.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-400 text-[10px] sm:text-xs">
-                      {isRTL ? 'صورة' : 'IMG'}
+                      {localText(language, { ar: 'صورة', en: 'IMG', fr: 'IMG' })}
                     </div>
                   )}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-slate-900 truncate text-sm sm:text-base">{product.name}</h3>
-                  <p className="text-xs sm:text-sm text-slate-500">{product.price.toLocaleString()} {isRTL ? 'دج' : 'DZD'}</p>
+                  <p className="text-xs sm:text-sm text-slate-500">{product.price.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DA' })}</p>
                 </div>
 
                 <span className={`hidden sm:inline text-xs px-2 py-1 rounded-full flex-shrink-0 ${product.showOnStorefront ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
-                  {product.showOnStorefront ? (isRTL ? 'ظاهر' : 'Visible') : (isRTL ? 'مخفي' : 'Hidden')}
+                  {product.showOnStorefront ? localText(language, { ar: 'ظاهر', en: 'Visible', fr: 'Visible' }) : localText(language, { ar: 'مخفي', en: 'Hidden', fr: 'Masqué' })}
                 </span>
               </div>
             ))}
@@ -386,21 +387,19 @@ export default function StorefrontPage() {
           <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">3</div>
             <h2 className="text-base sm:text-lg font-semibold text-slate-900">
-              {isRTL ? 'تخصيص القالب' : 'Customize Template'}
+              {localText(language, { ar: 'تخصيص القالب', en: 'Customize Template', fr: 'Personnaliser le modèle' })}
             </h2>
           </div>
 
           <div className="space-y-4">
             <p className="text-sm text-slate-600">
-              {isRTL
-                ? 'خصص مظهر متجرك: أضف صورة رئيسية، شريط إعلانات، منتجات مميزة، والمزيد.'
-                : 'Customize your store appearance: add hero banner, announcement bar, featured products, and more.'}
+              {localText(language, { ar: 'خصص مظهر متجرك: أضف صورة رئيسية، شريط إعلانات، منتجات مميزة، والمزيد.', en: 'Customize your store appearance: add hero banner, announcement bar, featured products, and more.', fr: 'Personnalisez l\'apparence de votre boutique : ajoutez une bannière, une barre d\'annonces, des produits vedettes, et plus.' })}
             </p>
             <a
               href="/dashboard/storefront/editor"
               className="inline-block px-4 py-2 bg-[#0054A6] text-white rounded-xl font-medium hover:opacity-90 text-sm"
             >
-              {isRTL ? 'فتح محرر القالب' : 'Open Template Editor'}
+              {localText(language, { ar: 'فتح محرر القالب', en: 'Open Template Editor', fr: 'Ouvrir l\'éditeur de modèle' })}
             </a>
           </div>
         </div>
@@ -412,7 +411,7 @@ export default function StorefrontPage() {
           <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">4</div>
             <h2 className="text-base sm:text-lg font-semibold text-slate-900">
-              {isRTL ? 'نشر المتجر' : 'Publish'}
+              {localText(language, { ar: 'نشر المتجر', en: 'Publish', fr: 'Publier' })}
             </h2>
           </div>
 
@@ -420,8 +419,8 @@ export default function StorefrontPage() {
             <div>
               <p className="text-sm sm:text-base text-slate-600">
                 {storefront.isPublished
-                  ? (isRTL ? 'متجرك منشور ومتاح للعملاء' : 'Your store is live')
-                  : (isRTL ? 'متجرك غير منشور بعد' : 'Not published yet')}
+                  ? localText(language, { ar: 'متجرك منشور ومتاح للعملاء', en: 'Your store is live', fr: 'Votre boutique est en ligne' })
+                  : localText(language, { ar: 'متجرك غير منشور بعد', en: 'Not published yet', fr: 'Pas encore publié' })}
               </p>
               {storefront.isPublished && (
                 <a
@@ -443,7 +442,7 @@ export default function StorefrontPage() {
                   rel="noopener noreferrer"
                   className="px-3 sm:px-4 py-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 text-sm"
                 >
-                  {isRTL ? 'معاينة' : 'Preview'}
+                  {localText(language, { ar: 'معاينة', en: 'Preview', fr: 'Aperçu' })}
                 </a>
               )}
               <Button
@@ -452,17 +451,15 @@ export default function StorefrontPage() {
                 disabled={storefrontProducts.length === 0}
               >
                 {storefront.isPublished
-                  ? (isRTL ? 'إلغاء النشر' : 'Unpublish')
-                  : (isRTL ? 'نشر' : 'Publish')}
+                  ? localText(language, { ar: 'إلغاء النشر', en: 'Unpublish', fr: 'Dépublier' })
+                  : localText(language, { ar: 'نشر', en: 'Publish', fr: 'Publier' })}
               </Button>
             </div>
           </div>
 
           {storefrontProducts.length === 0 && !storefront.isPublished && (
             <p className="mt-4 text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
-              {isRTL
-                ? 'أضف منتج واحد على الأقل لمتجرك قبل النشر'
-                : 'Add at least one product to your store before publishing'}
+              {localText(language, { ar: 'أضف منتج واحد على الأقل لمتجرك قبل النشر', en: 'Add at least one product to your store before publishing', fr: 'Ajoutez au moins un produit à votre boutique avant de publier' })}
             </p>
           )}
         </div>
@@ -474,7 +471,7 @@ export default function StorefrontPage() {
           <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">5</div>
             <h2 className="text-base sm:text-lg font-semibold text-slate-900">
-              {isRTL ? 'الإعدادات' : 'Settings'}
+              {localText(language, { ar: 'الإعدادات', en: 'Settings', fr: 'Paramètres' })}
             </h2>
           </div>
 
@@ -485,24 +482,22 @@ export default function StorefrontPage() {
                 Meta Pixel ID
               </label>
               <p className="text-xs text-slate-500 mb-2">
-                {isRTL
-                  ? 'أضف معرف البكسل لتتبع التحويلات'
-                  : 'Add your Pixel ID to track conversions'}
+                {localText(language, { ar: 'أضف معرف البكسل لتتبع التحويلات', en: 'Add your Pixel ID to track conversions', fr: 'Ajoutez votre Pixel ID pour le suivi des conversions' })}
               </p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   value={metaPixelId}
                   onChange={(e) => setMetaPixelId(e.target.value)}
-                  placeholder={isRTL ? '123456789012345' : '123456789012345'}
+                  placeholder="123456789012345"
                   className="flex-1"
                 />
                 <Button onClick={handleSavePixel} disabled={savingPixel} variant="secondary" className="w-full sm:w-auto">
-                  {savingPixel ? (isRTL ? 'جاري...' : 'Saving...') : (isRTL ? 'حفظ' : 'Save')}
+                  {savingPixel ? localText(language, { ar: 'جاري...', en: 'Saving...', fr: 'Enregistrement...' }) : localText(language, { ar: 'حفظ', en: 'Save', fr: 'Enregistrer' })}
                 </Button>
               </div>
               {storefront.metaPixelId && (
                 <p className="text-xs text-green-600 mt-2">
-                  {isRTL ? 'البكسل مفعّل' : 'Pixel active'}
+                  {localText(language, { ar: 'البكسل مفعّل', en: 'Pixel active', fr: 'Pixel actif' })}
                 </p>
               )}
             </div>
@@ -510,14 +505,14 @@ export default function StorefrontPage() {
             {/* Help text - collapsible on mobile */}
             <details className="bg-slate-50 rounded-xl">
               <summary className="p-3 sm:p-4 text-sm font-medium text-slate-600 cursor-pointer">
-                {isRTL ? 'كيفية الحصول على Pixel ID' : 'How to get your Pixel ID'}
+                {localText(language, { ar: 'كيفية الحصول على Pixel ID', en: 'How to get your Pixel ID', fr: 'Comment obtenir votre Pixel ID' })}
               </summary>
               <div className="px-3 sm:px-4 pb-3 sm:pb-4 text-xs sm:text-sm text-slate-600">
                 <ol className={`list-decimal ${isRTL ? 'mr-4' : 'ml-4'} space-y-1`}>
-                  <li>{isRTL ? 'اذهب إلى Meta Events Manager' : 'Go to Meta Events Manager'}</li>
-                  <li>{isRTL ? 'انقر على "Connect Data Sources"' : 'Click "Connect Data Sources"'}</li>
-                  <li>{isRTL ? 'اختر "Web" ثم "Meta Pixel"' : 'Select "Web" → "Meta Pixel"'}</li>
-                  <li>{isRTL ? 'انسخ Pixel ID' : 'Copy the Pixel ID'}</li>
+                  <li>{localText(language, { ar: 'اذهب إلى Meta Events Manager', en: 'Go to Meta Events Manager', fr: 'Allez sur Meta Events Manager' })}</li>
+                  <li>{localText(language, { ar: 'انقر على "Connect Data Sources"', en: 'Click "Connect Data Sources"', fr: 'Cliquez sur "Connect Data Sources"' })}</li>
+                  <li>{localText(language, { ar: 'اختر "Web" ثم "Meta Pixel"', en: 'Select "Web" → "Meta Pixel"', fr: 'Sélectionnez "Web" puis "Meta Pixel"' })}</li>
+                  <li>{localText(language, { ar: 'انسخ Pixel ID', en: 'Copy the Pixel ID', fr: 'Copiez le Pixel ID' })}</li>
                 </ol>
               </div>
             </details>

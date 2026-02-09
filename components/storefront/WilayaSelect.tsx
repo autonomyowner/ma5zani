@@ -2,6 +2,7 @@
 
 import { wilayas } from '@/lib/wilayas';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 
 interface WilayaSelectProps {
   value: string;
@@ -39,7 +40,7 @@ export default function WilayaSelect({
       required
     >
       <option value="" style={{ backgroundColor, color: textColor }}>
-        {isRTL ? 'اختر الولاية' : 'Select wilaya'}
+        {localText(language, { ar: 'اختر الولاية', en: 'Select wilaya', fr: 'Choisir la wilaya' })}
       </option>
       {wilayas.map((wilaya) => (
         <option

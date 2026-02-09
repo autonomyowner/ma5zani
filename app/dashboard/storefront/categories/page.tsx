@@ -5,13 +5,13 @@ import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { useLanguage } from '@/lib/LanguageContext';
+import { localText } from '@/lib/translations';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
 
 export default function CategoriesPage() {
   const { language } = useLanguage();
-  const isRTL = language === 'ar';
 
   const seller = useQuery(api.sellers.getCurrentSellerProfile);
   const categories = useQuery(api.categories.getCategories);
@@ -27,7 +27,7 @@ export default function CategoriesPage() {
 
   const handleSubmit = async () => {
     if (!name.trim() || !nameAr.trim()) {
-      alert(isRTL ? 'يرجى ملء جميع الحقول' : 'Please fill all fields');
+      alert(localText(language, { ar: 'يرجى ملء جميع الحقول', en: 'Please fill all fields', fr: 'Veuillez remplir tous les champs' }));
       return;
     }
 
@@ -54,7 +54,7 @@ export default function CategoriesPage() {
   };
 
   const handleDelete = async (categoryId: Id<'categories'>) => {
-    if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذه الفئة؟' : 'Are you sure you want to delete this category?')) {
+    if (!confirm(localText(language, { ar: 'هل أنت متأكد من حذف هذه الفئة؟', en: 'Are you sure you want to delete this category?', fr: 'Êtes-vous sûr de vouloir supprimer cette catégorie ?' }))) {
       return;
     }
     await deleteCategory({ categoryId });
@@ -89,17 +89,15 @@ export default function CategoriesPage() {
             className="text-2xl font-bold text-slate-900"
             style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
           >
-            {isRTL ? 'فئات المنتجات' : 'Product Categories'}
+            {localText(language, { ar: 'فئات المنتجات', en: 'Product Categories', fr: 'Catégories de produits' })}
           </h1>
           <p className="text-slate-500 mt-1">
-            {isRTL
-              ? 'تنظيم منتجاتك في فئات لتسهيل التصفح'
-              : 'Organize your products into categories for easier browsing'}
+            {localText(language, { ar: 'تنظيم منتجاتك في فئات لتسهيل التصفح', en: 'Organize your products into categories for easier browsing', fr: 'Organisez vos produits en catégories pour faciliter la navigation' })}
           </p>
         </div>
         {!showForm && (
           <Button onClick={() => setShowForm(true)}>
-            {isRTL ? '+ إضافة فئة' : '+ Add Category'}
+            {localText(language, { ar: '+ إضافة فئة', en: '+ Add Category', fr: '+ Ajouter une catégorie' })}
           </Button>
         )}
       </div>
@@ -109,17 +107,13 @@ export default function CategoriesPage() {
         <div className="bg-white rounded-2xl border border-slate-200 p-6">
           <h2 className="text-lg font-semibold text-slate-900 mb-4">
             {editingId
-              ? isRTL
-                ? 'تعديل الفئة'
-                : 'Edit Category'
-              : isRTL
-              ? 'إضافة فئة جديدة'
-              : 'Add New Category'}
+              ? localText(language, { ar: 'تعديل الفئة', en: 'Edit Category', fr: 'Modifier la catégorie' })
+              : localText(language, { ar: 'إضافة فئة جديدة', en: 'Add New Category', fr: 'Ajouter une nouvelle catégorie' })}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                {isRTL ? 'الاسم بالإنجليزية' : 'English Name'}
+                {localText(language, { ar: 'الاسم بالإنجليزية', en: 'English Name', fr: 'Nom en anglais' })}
               </label>
               <Input
                 value={name}
@@ -130,7 +124,7 @@ export default function CategoriesPage() {
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">
-                {isRTL ? 'الاسم بالعربية' : 'Arabic Name'}
+                {localText(language, { ar: 'الاسم بالعربية', en: 'Arabic Name', fr: 'Nom en arabe' })}
               </label>
               <Input
                 value={nameAr}
@@ -143,19 +137,13 @@ export default function CategoriesPage() {
           <div className="flex gap-3 mt-4">
             <Button onClick={handleSubmit} disabled={saving}>
               {saving
-                ? isRTL
-                  ? 'جاري الحفظ...'
-                  : 'Saving...'
+                ? localText(language, { ar: 'جاري الحفظ...', en: 'Saving...', fr: 'Enregistrement...' })
                 : editingId
-                ? isRTL
-                  ? 'تحديث'
-                  : 'Update'
-                : isRTL
-                ? 'إضافة'
-                : 'Add'}
+                ? localText(language, { ar: 'تحديث', en: 'Update', fr: 'Mettre à jour' })
+                : localText(language, { ar: 'إضافة', en: 'Add', fr: 'Ajouter' })}
             </Button>
             <Button variant="secondary" onClick={resetForm}>
-              {isRTL ? 'إلغاء' : 'Cancel'}
+              {localText(language, { ar: 'إلغاء', en: 'Cancel', fr: 'Annuler' })}
             </Button>
           </div>
         </div>
@@ -165,9 +153,7 @@ export default function CategoriesPage() {
       <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
         {categories.length === 0 ? (
           <div className="p-8 text-center text-slate-500">
-            {isRTL
-              ? 'لا توجد فئات. أضف فئتك الأولى.'
-              : 'No categories. Add your first category.'}
+            {localText(language, { ar: 'لا توجد فئات. أضف فئتك الأولى.', en: 'No categories. Add your first category.', fr: 'Aucune catégorie. Ajoutez votre première catégorie.' })}
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
@@ -190,13 +176,13 @@ export default function CategoriesPage() {
                     onClick={() => handleEdit(category)}
                     className="px-3 py-1.5 text-sm text-[#0054A6] hover:bg-blue-50 rounded-lg transition-colors"
                   >
-                    {isRTL ? 'تعديل' : 'Edit'}
+                    {localText(language, { ar: 'تعديل', en: 'Edit', fr: 'Modifier' })}
                   </button>
                   <button
                     onClick={() => handleDelete(category._id)}
                     className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   >
-                    {isRTL ? 'حذف' : 'Delete'}
+                    {localText(language, { ar: 'حذف', en: 'Delete', fr: 'Supprimer' })}
                   </button>
                 </div>
               </div>
