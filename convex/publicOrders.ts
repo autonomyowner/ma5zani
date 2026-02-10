@@ -17,7 +17,7 @@ export const getStorefrontProducts = query({
       .query("products")
       .withIndex("by_seller", (q) => q.eq("sellerId", storefront.sellerId))
       .filter((q) => q.eq(q.field("showOnStorefront"), true))
-      .collect();
+      .take(200);
 
     // Filter out-of-stock products if setting is off
     const filteredProducts = storefront.settings.showOutOfStock

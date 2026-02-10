@@ -8,6 +8,7 @@ import { useCart } from '@/lib/CartContext';
 import { useLanguage } from '@/lib/LanguageContext';
 import { localText } from '@/lib/translations';
 import { getR2PublicUrl } from '@/lib/r2';
+import Image from 'next/image';
 import WilayaSelect from './WilayaSelect';
 
 interface CheckoutFormProps {
@@ -221,14 +222,16 @@ export default function CheckoutForm({
                   style={{ borderBottom: `1px solid ${borderColor}` }}
                 >
                   <div
-                    className="w-20 h-24 flex-shrink-0 overflow-hidden"
+                    className="relative w-20 h-24 flex-shrink-0 overflow-hidden"
                     style={{ backgroundColor: inputBg }}
                   >
                     {item.imageKey ? (
-                      <img
+                      <Image
                         src={getR2PublicUrl(item.imageKey)}
                         alt={item.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="80px"
+                        className="object-cover"
                         loading="lazy"
                       />
                     ) : (

@@ -2,6 +2,7 @@
 
 import { ReactNode, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Script from 'next/script';
 import { Doc } from '@/convex/_generated/dataModel';
 import { getR2PublicUrl } from '@/lib/r2';
@@ -171,7 +172,7 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
               <Link href={`/${storefront.slug}`} className="inline-block">
                 <div className="flex items-center gap-3">
                   {logoUrl ? (
-                    <img src={logoUrl} alt={storefront.boutiqueName} className="w-12 h-12 rounded-full object-cover" />
+                    <Image src={logoUrl} alt={storefront.boutiqueName} width={48} height={48} className="w-12 h-12 rounded-full object-cover" />
                   ) : (
                     <span
                       className="text-4xl font-light tracking-[0.3em]"

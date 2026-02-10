@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCart } from '@/lib/CartContext';
 import { getR2PublicUrl } from '@/lib/r2';
 import { useLanguage } from '@/lib/LanguageContext';
@@ -134,14 +135,16 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
                 >
                   {/* Image */}
                   <div
-                    className="w-24 h-32 flex-shrink-0 overflow-hidden"
+                    className="relative w-24 h-32 flex-shrink-0 overflow-hidden"
                     style={{ backgroundColor: cardBg }}
                   >
                     {item.imageKey ? (
-                      <img
+                      <Image
                         src={getR2PublicUrl(item.imageKey)}
                         alt={item.name}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="96px"
+                        className="object-cover"
                         loading="lazy"
                       />
                     ) : (

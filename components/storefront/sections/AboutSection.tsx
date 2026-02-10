@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { getR2PublicUrl } from '@/lib/r2';
 import { useLanguage } from '@/lib/LanguageContext';
 import { localText } from '@/lib/translations';
@@ -65,10 +66,12 @@ export default function AboutSection({ content, primaryColor, accentColor = '#c9
           {imageUrl && (
             <div className="relative">
               <div className="relative aspect-[4/5] overflow-hidden">
-                <img
+                <Image
                   src={imageUrl}
                   alt={title || 'About'}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
                 />
                 {/* Floating accent element */}
                 <div

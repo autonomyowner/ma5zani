@@ -12,6 +12,7 @@ import { useCart } from '@/lib/CartContext';
 import StorefrontLayout from '@/components/storefront/StorefrontLayout';
 import WilayaSelect from '@/components/storefront/WilayaSelect';
 import Link from 'next/link';
+import Image from 'next/image';
 import { trackEvent, sendServerEvent, generateEventId, META_EVENTS } from '@/lib/meta-pixel';
 
 export default function ProductDetailPage() {
@@ -258,10 +259,13 @@ export default function ProductDetailPage() {
             onTouchEnd={(e) => handleTouchEnd(e, images.length)}
           >
             {images.length > 0 ? (
-              <img
+              <Image
                 src={getR2PublicUrl(images[selectedImageIndex])}
                 alt={product.name}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 640px) 100vw, 50vw"
+                className="object-cover"
+                priority
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-slate-300">
@@ -335,16 +339,18 @@ export default function ProductDetailPage() {
                 <button
                   key={imageKey}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`flex-shrink-0 w-16 h-16 sm:w-auto sm:h-auto sm:aspect-square rounded-lg sm:rounded-xl overflow-hidden border-2 transition-colors ${
+                  className={`relative flex-shrink-0 w-16 h-16 sm:w-auto sm:h-auto sm:aspect-square rounded-lg sm:rounded-xl overflow-hidden border-2 transition-colors ${
                     selectedImageIndex === index
                       ? 'border-slate-900'
                       : 'border-transparent hover:border-slate-300'
                   }`}
                 >
-                  <img
+                  <Image
                     src={getR2PublicUrl(imageKey)}
                     alt={`${product.name} ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="80px"
+                    className="object-cover"
                   />
                 </button>
               ))}
@@ -582,10 +588,13 @@ export default function ProductDetailPage() {
                   <div className="rounded-xl overflow-hidden hover:shadow-md transition-shadow" style={{ backgroundColor: cardBg, border: `1px solid ${borderClr}` }}>
                     <div className="aspect-square relative overflow-hidden" style={{ backgroundColor: formBg }}>
                       {relatedImage ? (
-                        <img
+                        <Image
                           src={getR2PublicUrl(relatedImage)}
                           alt={relatedProduct.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          fill
+                          sizes="(max-width: 640px) 50vw, 25vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          loading="lazy"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-slate-300">

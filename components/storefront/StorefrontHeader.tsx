@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCart } from '@/lib/CartContext';
 import { useLanguage } from '@/lib/LanguageContext';
 import { localText, Language } from '@/lib/translations';
@@ -107,9 +108,11 @@ export default function StorefrontHeader({
             className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2"
           >
             {logoUrl ? (
-              <img
+              <Image
                 src={logoUrl}
                 alt={boutiqueName}
+                width={48}
+                height={48}
                 className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full object-cover"
               />
             ) : (

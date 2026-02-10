@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { Doc } from '@/convex/_generated/dataModel';
 import { useCart } from '@/lib/CartContext';
@@ -18,7 +19,7 @@ interface ProductCardProps {
 
 import { isLightColor } from '@/lib/colors';
 
-export default function ProductCard({
+function ProductCard({
   product,
   accentColor,
   backgroundColor = '#0a0a0a',
@@ -71,10 +72,12 @@ export default function ProductCard({
           style={{ backgroundColor: cardBg }}
         >
           {imageUrl ? (
-            <img
+            <Image
               src={imageUrl}
               alt={product.name}
-              className="w-full h-full object-cover transition-transform duration-700 ease-out"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform duration-700 ease-out"
               loading="lazy"
               style={{
                 transform: isHovered ? 'scale(1.05)' : 'scale(1)',
@@ -221,3 +224,5 @@ export default function ProductCard({
     </Link>
   );
 }
+
+export default memo(ProductCard);
