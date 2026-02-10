@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { ConvexError } from "convex/values";
 import { requireSeller, getCurrentSeller } from "./auth";
 
 export const getMyStorefront = query({
@@ -117,7 +118,7 @@ export const createStorefront = mutation({
       .first();
 
     if (slugCheck) {
-      throw new Error("Slug is already taken");
+      throw new ConvexError("SLUG_TAKEN");
     }
 
     const now = Date.now();
@@ -217,7 +218,7 @@ export const updateSlug = mutation({
         .first();
 
       if (slugCheck) {
-        throw new Error("Slug is already taken");
+        throw new ConvexError("SLUG_TAKEN");
       }
     }
 

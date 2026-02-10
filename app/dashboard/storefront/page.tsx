@@ -121,9 +121,22 @@ export default function StorefrontPage() {
           theme: { primaryColor, accentColor },
         });
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Save error:', error);
-      alert(error instanceof Error ? error.message : 'Failed to save');
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      if (errorMsg.includes('SLUG_TAKEN')) {
+        alert(localText(language, {
+          ar: 'هذا الرابط مستخدم بالفعل. يرجى اختيار رابط آخر.',
+          en: 'This store URL is already taken. Please choose a different one.',
+          fr: 'Ce lien de boutique est déjà utilisé. Veuillez en choisir un autre.',
+        }));
+      } else {
+        alert(localText(language, {
+          ar: 'فشل حفظ المتجر. حاول مرة أخرى.',
+          en: 'Failed to save store. Please try again.',
+          fr: 'Échec de l\'enregistrement. Veuillez réessayer.',
+        }));
+      }
     } finally {
       setSaving(false);
     }
