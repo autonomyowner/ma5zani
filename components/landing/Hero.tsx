@@ -4,9 +4,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import Button from '@/components/ui/Button'
 import { useLanguage } from '@/lib/LanguageContext'
+import { authClient } from '@/lib/auth-client'
 
 export default function Hero() {
   const { t, dir, language } = useLanguage()
+  const { data: session } = authClient.useSession()
+  const isSignedIn = !!session
 
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
@@ -55,9 +58,9 @@ export default function Hero() {
             </div>
 
             <div className="flex flex-wrap gap-4 opacity-0 animate-fade-in-up stagger-3">
-              <Link href="/signup">
+              <Link href={isSignedIn ? "/dashboard" : "/signup"}>
                 <Button variant="primary" size="lg">
-                  {t.hero.startTrial}
+                  {isSignedIn ? t.nav.dashboard : t.hero.startTrial}
                 </Button>
               </Link>
               <Link href="#how-it-works">

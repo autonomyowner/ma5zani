@@ -3,9 +3,12 @@
 import Link from 'next/link'
 import Button from '@/components/ui/Button'
 import { useLanguage } from '@/lib/LanguageContext'
+import { authClient } from '@/lib/auth-client'
 
 export default function CTA() {
   const { t } = useLanguage()
+  const { data: session } = authClient.useSession()
+  const isSignedIn = !!session
 
   return (
     <section className="py-24 bg-[#0054A6] relative overflow-hidden">
@@ -39,12 +42,12 @@ export default function CTA() {
         </p>
 
         <div className="flex flex-wrap justify-center gap-4">
-          <Link href="/signup">
+          <Link href={isSignedIn ? "/dashboard" : "/signup"}>
             <Button
               size="lg"
               className="bg-[#F7941D] hover:bg-[#D35400] text-white"
             >
-              {t.cta.startTrial}
+              {isSignedIn ? t.nav.dashboard : t.cta.startTrial}
             </Button>
           </Link>
           <Link href="#pricing">
