@@ -16,6 +16,8 @@ export default defineSchema({
     plan: v.union(v.literal("basic"), v.literal("plus"), v.literal("gros")),
     isActivated: v.optional(v.boolean()),
     activatedAt: v.optional(v.number()),
+    expoPushToken: v.optional(v.string()),
+    emailNotifications: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -48,6 +50,8 @@ export default defineSchema({
     customerName: v.string(),
     customerPhone: v.optional(v.string()),
     wilaya: v.string(),
+    commune: v.optional(v.string()),
+    deliveryType: v.optional(v.union(v.literal("office"), v.literal("home"))),
     deliveryAddress: v.optional(v.string()),
     productName: v.string(),
     quantity: v.number(),

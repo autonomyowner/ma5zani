@@ -1,5 +1,7 @@
 import { query, mutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
+import { Id } from "./_generated/dataModel";
 
 export const getStorefrontProducts = query({
   args: { slug: v.string() },
@@ -106,6 +108,8 @@ export const createPublicOrder = mutation({
     customerName: v.string(),
     customerPhone: v.string(),
     wilaya: v.string(),
+    commune: v.optional(v.string()),
+    deliveryType: v.optional(v.union(v.literal("office"), v.literal("home"))),
     deliveryAddress: v.string(),
   },
   handler: async (ctx, args) => {
@@ -119,7 +123,10 @@ export const createPublicOrder = mutation({
     }
 
     const now = Date.now();
-    const orderIds: string[] = [];
+    const orderIds: Id<"orders">[] = [];
+    const productNames: string[] = [];
+    let firstOrderNumber = "";
+    let totalQuantity = 0;
 
     for (const item of args.items) {
       const product = await ctx.db.get(item.productId);
@@ -146,6 +153,8 @@ export const createPublicOrder = mutation({
         customerName: args.customerName,
         customerPhone: args.customerPhone,
         wilaya: args.wilaya,
+        commune: args.commune,
+        deliveryType: args.deliveryType,
         deliveryAddress: args.deliveryAddress,
         productName: product.name,
         quantity: item.quantity,
@@ -161,6 +170,9 @@ export const createPublicOrder = mutation({
       });
 
       orderIds.push(orderId);
+      productNames.push(product.name);
+      totalQuantity += item.quantity;
+      if (!firstOrderNumber) firstOrderNumber = orderNumber;
 
       // Update product stock
       const newStock = product.stock - item.quantity;
@@ -177,6 +189,31 @@ export const createPublicOrder = mutation({
         updatedAt: now,
       });
     }
+
+    // Send push notification to seller
+    let notificationAmount = 0;
+    for (const oid of orderIds) {
+      const o = await ctx.db.get(oid);
+      if (o) notificationAmount += o.amount;
+    }
+
+    await ctx.scheduler.runAfter(0, internal.notifications.sendNewOrderNotification, {
+      sellerId: storefront.sellerId,
+      customerName: args.customerName,
+      orderAmount: notificationAmount,
+    });
+
+    // Send email notification to seller
+    await ctx.scheduler.runAfter(0, internal.notifications.sendOrderEmailNotification, {
+      sellerId: storefront.sellerId,
+      customerName: args.customerName,
+      customerPhone: args.customerPhone,
+      orderAmount: notificationAmount,
+      wilaya: args.wilaya,
+      productName: productNames.join(", "),
+      quantity: totalQuantity,
+      orderNumber: firstOrderNumber,
+    });
 
     return { orderIds, orderNumber: `ORD-${Date.now().toString(36).toUpperCase()}` };
   },

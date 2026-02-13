@@ -10,6 +10,7 @@ import { localText } from '@/lib/translations';
 import { getR2PublicUrl } from '@/lib/r2';
 import Image from 'next/image';
 import WilayaSelect from './WilayaSelect';
+import CommuneSelect from './CommuneSelect';
 
 interface CheckoutFormProps {
   slug: string;
@@ -38,6 +39,8 @@ export default function CheckoutForm({
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [wilaya, setWilaya] = useState('');
+  const [deliveryType, setDeliveryType] = useState<'office' | 'home'>('office');
+  const [commune, setCommune] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -75,7 +78,7 @@ export default function CheckoutForm({
     e.preventDefault();
     setError('');
 
-    if (!customerName || !customerPhone || !wilaya || !deliveryAddress) {
+    if (!customerName || !customerPhone || !wilaya || !deliveryAddress || (deliveryType === 'home' && !commune)) {
       setError(localText(language, { ar: 'يرجى ملء جميع الحقول', en: 'Please fill all fields', fr: 'Veuillez remplir tous les champs' }));
       return;
     }
@@ -103,6 +106,8 @@ export default function CheckoutForm({
         customerName,
         customerPhone,
         wilaya,
+        commune: deliveryType === 'home' ? commune : undefined,
+        deliveryType,
         deliveryAddress,
       });
 
@@ -367,12 +372,68 @@ export default function CheckoutForm({
                 </label>
                 <WilayaSelect
                   value={wilaya}
-                  onChange={setWilaya}
+                  onChange={(v) => { setWilaya(v); setCommune(''); }}
                   backgroundColor={inputBg}
                   borderColor={inputBorder}
                   textColor={textColor}
                 />
               </div>
+
+              {/* Delivery Type */}
+              <div>
+                <label
+                  className="block text-xs tracking-[0.15em] uppercase mb-3"
+                  style={{ color: textMuted }}
+                >
+                  {localText(language, { ar: 'نوع التوصيل *', en: 'Delivery Type *', fr: 'Type de livraison *' })}
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => { setDeliveryType('office'); setCommune(''); }}
+                    className="flex-1 py-3 text-sm tracking-[0.1em] uppercase transition-all duration-300"
+                    style={{
+                      backgroundColor: deliveryType === 'office' ? accentColor : inputBg,
+                      color: deliveryType === 'office' ? (isLightColor(accentColor) ? '#0a0a0a' : '#ffffff') : textColor,
+                      border: `1px solid ${deliveryType === 'office' ? accentColor : inputBorder}`,
+                    }}
+                  >
+                    {localText(language, { ar: 'مكتب (ستوب ديسك)', en: 'Office (Stop Desk)', fr: 'Bureau (Stop Desk)' })}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeliveryType('home')}
+                    className="flex-1 py-3 text-sm tracking-[0.1em] uppercase transition-all duration-300"
+                    style={{
+                      backgroundColor: deliveryType === 'home' ? accentColor : inputBg,
+                      color: deliveryType === 'home' ? (isLightColor(accentColor) ? '#0a0a0a' : '#ffffff') : textColor,
+                      border: `1px solid ${deliveryType === 'home' ? accentColor : inputBorder}`,
+                    }}
+                  >
+                    {localText(language, { ar: 'المنزل', en: 'Home', fr: 'Domicile' })}
+                  </button>
+                </div>
+              </div>
+
+              {/* Commune (for home delivery) */}
+              {deliveryType === 'home' && wilaya && (
+                <div>
+                  <label
+                    className="block text-xs tracking-[0.15em] uppercase mb-3"
+                    style={{ color: textMuted }}
+                  >
+                    {localText(language, { ar: 'البلدية *', en: 'Commune *', fr: 'Commune *' })}
+                  </label>
+                  <CommuneSelect
+                    wilayaName={wilaya}
+                    value={commune}
+                    onChange={setCommune}
+                    backgroundColor={inputBg}
+                    borderColor={inputBorder}
+                    textColor={textColor}
+                  />
+                </div>
+              )}
 
               <div>
                 <label

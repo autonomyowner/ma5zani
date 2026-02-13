@@ -14,6 +14,7 @@ import type * as categories from "../categories.js";
 import type * as chat from "../chat.js";
 import type * as chatbot from "../chatbot.js";
 import type * as http from "../http.js";
+import type * as notifications from "../notifications.js";
 import type * as orders from "../orders.js";
 import type * as products from "../products.js";
 import type * as publicOrders from "../publicOrders.js";
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   chat: typeof chat;
   chatbot: typeof chatbot;
   http: typeof http;
+  notifications: typeof notifications;
   orders: typeof orders;
   products: typeof products;
   publicOrders: typeof publicOrders;
