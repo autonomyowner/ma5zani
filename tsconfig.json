@@ -23,5 +23,5 @@
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "ma5zani_mobile"]
+  "exclude": ["node_modules", "ma5zani_mobile", "ma5zani-mobile-v2"]
 }

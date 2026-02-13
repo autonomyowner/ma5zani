@@ -114,6 +114,14 @@ export default function OrderSuccessPage() {
                 <span style={{ color: textMuted }}>{localText(language, { ar: 'المنتج', en: 'Product', fr: 'Produit' })}</span>
                 <span className="font-medium" style={{ color: textColor }}>{order.productName}</span>
               </div>
+              {(order.selectedSize || order.selectedColor) && (
+                <div className="flex justify-between">
+                  <span style={{ color: textMuted }}>{localText(language, { ar: 'الخيارات', en: 'Options', fr: 'Options' })}</span>
+                  <span className="font-medium" style={{ color: textColor }}>
+                    {[order.selectedSize, order.selectedColor].filter(Boolean).join(' / ')}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span style={{ color: textMuted }}>{localText(language, { ar: 'الكمية', en: 'Quantity', fr: 'Quantite' })}</span>
                 <span className="font-medium" style={{ color: textColor }}>{order.quantity}</span>

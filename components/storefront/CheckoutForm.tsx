@@ -135,6 +135,8 @@ export default function CheckoutForm({
         items: items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
+          selectedSize: item.selectedSize,
+          selectedColor: item.selectedColor,
         })),
         customerName,
         customerPhone,
@@ -291,6 +293,11 @@ export default function CheckoutForm({
                     >
                       {item.name}
                     </h3>
+                    {(item.selectedSize || item.selectedColor) && (
+                      <p className="text-xs mb-1" style={{ color: textMuted }}>
+                        {[item.selectedSize, item.selectedColor].filter(Boolean).join(' / ')}
+                      </p>
+                    )}
                     <p className="text-xs mb-2" style={{ color: textMuted }}>
                       {localText(language, { ar: `الكمية: ${item.quantity}`, en: `Qty: ${item.quantity}`, fr: `Qte: ${item.quantity}` })}
                     </p>

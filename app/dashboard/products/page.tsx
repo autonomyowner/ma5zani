@@ -34,7 +34,11 @@ export default function ProductsPage() {
     price: '',
     description: '',
     imageKeys: [] as string[],
+    sizes: [] as string[],
+    colors: [] as string[],
   })
+  const [sizeInput, setSizeInput] = useState('')
+  const [colorInput, setColorInput] = useState('')
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -56,7 +60,9 @@ export default function ProductsPage() {
   }
 
   const resetForm = () => {
-    setFormData({ name: '', sku: '', stock: '', price: '', description: '', imageKeys: [] })
+    setFormData({ name: '', sku: '', stock: '', price: '', description: '', imageKeys: [], sizes: [], colors: [] })
+    setSizeInput('')
+    setColorInput('')
     setEditingProduct(null)
     setShowAddModal(false)
   }
@@ -90,6 +96,8 @@ export default function ProductsPage() {
           price: priceNum,
           description: formData.description?.trim() || undefined,
           imageKeys: formData.imageKeys.length > 0 ? formData.imageKeys : undefined,
+          sizes: formData.sizes.length > 0 ? formData.sizes : undefined,
+          colors: formData.colors.length > 0 ? formData.colors : undefined,
         })
       } else {
         await createProduct({
@@ -99,6 +107,8 @@ export default function ProductsPage() {
           price: priceNum,
           description: formData.description?.trim() || undefined,
           imageKeys: formData.imageKeys.length > 0 ? formData.imageKeys : undefined,
+          sizes: formData.sizes.length > 0 ? formData.sizes : undefined,
+          colors: formData.colors.length > 0 ? formData.colors : undefined,
         })
       }
       resetForm()
@@ -118,6 +128,8 @@ export default function ProductsPage() {
       price: product.price.toString(),
       description: product.description || '',
       imageKeys: product.imageKeys || [],
+      sizes: product.sizes || [],
+      colors: product.colors || [],
     })
     setEditingProduct(product._id)
     setShowAddModal(true)
@@ -306,6 +318,128 @@ export default function ProductsPage() {
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   />
+                </div>
+
+                {/* Sizes (Optional) */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-900 mb-2">
+                    {t.dashboard.sizes} ({t.dashboard.optional})
+                  </label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {formData.sizes.map((size, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 text-sm rounded-full"
+                      >
+                        {size}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFormData({
+                              ...formData,
+                              sizes: formData.sizes.filter((_, i) => i !== idx),
+                            })
+                          }
+                          className="text-slate-400 hover:text-red-500 ml-1"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 px-4 py-2 rounded-xl border-2 border-slate-200 focus:border-[#00AEEF] focus:outline-none text-sm"
+                      placeholder={t.dashboard.sizesPlaceholder}
+                      value={sizeInput}
+                      onChange={(e) => setSizeInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          const val = sizeInput.trim()
+                          if (val && !formData.sizes.includes(val)) {
+                            setFormData({ ...formData, sizes: [...formData.sizes, val] })
+                            setSizeInput('')
+                          }
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const val = sizeInput.trim()
+                        if (val && !formData.sizes.includes(val)) {
+                          setFormData({ ...formData, sizes: [...formData.sizes, val] })
+                          setSizeInput('')
+                        }
+                      }}
+                    >
+                      {t.dashboard.addSize}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Colors (Optional) */}
+                <div>
+                  <label className="block text-sm font-medium text-slate-900 mb-2">
+                    {t.dashboard.productColors} ({t.dashboard.optional})
+                  </label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {formData.colors.map((color, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-3 py-1 bg-slate-100 text-slate-700 text-sm rounded-full"
+                      >
+                        {color}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setFormData({
+                              ...formData,
+                              colors: formData.colors.filter((_, i) => i !== idx),
+                            })
+                          }
+                          className="text-slate-400 hover:text-red-500 ml-1"
+                        >
+                          &times;
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      className="flex-1 px-4 py-2 rounded-xl border-2 border-slate-200 focus:border-[#00AEEF] focus:outline-none text-sm"
+                      placeholder={t.dashboard.colorsPlaceholder}
+                      value={colorInput}
+                      onChange={(e) => setColorInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          const val = colorInput.trim()
+                          if (val && !formData.colors.includes(val)) {
+                            setFormData({ ...formData, colors: [...formData.colors, val] })
+                            setColorInput('')
+                          }
+                        }
+                      }}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        const val = colorInput.trim()
+                        if (val && !formData.colors.includes(val)) {
+                          setFormData({ ...formData, colors: [...formData.colors, val] })
+                          setColorInput('')
+                        }
+                      }}
+                    >
+                      {t.dashboard.addColor}
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">

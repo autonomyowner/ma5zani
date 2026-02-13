@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ma5zani is an e-commerce fulfillment platform for Algerian sellers. It's a trilingual (Arabic/English/French) Next.js application with RTL support, using Convex for real-time backend, Clerk for authentication, and Cloudflare R2 for image storage.
+ma5zani is an e-commerce fulfillment platform for Algerian sellers. It's a trilingual (Arabic/English/French) Next.js application with RTL support, using Convex for real-time backend, better-auth for authentication, and Cloudflare R2 for image storage.
 
 **Production URL**: https://www.ma5zani.com
 
@@ -23,6 +23,8 @@ vercel --prod        # Deploy to Vercel production
 
 **Windows builds**: Use `set NODE_OPTIONS=--max-old-space-size=4096 && npm run build` to avoid segfaults during production builds.
 
+**tsconfig**: `ma5zani_mobile` and `ma5zani-mobile-v2` directories are excluded in `tsconfig.json`. If adding new non-Next.js directories, add them to the exclude list to prevent build failures.
+
 ## Architecture
 
 ### Tech Stack
@@ -31,8 +33,9 @@ vercel --prod        # Deploy to Vercel production
 - TypeScript
 - Tailwind CSS 3.4
 - Convex (real-time backend)
-- Clerk (authentication)
+- better-auth with `@convex-dev/better-auth` (authentication — email/password + Google OAuth)
 - Cloudflare R2 (image storage via presigned URLs)
+- Resend (transactional email notifications)
 
 ### Key Features
 
@@ -60,7 +63,7 @@ app/
 ### Convex Data Model
 
 ```typescript
-sellers: { clerkId, email, name, phone?, businessAddress?, plan, isActivated?, activatedAt? }
+sellers: { email, name, phone?, businessAddress?, plan, isActivated?, activatedAt?, expoPushToken?, emailNotifications? }
 products: { sellerId, name, sku, stock, price, status, imageKeys?, categoryId?, showOnStorefront?, salePrice? }
 orders: { sellerId, productId, orderNumber, customerName, wilaya, amount, status, source?, storefrontId?, fulfillmentStatus? }
 storefronts: { sellerId, slug, boutiqueName, logoKey?, theme, settings, metaPixelId?, isPublished }
@@ -73,10 +76,15 @@ chatbots: { storefrontId, sellerId, name, greeting, personality, isEnabled }
 chatbotKnowledge: { chatbotId, category, question, answer, keywords }
 chatbotConversations: { chatbotId, storefrontId, sessionId, customerName?, status, context? }
 chatbotMessages: { conversationId, sender, content, metadata? }
+
+// Telegram Bot
+telegramLinks: { sellerId, telegramUserId, status, verificationCode? }
+telegramSessions: { telegramUserId, sellerId, command, step, data }
 ```
 
 - Product `status` auto-updates based on stock: `active` (>10), `low_stock` (1-10), `out_of_stock` (0)
 - `imageKeys` are R2 storage keys (strings), not Convex storage IDs
+- `clerkId` field on sellers is deprecated (optional, from pre-migration)
 
 ### Image Storage (R2)
 
@@ -85,19 +93,31 @@ Images are stored in Cloudflare R2, not Convex storage:
 - Display: `getR2PublicUrl(key)` from `lib/r2.ts`
 - Keys stored as strings in `imageKeys` (products) or `logoKey` (storefronts)
 
-### Authentication Flow
+### Authentication (better-auth)
 
-1. User signs up via Clerk (`/signup`)
+Auth was migrated from Clerk to `@convex-dev/better-auth`. Supports email/password + Google OAuth.
+
+**Key files**:
+- `convex/auth.ts` - `authComponent`, `createAuth()`, `getAuthenticatedSeller()`, `requireSeller()`
+- `convex/auth.config.ts` - Auth config provider for Convex
+- `convex/http.ts` - Auth routes registered via `authComponent.registerRoutes()` + CORS preflight handlers
+- `convex/convex.config.ts` - Registers better-auth component
+- `lib/auth-client.ts` - Frontend auth client (no `baseURL` — uses same-origin `/api/auth/*`)
+- `lib/auth-server.ts` - Server-side auth utilities via `convexBetterAuthNextJs()`
+- `app/api/auth/[...all]/route.ts` - Next.js auth API handler
+
+**Flow**:
+1. User signs up at `/signup` (email/password or Google OAuth)
 2. Redirected to `/onboarding` to select plan
-3. `upsertSeller` mutation creates seller record in Convex
+3. `upsertSeller` mutation creates seller record matched by email
 4. Dashboard queries require authenticated seller via `requireSeller()`
 5. Public storefront routes (`/[slug]`) don't require auth
 
-**Clerk Production Setup**: Auth domain is `clerk.ma5zani.com`. The Convex auth config (`convex/auth.config.ts`) uses `CLERK_ISSUER_URL` env var with fallback to production domain.
+**Important**: `authComponent.getAuthUser(ctx)` throws when unauthenticated — always wrap in try-catch (see `getAuthenticatedSeller` in `convex/auth.ts`). Do NOT set `baseURL` in the frontend auth client to avoid CORS issues.
 
 ### Middleware Logic
 
-`middleware.ts` distinguishes between:
+`middleware.ts` passes through all requests — auth is handled client-side. It distinguishes between:
 - Reserved paths (`dashboard`, `login`, `admin`, etc.) - standard auth rules
 - Dynamic slugs (`/[slug]`) - treated as public storefront routes
 
@@ -141,7 +161,31 @@ When adding new text, use `t.section.key` if translations are in `lib/translatio
 Protected functions use `requireSeller()` from `convex/auth.ts`. Public functions (for storefronts) are in `convex/publicOrders.ts`:
 - `getStorefrontProducts` - Public product listing
 - `getPublicProduct` - Single product with related products
-- `createPublicOrder` - Order creation without auth
+- `createPublicOrder` - Order creation without auth (triggers push + email notifications)
+
+### Notification System
+
+When a new order is created via `createPublicOrder`, two notifications are scheduled:
+
+1. **Push notification** (Expo) — `convex/notifications.ts:sendNewOrderNotification`
+   - Sends to seller's `expoPushToken` (set from mobile app via `sellers.updatePushToken`)
+   - Uses Expo Push API (`exp.host/--/api/v2/push/send`)
+
+2. **Email notification** (Resend) — `convex/notifications.ts:sendOrderEmailNotification`
+   - Only sends if `seller.emailNotifications === true` (opt-in toggle in Dashboard > Settings)
+   - Uses Resend API with `RESEND_API_KEY` env var in Convex
+   - Sends from `orders@ma5zani.com`
+   - HTML email with order details (bilingual Arabic + English)
+
+Both are scheduled as internal actions via `ctx.scheduler.runAfter(0, ...)` so they don't block order creation.
+
+### Telegram Bot Integration
+
+Sellers can link their Telegram account to manage products via bot:
+- `convex/telegram.ts` - Bot command handlers
+- Webhook endpoint at `/api/telegram/webhook`
+- Verification code flow to link seller account
+- Tables: `telegramLinks` (account linking), `telegramSessions` (multi-step command state)
 
 ### Meta Pixel Integration
 
@@ -218,14 +262,15 @@ The storefront header (`components/storefront/StorefrontHeader.tsx`) uses `dir={
 ### Environment Variables
 
 **Vercel (Production)**:
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` - Clerk production key (pk_live_...)
-- `CLERK_SECRET_KEY` - Clerk secret (sk_live_...)
 - `NEXT_PUBLIC_CONVEX_URL` - Convex deployment URL
-- `R2_*` - Cloudflare R2 credentials
+- `NEXT_PUBLIC_CONVEX_SITE_URL` - Convex site URL (for auth)
+- `CONVEX_SITE_URL` - Convex site URL (server-side)
+- `R2_*` - Cloudflare R2 credentials (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_ACCOUNT_ID, R2_PUBLIC_URL)
+- `OPENROUTER_API_KEY` - OpenRouter API key for AI chatbot (Claude 3.5 Haiku)
 
-**Convex**:
-- `CLERK_ISSUER_URL` - Set to `https://clerk.ma5zani.com` for production
+**Convex (set via `npx convex env set`)**:
+- `BETTER_AUTH_SECRET` - Secret for better-auth session signing
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - Google OAuth credentials
+- `SITE_URL` - Frontend URL (`https://www.ma5zani.com` in production)
 - `ADMIN_PASSWORD` - Admin panel access password
-
-**AI Chatbot**:
-- `OPENROUTER_API_KEY` - OpenRouter API key for Claude 3.5 Haiku (set in Vercel)
+- `RESEND_API_KEY` - Resend API key for email notifications (sends from `orders@ma5zani.com`)

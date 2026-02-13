@@ -66,6 +66,7 @@ export default function StorefrontEditorPage() {
     footerBg: '#ffffff',
   });
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('shopify');
   const [saving, setSaving] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
   const [showAddSection, setShowAddSection] = useState(false);
@@ -100,6 +101,10 @@ export default function StorefrontEditorPage() {
           headerBg: '#ffffff',
           footerBg: '#ffffff',
         });
+      }
+
+      if (storefront.templateId) {
+        setSelectedTemplateId(storefront.templateId);
       }
     }
   }, [storefront]);
@@ -173,6 +178,7 @@ export default function StorefrontEditorPage() {
     const template = getTemplate(templateId);
     setSections(template.sections);
     setColors(template.colors);
+    setSelectedTemplateId(templateId);
   };
 
   // Save changes
@@ -180,8 +186,7 @@ export default function StorefrontEditorPage() {
     if (!storefront) return;
     setSaving(true);
     try {
-      await updateSections({ sections });
-      await updateColors({ colors });
+      await applyTemplate({ templateId: selectedTemplateId, sections, colors });
       setPreviewKey(prev => prev + 1);
     } catch (error) {
       console.error('Save error:', error);
@@ -307,7 +312,11 @@ export default function StorefrontEditorPage() {
                     <button
                       key={template.id}
                       onClick={() => handleApplyTemplate(template.id)}
-                      className="flex-shrink-0 px-3 py-2 text-xs border border-slate-200 rounded-lg hover:border-[#0054A6] hover:bg-slate-50 transition-colors flex items-center gap-1.5"
+                      className={`flex-shrink-0 px-3 py-2 text-xs border rounded-lg transition-colors flex items-center gap-1.5 ${
+                        selectedTemplateId === template.id
+                          ? 'border-[#0054A6] bg-blue-50 text-[#0054A6] font-medium'
+                          : 'border-slate-200 hover:border-[#0054A6] hover:bg-slate-50'
+                      }`}
                     >
                       <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.primary }} />
                       <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.accent }} />
@@ -527,7 +536,11 @@ export default function StorefrontEditorPage() {
                 <button
                   key={template.id}
                   onClick={() => handleApplyTemplate(template.id)}
-                  className="px-3 py-2 text-xs border border-slate-200 rounded-lg hover:border-[#0054A6] hover:bg-slate-50 transition-colors flex items-center gap-1.5"
+                  className={`px-3 py-2 text-xs border rounded-lg transition-colors flex items-center gap-1.5 ${
+                    selectedTemplateId === template.id
+                      ? 'border-[#0054A6] bg-blue-50 text-[#0054A6] font-medium'
+                      : 'border-slate-200 hover:border-[#0054A6] hover:bg-slate-50'
+                  }`}
                 >
                   <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.primary }} />
                   <span className="inline-block w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: template.colors.accent }} />

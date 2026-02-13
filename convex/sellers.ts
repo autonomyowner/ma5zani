@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getCurrentSeller, getAuthUser } from "./auth";
+import { getCurrentSeller, getAuthUser, requireSeller } from "./auth";
 
 export const getCurrentSellerProfile = query({
   args: {},
@@ -88,6 +88,30 @@ export const updateSellerProfile = mutation({
     if (args.plan !== undefined) updates.plan = args.plan;
 
     await ctx.db.patch(seller._id, updates);
+    return seller._id;
+  },
+});
+
+export const toggleEmailNotifications = mutation({
+  args: { enabled: v.boolean() },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+    await ctx.db.patch(seller._id, {
+      emailNotifications: args.enabled,
+      updatedAt: Date.now(),
+    });
+    return seller._id;
+  },
+});
+
+export const updatePushToken = mutation({
+  args: { token: v.string() },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+    await ctx.db.patch(seller._id, {
+      expoPushToken: args.token,
+      updatedAt: Date.now(),
+    });
     return seller._id;
   },
 });

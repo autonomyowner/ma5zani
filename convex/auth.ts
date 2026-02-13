@@ -20,6 +20,8 @@ export const createAuth = (ctx: GenericCtx<DataModel>) => {
       "https://www.ma5zani.com",
       "https://ma5zani.com",
       "http://localhost:3000",
+      "exp://",
+      "ma5zani://",
     ],
     emailAndPassword: {
       enabled: true,

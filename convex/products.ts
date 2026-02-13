@@ -54,6 +54,8 @@ export const createProduct = mutation({
     categoryId: v.optional(v.id("categories")),
     showOnStorefront: v.optional(v.boolean()),
     salePrice: v.optional(v.number()),
+    sizes: v.optional(v.array(v.string())),
+    colors: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const seller = await requireSeller(ctx);
@@ -89,6 +91,8 @@ export const createProduct = mutation({
       categoryId: args.categoryId,
       showOnStorefront: args.showOnStorefront ?? false,
       salePrice: args.salePrice,
+      sizes: args.sizes,
+      colors: args.colors,
       sortOrder: maxSortOrder + 1,
       createdAt: now,
       updatedAt: now,
@@ -110,6 +114,8 @@ export const updateProduct = mutation({
     categoryId: v.optional(v.id("categories")),
     showOnStorefront: v.optional(v.boolean()),
     salePrice: v.optional(v.number()),
+    sizes: v.optional(v.array(v.string())),
+    colors: v.optional(v.array(v.string())),
     sortOrder: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
@@ -129,6 +135,8 @@ export const updateProduct = mutation({
     if (args.categoryId !== undefined) updates.categoryId = args.categoryId;
     if (args.showOnStorefront !== undefined) updates.showOnStorefront = args.showOnStorefront;
     if (args.salePrice !== undefined) updates.salePrice = args.salePrice;
+    if (args.sizes !== undefined) updates.sizes = args.sizes;
+    if (args.colors !== undefined) updates.colors = args.colors;
     if (args.sortOrder !== undefined) updates.sortOrder = args.sortOrder;
 
     if (args.stock !== undefined) {

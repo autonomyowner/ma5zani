@@ -1,4 +1,5 @@
 import { StorefrontSection } from '@/components/storefront/sections';
+import { classicTemplate, classicColors, classicFooter } from './classic';
 import { shopifyTemplate, shopifyColors, shopifyFooter } from './shopify';
 import { minimalTemplate, minimalColors, minimalFooter } from './minimal';
 import {
@@ -33,10 +34,20 @@ export interface TemplateConfig {
 }
 
 export const templates: Record<string, TemplateConfig> = {
+  classic: {
+    id: 'classic',
+    name: 'Classic',
+    nameAr: 'كلاسيكي',
+    description: 'Original dark elegant look with cream text and orange accents',
+    descriptionAr: 'التصميم الأصلي الداكن الأنيق مع نص كريمي ولمسات برتقالية',
+    sections: classicTemplate,
+    colors: classicColors,
+    footer: classicFooter,
+  },
   shopify: {
     id: 'shopify',
-    name: 'Shopify Style',
-    nameAr: 'ستايل شوبيفاي',
+    name: 'Standard',
+    nameAr: 'قياسي',
     description: 'Full-featured layout with hero, features, and product grid',
     descriptionAr: 'تصميم كامل مع صورة رئيسية ومميزات وشبكة منتجات',
     sections: shopifyTemplate,

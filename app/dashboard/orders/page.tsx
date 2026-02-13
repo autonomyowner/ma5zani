@@ -185,7 +185,16 @@ export default function OrdersPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-slate-600">{order.productName}</td>
+                      <td className="px-6 py-4 text-slate-600">
+                        <div>
+                          <span>{order.productName}</span>
+                          {(order.selectedSize || order.selectedColor) && (
+                            <p className="text-xs text-slate-400">
+                              {[order.selectedSize, order.selectedColor].filter(Boolean).join(' / ')}
+                            </p>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-slate-600">{order.quantity}</td>
                       <td className="px-6 py-4">
                         <span className="font-medium text-slate-900">
@@ -278,6 +287,11 @@ export default function OrdersPage() {
                   <div className="col-span-2">
                     <span className="text-slate-500">{t.dashboard.product}:</span>
                     <span className="ml-1 text-slate-900">{order.productName}</span>
+                    {(order.selectedSize || order.selectedColor) && (
+                      <span className="ml-1 text-xs text-slate-400">
+                        ({[order.selectedSize, order.selectedColor].filter(Boolean).join(' / ')})
+                      </span>
+                    )}
                   </div>
                 </div>
                 {/* Delivery Actions */}

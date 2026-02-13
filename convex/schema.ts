@@ -44,6 +44,8 @@ export default defineSchema({
     categoryId: v.optional(v.id("categories")),
     showOnStorefront: v.optional(v.boolean()),
     salePrice: v.optional(v.number()),
+    sizes: v.optional(v.array(v.string())),
+    colors: v.optional(v.array(v.string())),
     sortOrder: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -63,6 +65,8 @@ export default defineSchema({
     deliveryAddress: v.optional(v.string()),
     productName: v.string(),
     quantity: v.number(),
+    selectedSize: v.optional(v.string()),
+    selectedColor: v.optional(v.string()),
     amount: v.number(),
     status: v.union(
       v.literal("pending"),

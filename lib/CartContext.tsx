@@ -11,6 +11,8 @@ export interface CartItem {
   quantity: number;
   imageKey?: string;
   stock: number;
+  selectedSize?: string;
+  selectedColor?: string;
 }
 
 interface CartContextType {
@@ -69,11 +71,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = (item: Omit<CartItem, 'quantity'>, quantity = 1) => {
     setItems((current) => {
-      const existing = current.find((i) => i.productId === item.productId);
+      const existing = current.find(
+        (i) =>
+          i.productId === item.productId &&
+          i.selectedSize === item.selectedSize &&
+          i.selectedColor === item.selectedColor
+      );
       if (existing) {
         const newQuantity = Math.min(existing.quantity + quantity, item.stock);
         return current.map((i) =>
-          i.productId === item.productId ? { ...i, quantity: newQuantity } : i
+          i.productId === item.productId &&
+          i.selectedSize === item.selectedSize &&
+          i.selectedColor === item.selectedColor
+            ? { ...i, quantity: newQuantity }
+            : i
         );
       }
       return [...current, { ...item, quantity: Math.min(quantity, item.stock) }];

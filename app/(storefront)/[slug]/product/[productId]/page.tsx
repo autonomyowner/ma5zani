@@ -31,6 +31,10 @@ export default function ProductDetailPage() {
   const [showStickyBar, setShowStickyBar] = useState(false);
   const { addItem, getItemQuantity } = useCart();
 
+  // Size/Color state
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+
   // Form state
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
@@ -110,6 +114,16 @@ export default function ProductDetailPage() {
 
     if (!data) return;
 
+    // Validate size/color if product has them
+    if (data.product.sizes && data.product.sizes.length > 0 && !selectedSize) {
+      setError(localText(language, { ar: 'يرجى اختيار المقاس', en: 'Please select a size', fr: 'Veuillez choisir une taille' }));
+      return;
+    }
+    if (data.product.colors && data.product.colors.length > 0 && !selectedColor) {
+      setError(localText(language, { ar: 'يرجى اختيار اللون', en: 'Please select a color', fr: 'Veuillez choisir une couleur' }));
+      return;
+    }
+
     setSubmitting(true);
     try {
       const result = await createOrder({
@@ -117,6 +131,8 @@ export default function ProductDetailPage() {
         items: [{
           productId: data.product._id,
           quantity: quantity,
+          selectedSize: selectedSize || undefined,
+          selectedColor: selectedColor || undefined,
         }],
         customerName,
         customerPhone,
@@ -444,6 +460,58 @@ export default function ProductDetailPage() {
             </div>
           )}
 
+          {/* Size Selector */}
+          {product.sizes && product.sizes.length > 0 && (
+            <div className="mb-4 sm:mb-6">
+              <h3 className="font-medium mb-2 text-sm sm:text-base" style={{ color: txtColor }}>
+                {localText(language, { ar: 'المقاس', en: 'Size', fr: 'Taille' })}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map((size) => (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => setSelectedSize(selectedSize === size ? '' : size)}
+                    className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+                    style={{
+                      backgroundColor: selectedSize === size ? accentColor : inputBg,
+                      color: selectedSize === size ? '#ffffff' : inputText,
+                      border: `1px solid ${selectedSize === size ? accentColor : borderClr}`,
+                    }}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Color Selector */}
+          {product.colors && product.colors.length > 0 && (
+            <div className="mb-4 sm:mb-6">
+              <h3 className="font-medium mb-2 text-sm sm:text-base" style={{ color: txtColor }}>
+                {localText(language, { ar: 'اللون', en: 'Color', fr: 'Couleur' })}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {product.colors.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setSelectedColor(selectedColor === color ? '' : color)}
+                    className="px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200"
+                    style={{
+                      backgroundColor: selectedColor === color ? accentColor : inputBg,
+                      color: selectedColor === color ? '#ffffff' : inputText,
+                      border: `1px solid ${selectedColor === color ? accentColor : borderClr}`,
+                    }}
+                  >
+                    {color}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Order Form */}
           {!isOutOfStock ? (
             <div
@@ -760,6 +828,8 @@ export default function ProductDetailPage() {
                   salePrice: product.salePrice,
                   imageKey: product.imageKeys?.[0],
                   stock: product.stock,
+                  selectedSize: selectedSize || undefined,
+                  selectedColor: selectedColor || undefined,
                 });
               }}
               className="px-6 py-3 rounded-xl text-sm font-semibold transition-opacity active:opacity-80"
