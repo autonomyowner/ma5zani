@@ -18,9 +18,11 @@ export default function OrdersPage() {
   const { seller, isLoading, isAuthenticated } = useCurrentSeller()
   const orders = useQuery(api.orders.getOrders, {})
   const updateOrderStatus = useMutation(api.orders.updateOrderStatus)
+  const deleteOrder = useMutation(api.orders.deleteOrder)
 
   const [filterStatus, setFilterStatus] = useState<OrderStatus | 'all'>('all')
   const [updatingOrder, setUpdatingOrder] = useState<string | null>(null)
+  const [deletingOrder, setDeletingOrder] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -67,7 +69,7 @@ export default function OrdersPage() {
     return labels[status] || status
   }
 
-  const handleStatusChange = async (orderId: Id<'orders'>, newStatus: 'pending' | 'processing') => {
+  const handleStatusChange = async (orderId: Id<'orders'>, newStatus: OrderStatus) => {
     setUpdatingOrder(orderId)
     try {
       await updateOrderStatus({ orderId, status: newStatus })
@@ -77,10 +79,18 @@ export default function OrdersPage() {
     setUpdatingOrder(null)
   }
 
-  const statusOptions: OrderStatus[] = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
+  const handleDeleteOrder = async (orderId: Id<'orders'>) => {
+    if (!window.confirm(t.dashboard.delete + '?')) return
+    setDeletingOrder(orderId)
+    try {
+      await deleteOrder({ orderId })
+    } catch (error) {
+      console.error('Failed to delete order:', error)
+    }
+    setDeletingOrder(null)
+  }
 
-  // Seller can only set pending or processing (send order). Other statuses are admin-controlled.
-  const isSellerActionable = (status: OrderStatus) => status === 'pending' || status === 'processing'
+  const statusOptions: OrderStatus[] = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
 
   return (
     <DashboardLayout
@@ -186,34 +196,25 @@ export default function OrdersPage() {
                         </Badge>
                       </td>
                       <td className="px-6 py-4">
-                        {isSellerActionable(order.status) ? (
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => handleStatusChange(order._id, 'pending')}
-                              disabled={updatingOrder === order._id || order.status === 'pending'}
-                              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
-                                order.status === 'pending'
-                                  ? 'bg-slate-200 text-slate-600 cursor-default'
-                                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                              }`}
-                            >
-                              {t.dashboard.pending}
-                            </button>
-                            <button
-                              onClick={() => handleStatusChange(order._id, 'processing')}
-                              disabled={updatingOrder === order._id || order.status === 'processing'}
-                              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50 ${
-                                order.status === 'processing'
-                                  ? 'bg-[#0054A6]/20 text-[#0054A6] cursor-default'
-                                  : 'bg-[#0054A6] text-white hover:bg-[#004690]'
-                              }`}
-                            >
-                              {t.dashboard.sendOrder}
-                            </button>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-slate-400">—</span>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={order.status}
+                            onChange={(e) => handleStatusChange(order._id, e.target.value as OrderStatus)}
+                            disabled={updatingOrder === order._id}
+                            className="px-2 py-1.5 rounded-lg text-sm border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0054A6]/20 disabled:opacity-50"
+                          >
+                            {statusOptions.map(s => (
+                              <option key={s} value={s}>{getStatusLabel(s)}</option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => handleDeleteOrder(order._id)}
+                            disabled={deletingOrder === order._id}
+                            className="px-2 py-1.5 rounded-lg text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
+                          >
+                            {t.dashboard.delete}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -273,34 +274,25 @@ export default function OrdersPage() {
                   <span className="font-bold text-slate-900">
                     {order.amount.toLocaleString()} {t.dashboard.dzd}
                   </span>
-                  {isSellerActionable(order.status) ? (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleStatusChange(order._id, 'pending')}
-                        disabled={updatingOrder === order._id || order.status === 'pending'}
-                        className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
-                          order.status === 'pending'
-                            ? 'bg-slate-200 text-slate-600 cursor-default'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                        }`}
-                      >
-                        {t.dashboard.pending}
-                      </button>
-                      <button
-                        onClick={() => handleStatusChange(order._id, 'processing')}
-                        disabled={updatingOrder === order._id || order.status === 'processing'}
-                        className={`px-2 py-1 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 ${
-                          order.status === 'processing'
-                            ? 'bg-[#0054A6]/20 text-[#0054A6] cursor-default'
-                            : 'bg-[#0054A6] text-white hover:bg-[#004690]'
-                        }`}
-                      >
-                        {t.dashboard.sendOrder}
-                      </button>
-                    </div>
-                  ) : (
-                    <span className="text-xs text-slate-400">—</span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={order.status}
+                      onChange={(e) => handleStatusChange(order._id, e.target.value as OrderStatus)}
+                      disabled={updatingOrder === order._id}
+                      className="px-2 py-1 rounded-lg text-xs border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#0054A6]/20 disabled:opacity-50"
+                    >
+                      {statusOptions.map(s => (
+                        <option key={s} value={s}>{getStatusLabel(s)}</option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={() => handleDeleteOrder(order._id)}
+                      disabled={deletingOrder === order._id}
+                      className="px-2 py-1 rounded-lg text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 transition-colors disabled:opacity-50"
+                    >
+                      {t.dashboard.delete}
+                    </button>
+                  </div>
                 </div>
               </div>
             ))

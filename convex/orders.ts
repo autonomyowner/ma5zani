@@ -110,7 +110,10 @@ export const updateOrderStatus = mutation({
     orderId: v.id("orders"),
     status: v.union(
       v.literal("pending"),
-      v.literal("processing")
+      v.literal("processing"),
+      v.literal("shipped"),
+      v.literal("delivered"),
+      v.literal("cancelled")
     ),
   },
   handler: async (ctx, args) => {
@@ -176,6 +179,21 @@ export const updateFulfillmentStatus = mutation({
       updatedAt: Date.now(),
     });
 
+    return args.orderId;
+  },
+});
+
+export const deleteOrder = mutation({
+  args: { orderId: v.id("orders") },
+  handler: async (ctx, args) => {
+    const seller = await requireSeller(ctx);
+
+    const order = await ctx.db.get(args.orderId);
+    if (!order || order.sellerId !== seller._id) {
+      throw new Error("Order not found");
+    }
+
+    await ctx.db.delete(args.orderId);
     return args.orderId;
   },
 });
