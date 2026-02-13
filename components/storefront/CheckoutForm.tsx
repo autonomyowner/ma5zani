@@ -256,9 +256,9 @@ export default function CheckoutForm({
             </h2>
 
             <div className="space-y-6 mb-8">
-              {items.map((item) => (
+              {items.map((item, idx) => (
                 <div
-                  key={item.productId}
+                  key={`${item.productId}-${item.selectedSize || ''}-${item.selectedColor || ''}-${idx}`}
                   className="flex gap-4 pb-6"
                   style={{ borderBottom: `1px solid ${borderColor}` }}
                 >

@@ -127,9 +127,9 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
             </div>
           ) : (
             <ul className="space-y-6">
-              {items.map((item) => (
+              {items.map((item, idx) => (
                 <li
-                  key={item.productId}
+                  key={`${item.productId}-${item.selectedSize || ''}-${item.selectedColor || ''}-${idx}`}
                   className="flex gap-4 pb-6"
                   style={{ borderBottom: `1px solid ${borderColor}` }}
                 >
@@ -167,6 +167,11 @@ export default function CartDrawer({ slug, colors, fonts }: CartDrawerProps) {
                     >
                       {item.name}
                     </h3>
+                    {(item.selectedSize || item.selectedColor) && (
+                      <p className="text-xs mt-0.5" style={{ color: textMuted }}>
+                        {[item.selectedSize, item.selectedColor].filter(Boolean).join(' / ')}
+                      </p>
+                    )}
                     <p className="text-xs mt-1" style={{ color: textMuted }}>
                       {(item.salePrice ?? item.price).toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
                       {item.quantity > 1 && (

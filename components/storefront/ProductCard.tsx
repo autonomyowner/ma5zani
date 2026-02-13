@@ -45,10 +45,17 @@ function ProductCard({
   const borderColor = isLightBg ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)';
   const textMuted = isLightBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
 
+  const hasVariants = (product.sizes && product.sizes.length > 0) || (product.colors && product.colors.length > 0);
+
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (isOutOfStock) return;
+    // If product has sizes/colors, go to detail page to select
+    if (hasVariants) {
+      window.location.href = `/${slug}/product/${product._id}`;
+      return;
+    }
     addItem({
       productId: product._id,
       name: product.name,
