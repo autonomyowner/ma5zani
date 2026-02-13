@@ -204,7 +204,7 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
                 <div className="flex items-center gap-4 mt-8">
                   {storefront.socialLinks.instagram && (
                     <a
-                      href={storefront.socialLinks.instagram}
+                      href={storefront.socialLinks.instagram.startsWith('http') ? storefront.socialLinks.instagram : `https://instagram.com/${storefront.socialLinks.instagram}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs tracking-[0.2em] uppercase transition-colors duration-300"
@@ -215,13 +215,24 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
                   )}
                   {storefront.socialLinks.facebook && (
                     <a
-                      href={storefront.socialLinks.facebook}
+                      href={storefront.socialLinks.facebook.startsWith('http') ? storefront.socialLinks.facebook : `https://facebook.com/${storefront.socialLinks.facebook}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs tracking-[0.2em] uppercase transition-colors duration-300"
                       style={{ color: colors.accent }}
                     >
                       Facebook
+                    </a>
+                  )}
+                  {storefront.socialLinks.tiktok && (
+                    <a
+                      href={storefront.socialLinks.tiktok.startsWith('http') ? storefront.socialLinks.tiktok : `https://tiktok.com/@${storefront.socialLinks.tiktok}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs tracking-[0.2em] uppercase transition-colors duration-300"
+                      style={{ color: colors.accent }}
+                    >
+                      TikTok
                     </a>
                   )}
                 </div>
@@ -270,13 +281,39 @@ export default function StorefrontLayout({ storefront, children }: StorefrontLay
                 {storefront.socialLinks?.instagram && (
                   <li>
                     <a
-                      href={storefront.socialLinks.instagram}
+                      href={storefront.socialLinks.instagram.startsWith('http') ? storefront.socialLinks.instagram : `https://instagram.com/${storefront.socialLinks.instagram}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm transition-colors duration-300"
                       style={{ color: textMuted }}
                     >
                       Instagram DM
+                    </a>
+                  </li>
+                )}
+                {storefront.socialLinks?.facebook && (
+                  <li>
+                    <a
+                      href={storefront.socialLinks.facebook.startsWith('http') ? storefront.socialLinks.facebook : `https://facebook.com/${storefront.socialLinks.facebook}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm transition-colors duration-300"
+                      style={{ color: textMuted }}
+                    >
+                      Facebook
+                    </a>
+                  </li>
+                )}
+                {storefront.socialLinks?.tiktok && (
+                  <li>
+                    <a
+                      href={storefront.socialLinks.tiktok.startsWith('http') ? storefront.socialLinks.tiktok : `https://tiktok.com/@${storefront.socialLinks.tiktok}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm transition-colors duration-300"
+                      style={{ color: textMuted }}
+                    >
+                      TikTok
                     </a>
                   </li>
                 )}
