@@ -127,41 +127,6 @@ export default function StorefrontHeader({
 
           {/* Right - Actions */}
           <div className="flex items-center gap-3 md:gap-6 lg:gap-10 ms-auto relative z-10">
-            {/* Social Links (Desktop) */}
-            {socialLinks?.instagram && (
-              <a
-                href={socialLinks.instagram.startsWith('http') ? socialLinks.instagram : `https://instagram.com/${socialLinks.instagram}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden lg:block text-xs tracking-[0.2em] uppercase transition-colors duration-300"
-                style={{ color: textMuted }}
-              >
-                Instagram
-              </a>
-            )}
-            {socialLinks?.facebook && (
-              <a
-                href={socialLinks.facebook.startsWith('http') ? socialLinks.facebook : `https://facebook.com/${socialLinks.facebook}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden lg:block text-xs tracking-[0.2em] uppercase transition-colors duration-300"
-                style={{ color: textMuted }}
-              >
-                Facebook
-              </a>
-            )}
-            {socialLinks?.tiktok && (
-              <a
-                href={socialLinks.tiktok.startsWith('http') ? socialLinks.tiktok : `https://tiktok.com/@${socialLinks.tiktok}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hidden lg:block text-xs tracking-[0.2em] uppercase transition-colors duration-300"
-                style={{ color: textMuted }}
-              >
-                TikTok
-              </a>
-            )}
-
             {/* Language Toggle */}
             <button
               onClick={() => {

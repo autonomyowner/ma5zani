@@ -35,9 +35,13 @@ export default function StorefrontPage() {
   const [accentColor, setAccentColor] = useState('#F7941D');
   const [logoKey, setLogoKey] = useState('');
   const [metaPixelId, setMetaPixelId] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [facebook, setFacebook] = useState('');
+  const [tiktok, setTiktok] = useState('');
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savingPixel, setSavingPixel] = useState(false);
+  const [savingSocial, setSavingSocial] = useState(false);
 
   // Auth protection
   useEffect(() => {
@@ -56,6 +60,9 @@ export default function StorefrontPage() {
       setAccentColor(storefront.theme.accentColor);
       setLogoKey(storefront.logoKey || '');
       setMetaPixelId(storefront.metaPixelId || '');
+      setInstagram(storefront.socialLinks?.instagram || '');
+      setFacebook(storefront.socialLinks?.facebook || '');
+      setTiktok(storefront.socialLinks?.tiktok || '');
     }
   }, [storefront]);
 
@@ -177,6 +184,25 @@ export default function StorefrontPage() {
       alert(localText(language, { ar: 'فشل حفظ البكسل', en: 'Failed to save pixel', fr: 'Échec de l\'enregistrement du pixel' }));
     } finally {
       setSavingPixel(false);
+    }
+  };
+
+  const handleSaveSocial = async () => {
+    if (!storefront) return;
+    setSavingSocial(true);
+    try {
+      await updateStorefront({
+        socialLinks: {
+          instagram: instagram.trim() || undefined,
+          facebook: facebook.trim() || undefined,
+          tiktok: tiktok.trim() || undefined,
+        },
+      });
+    } catch (error) {
+      console.error('Save social links error:', error);
+      alert(localText(language, { ar: 'فشل حفظ الروابط', en: 'Failed to save links', fr: 'Échec de l\'enregistrement des liens' }));
+    } finally {
+      setSavingSocial(false);
     }
   };
 
@@ -529,6 +555,72 @@ export default function StorefrontPage() {
                 </ol>
               </div>
             </details>
+          </div>
+        </div>
+      )}
+
+      {/* Step 6: Social Media Links */}
+      {storefront && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">6</div>
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">
+              {localText(language, { ar: 'روابط التواصل الاجتماعي', en: 'Social Media Links', fr: 'Réseaux sociaux' })}
+            </h2>
+          </div>
+
+          <p className="text-xs sm:text-sm text-slate-500 mb-4">
+            {localText(language, { ar: 'أضف روابط حساباتك لعرضها في أسفل متجرك', en: 'Add your social media links to display them in your store footer', fr: 'Ajoutez vos liens de réseaux sociaux pour les afficher dans le pied de page de votre boutique' })}
+          </p>
+
+          <div className="space-y-4 max-w-xl">
+            {/* Instagram */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Instagram</label>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 text-sm">@</span>
+                <Input
+                  value={instagram}
+                  onChange={(e) => setInstagram(e.target.value.replace('@', ''))}
+                  placeholder="yourusername"
+                  dir="ltr"
+                />
+              </div>
+            </div>
+
+            {/* Facebook */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">Facebook</label>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 text-sm">facebook.com/</span>
+                <Input
+                  value={facebook}
+                  onChange={(e) => setFacebook(e.target.value)}
+                  placeholder="yourpage"
+                  dir="ltr"
+                />
+              </div>
+            </div>
+
+            {/* TikTok */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">TikTok</label>
+              <div className="flex items-center gap-2">
+                <span className="text-slate-400 text-sm">@</span>
+                <Input
+                  value={tiktok}
+                  onChange={(e) => setTiktok(e.target.value.replace('@', ''))}
+                  placeholder="yourusername"
+                  dir="ltr"
+                />
+              </div>
+            </div>
+
+            <Button onClick={handleSaveSocial} disabled={savingSocial} variant="secondary">
+              {savingSocial
+                ? localText(language, { ar: 'جاري الحفظ...', en: 'Saving...', fr: 'Enregistrement...' })
+                : localText(language, { ar: 'حفظ الروابط', en: 'Save Links', fr: 'Enregistrer les liens' })}
+            </Button>
           </div>
         </div>
       )}
