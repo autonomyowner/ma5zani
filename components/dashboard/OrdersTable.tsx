@@ -85,7 +85,12 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     <span className="font-medium text-[#0054A6]">{order.orderNumber}</span>
                   </td>
                   <td className="px-6 py-4 text-slate-900">{order.customerName}</td>
-                  <td className="px-6 py-4 text-slate-600">{order.wilaya}</td>
+                  <td className="px-6 py-4 text-slate-600">
+                    <span>{order.wilaya}</span>
+                    {order.commune && (
+                      <p className="text-xs text-slate-400">{order.commune}</p>
+                    )}
+                  </td>
                   <td className="px-6 py-4 text-slate-600">{order.productName}</td>
                   <td className="px-6 py-4">
                     <span className="font-medium text-slate-900">

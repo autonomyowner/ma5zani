@@ -235,6 +235,8 @@ export const getPublicOrder = query({
       status: order.status,
       customerName: order.customerName,
       wilaya: order.wilaya,
+      commune: order.commune,
+      deliveryType: order.deliveryType,
       createdAt: order.createdAt,
     };
   },

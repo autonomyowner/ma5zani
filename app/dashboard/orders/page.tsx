@@ -160,7 +160,19 @@ export default function OrdersPage() {
                           )}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-slate-600">{order.wilaya}</td>
+                      <td className="px-6 py-4 text-slate-600">
+                        <div>
+                          <span>{order.wilaya}</span>
+                          {order.commune && (
+                            <p className="text-xs text-slate-400">{order.commune}</p>
+                          )}
+                          {order.deliveryType && (
+                            <p className="text-xs text-slate-400">
+                              {order.deliveryType === 'home' ? t.dashboard.homeDelivery : t.dashboard.officeDelivery}
+                            </p>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-slate-600">{order.productName}</td>
                       <td className="px-6 py-4 text-slate-600">{order.quantity}</td>
                       <td className="px-6 py-4">
@@ -239,6 +251,14 @@ export default function OrdersPage() {
                   <div>
                     <span className="text-slate-500">{t.dashboard.wilaya}:</span>
                     <span className="ml-1 text-slate-900">{order.wilaya}</span>
+                    {order.commune && (
+                      <span className="ml-1 text-xs text-slate-400">({order.commune})</span>
+                    )}
+                    {order.deliveryType && (
+                      <span className="ml-1 text-xs text-slate-400">
+                        - {order.deliveryType === 'home' ? t.dashboard.homeDelivery : t.dashboard.officeDelivery}
+                      </span>
+                    )}
                   </div>
                   <div>
                     <span className="text-slate-500">{t.dashboard.qty}:</span>

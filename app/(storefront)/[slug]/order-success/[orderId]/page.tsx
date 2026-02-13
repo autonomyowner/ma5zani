@@ -128,6 +128,22 @@ export default function OrderSuccessPage() {
                 <span style={{ color: textMuted }}>{localText(language, { ar: 'التوصيل إلى', en: 'Delivery to', fr: 'Livraison a' })}</span>
                 <span className="font-medium" style={{ color: textColor }}>{order.wilaya}</span>
               </div>
+              {order.commune && (
+                <div className="flex justify-between">
+                  <span style={{ color: textMuted }}>{localText(language, { ar: 'البلدية', en: 'Commune', fr: 'Commune' })}</span>
+                  <span className="font-medium" style={{ color: textColor }}>{order.commune}</span>
+                </div>
+              )}
+              {order.deliveryType && (
+                <div className="flex justify-between">
+                  <span style={{ color: textMuted }}>{localText(language, { ar: 'نوع التوصيل', en: 'Delivery Type', fr: 'Type de livraison' })}</span>
+                  <span className="font-medium" style={{ color: textColor }}>
+                    {order.deliveryType === 'home'
+                      ? localText(language, { ar: 'المنزل', en: 'Home', fr: 'Domicile' })
+                      : localText(language, { ar: 'مكتب (ستوب ديسك)', en: 'Office (Stop Desk)', fr: 'Bureau (Stop Desk)' })}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span style={{ color: textMuted }}>{localText(language, { ar: 'الدفع', en: 'Payment', fr: 'Paiement' })}</span>
                 <span className="font-medium" style={{ color: textColor }}>
