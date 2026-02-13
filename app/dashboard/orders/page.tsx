@@ -8,6 +8,7 @@ import { Id } from '@/convex/_generated/dataModel'
 import { useLanguage } from '@/lib/LanguageContext'
 import { useCurrentSeller } from '@/hooks/useCurrentSeller'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
+import YalidineOrderActions from '@/components/dashboard/YalidineOrderActions'
 import Badge from '@/components/ui/Badge'
 
 type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
@@ -153,6 +154,7 @@ export default function OrdersPage() {
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{t.dashboard.qty}</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{t.dashboard.amount}</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{t.dashboard.status}</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{t.dashboard.delivery}</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase">{t.dashboard.actions}</th>
                   </tr>
                 </thead>
@@ -194,6 +196,14 @@ export default function OrdersPage() {
                         <Badge variant={getStatusVariant(order.status)}>
                           {getStatusLabel(order.status)}
                         </Badge>
+                      </td>
+                      <td className="px-6 py-4">
+                        <YalidineOrderActions
+                          orderId={order._id}
+                          yalidineTracking={order.yalidineTracking}
+                          yalidineStatus={order.yalidineStatus}
+                          hasDeliverySettings={!!seller?.deliverySettings?.isEnabled}
+                        />
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -270,6 +280,17 @@ export default function OrdersPage() {
                     <span className="ml-1 text-slate-900">{order.productName}</span>
                   </div>
                 </div>
+                {/* Delivery Actions */}
+                {seller?.deliverySettings?.isEnabled && (
+                  <div className="mb-3">
+                    <YalidineOrderActions
+                      orderId={order._id}
+                      yalidineTracking={order.yalidineTracking}
+                      yalidineStatus={order.yalidineStatus}
+                      hasDeliverySettings={!!seller?.deliverySettings?.isEnabled}
+                    />
+                  </div>
+                )}
                 <div className="flex items-center justify-between pt-3 border-t border-slate-100">
                   <span className="font-bold text-slate-900">
                     {order.amount.toLocaleString()} {t.dashboard.dzd}

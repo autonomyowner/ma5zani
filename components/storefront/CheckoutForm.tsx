@@ -44,6 +44,9 @@ export default function CheckoutForm({
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [deliveryFee, setDeliveryFee] = useState<number | null>(null);
+  const [loadingFee, setLoadingFee] = useState(false);
+  const [feeAvailable, setFeeAvailable] = useState(true);
 
   const isLightBg = isLightColor(backgroundColor);
   const cardBg = isLightBg ? '#ffffff' : '#141414';
@@ -51,6 +54,36 @@ export default function CheckoutForm({
   const textMuted = isLightBg ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)';
   const inputBg = isLightBg ? '#ffffff' : '#0a0a0a';
   const inputBorder = isLightBg ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.15)';
+
+  // Fetch delivery fee when wilaya or deliveryType changes
+  useEffect(() => {
+    if (!wilaya) {
+      setDeliveryFee(null);
+      return;
+    }
+    const fetchFee = async () => {
+      setLoadingFee(true);
+      setDeliveryFee(null);
+      try {
+        const res = await fetch(
+          `/api/delivery/fees?slug=${encodeURIComponent(slug)}&toWilaya=${encodeURIComponent(wilaya)}&deliveryType=${deliveryType}`
+        );
+        const data = await res.json();
+        if (data.available) {
+          setDeliveryFee(data.fee);
+          setFeeAvailable(true);
+        } else {
+          setDeliveryFee(null);
+          setFeeAvailable(false);
+        }
+      } catch {
+        setDeliveryFee(null);
+        setFeeAvailable(false);
+      }
+      setLoadingFee(false);
+    };
+    fetchFee();
+  }, [wilaya, deliveryType, slug]);
 
   // Track InitiateCheckout when checkout page loads
   useEffect(() => {
@@ -78,7 +111,7 @@ export default function CheckoutForm({
     e.preventDefault();
     setError('');
 
-    if (!customerName || !customerPhone || !wilaya || !deliveryAddress || (deliveryType === 'home' && !commune)) {
+    if (!customerName || !customerPhone || !wilaya || !deliveryAddress) {
       setError(localText(language, { ar: 'يرجى ملء جميع الحقول', en: 'Please fill all fields', fr: 'Veuillez remplir tous les champs' }));
       return;
     }
@@ -106,9 +139,10 @@ export default function CheckoutForm({
         customerName,
         customerPhone,
         wilaya,
-        commune: deliveryType === 'home' ? commune : undefined,
+        commune: commune || undefined,
         deliveryType,
         deliveryAddress,
+        deliveryFee: deliveryFee ?? undefined,
       });
 
       // Track Purchase with dedup
@@ -268,19 +302,57 @@ export default function CheckoutForm({
               ))}
             </div>
 
-            {/* Total */}
-            <div className="flex items-center justify-between mb-4">
+            {/* Subtotal */}
+            <div className="flex items-center justify-between mb-3">
               <span
                 className="text-xs tracking-[0.15em] uppercase"
                 style={{ color: textMuted }}
               >
-                {localText(language, { ar: 'المجموع', en: 'Total', fr: 'Total' })}
+                {localText(language, { ar: 'المجموع الفرعي', en: 'Subtotal', fr: 'Sous-total' })}
+              </span>
+              <span
+                className="text-lg font-light"
+                style={{ color: textColor }}
+              >
+                {totalPrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
+              </span>
+            </div>
+
+            {/* Delivery Fee */}
+            {wilaya && (
+              <div className="flex items-center justify-between mb-3">
+                <span
+                  className="text-xs tracking-[0.15em] uppercase"
+                  style={{ color: textMuted }}
+                >
+                  {localText(language, { ar: 'رسوم التوصيل', en: 'Delivery Fee', fr: 'Frais de livraison' })}
+                </span>
+                <span className="text-lg font-light" style={{ color: textColor }}>
+                  {loadingFee
+                    ? '...'
+                    : deliveryFee !== null
+                    ? `${deliveryFee.toLocaleString()} ${localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}`
+                    : '-'}
+                </span>
+              </div>
+            )}
+
+            {/* Total */}
+            <div
+              className="flex items-center justify-between mb-4 pt-3"
+              style={{ borderTop: `1px solid ${borderColor}` }}
+            >
+              <span
+                className="text-xs tracking-[0.15em] uppercase"
+                style={{ color: textMuted }}
+              >
+                {localText(language, { ar: 'المجموع الكلي', en: 'Total', fr: 'Total' })}
               </span>
               <span
                 className="text-2xl font-light"
                 style={{ color: textColor }}
               >
-                {totalPrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
+                {(totalPrice + (deliveryFee || 0)).toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
               </span>
             </div>
 
@@ -415,14 +487,14 @@ export default function CheckoutForm({
                 </div>
               </div>
 
-              {/* Commune (for home delivery) */}
-              {deliveryType === 'home' && wilaya && (
+              {/* Commune */}
+              {wilaya && (
                 <div>
                   <label
                     className="block text-xs tracking-[0.15em] uppercase mb-3"
                     style={{ color: textMuted }}
                   >
-                    {localText(language, { ar: 'البلدية *', en: 'Commune *', fr: 'Commune *' })}
+                    {localText(language, { ar: 'البلدية', en: 'Commune', fr: 'Commune' })}
                   </label>
                   <CommuneSelect
                     wilayaName={wilaya}

@@ -18,6 +18,14 @@ export default defineSchema({
     activatedAt: v.optional(v.number()),
     expoPushToken: v.optional(v.string()),
     emailNotifications: v.optional(v.boolean()),
+    deliverySettings: v.optional(v.object({
+      provider: v.literal("yalidine"),
+      apiId: v.string(),
+      apiToken: v.string(),
+      originWilayaCode: v.string(),
+      isEnabled: v.boolean(),
+      defaultWeight: v.optional(v.number()),
+    })),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -72,12 +80,17 @@ export default defineSchema({
       v.literal("accepted"),
       v.literal("rejected")
     )),
+    deliveryFee: v.optional(v.number()),
+    yalidineTracking: v.optional(v.string()),
+    yalidineStatus: v.optional(v.string()),
+    yalidineSubmittedAt: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_seller", ["sellerId"])
     .index("by_seller_status", ["sellerId", "status"])
-    .index("by_storefront", ["storefrontId"]),
+    .index("by_storefront", ["storefrontId"])
+    .index("by_yalidine_tracking", ["yalidineTracking"]),
 
   storefronts: defineTable({
     sellerId: v.id("sellers"),

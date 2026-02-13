@@ -111,6 +111,7 @@ export const createPublicOrder = mutation({
     commune: v.optional(v.string()),
     deliveryType: v.optional(v.union(v.literal("office"), v.literal("home"))),
     deliveryAddress: v.string(),
+    deliveryFee: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const storefront = await ctx.db
@@ -159,6 +160,7 @@ export const createPublicOrder = mutation({
         productName: product.name,
         quantity: item.quantity,
         amount: unitPrice * item.quantity,
+        deliveryFee: args.deliveryFee,
         status: "pending",
         source: "storefront",
         storefrontId: storefront._id,
@@ -232,6 +234,7 @@ export const getPublicOrder = query({
       productName: order.productName,
       quantity: order.quantity,
       amount: order.amount,
+      deliveryFee: order.deliveryFee,
       status: order.status,
       customerName: order.customerName,
       wilaya: order.wilaya,

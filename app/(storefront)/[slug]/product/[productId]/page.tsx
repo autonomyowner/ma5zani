@@ -40,6 +40,27 @@ export default function ProductDetailPage() {
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [deliveryFee, setDeliveryFee] = useState<number | null>(null);
+  const [loadingFee, setLoadingFee] = useState(false);
+
+  // Fetch delivery fee when wilaya/deliveryType changes
+  useEffect(() => {
+    if (!wilaya) { setDeliveryFee(null); return; }
+    const fetchFee = async () => {
+      setLoadingFee(true);
+      setDeliveryFee(null);
+      try {
+        const res = await fetch(
+          `/api/delivery/fees?slug=${encodeURIComponent(slug)}&toWilaya=${encodeURIComponent(wilaya)}&deliveryType=${deliveryType}`
+        );
+        const feeData = await res.json();
+        if (feeData.available) setDeliveryFee(feeData.fee);
+        else setDeliveryFee(null);
+      } catch { setDeliveryFee(null); }
+      setLoadingFee(false);
+    };
+    fetchFee();
+  }, [wilaya, deliveryType, slug]);
 
   const data = useQuery(api.publicOrders.getPublicProduct, { slug, productId });
   const createOrder = useMutation(api.publicOrders.createPublicOrder);
@@ -82,7 +103,7 @@ export default function ProductDetailPage() {
     e.preventDefault();
     setError('');
 
-    if (!customerName || !customerPhone || !wilaya || !deliveryAddress || (deliveryType === 'home' && !commune)) {
+    if (!customerName || !customerPhone || !wilaya || !deliveryAddress) {
       setError(localText(language, { ar: 'يرجى ملء جميع الحقول', en: 'Please fill all fields', fr: 'Veuillez remplir tous les champs' }));
       return;
     }
@@ -100,9 +121,10 @@ export default function ProductDetailPage() {
         customerName,
         customerPhone,
         wilaya,
-        commune: deliveryType === 'home' ? commune : undefined,
+        commune: commune || undefined,
         deliveryType,
         deliveryAddress,
+        deliveryFee: deliveryFee ?? undefined,
       });
 
       // Track Purchase with dedup (fires for both ma5zani pixel and storefront pixel)
@@ -546,11 +568,11 @@ export default function ProductDetailPage() {
                   </div>
                 </div>
 
-                {/* Commune (for home delivery) */}
-                {deliveryType === 'home' && wilaya && (
+                {/* Commune */}
+                {wilaya && (
                   <div>
                     <label className="block text-xs sm:text-sm font-medium mb-1" style={{ color: textMuted }}>
-                      {localText(language, { ar: 'البلدية *', en: 'Commune *', fr: 'Commune *' })}
+                      {localText(language, { ar: 'البلدية', en: 'Commune', fr: 'Commune' })}
                     </label>
                     <CommuneSelect
                       wilayaName={wilaya}
@@ -581,12 +603,33 @@ export default function ProductDetailPage() {
 
                 {/* Total & Submit */}
                 <div className="pt-3 sm:pt-4" style={{ borderTop: `1px solid ${borderClr}` }}>
+                  {/* Subtotal */}
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs sm:text-sm" style={{ color: textMuted }}>
+                      {localText(language, { ar: 'المجموع الفرعي', en: 'Subtotal', fr: 'Sous-total' })}
+                    </span>
+                    <span className="text-sm sm:text-base font-medium" style={{ color: txtColor }}>
+                      {totalPrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
+                    </span>
+                  </div>
+                  {/* Delivery Fee */}
+                  {wilaya && (
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs sm:text-sm" style={{ color: textMuted }}>
+                        {localText(language, { ar: 'رسوم التوصيل', en: 'Delivery Fee', fr: 'Frais de livraison' })}
+                      </span>
+                      <span className="text-sm sm:text-base font-medium" style={{ color: txtColor }}>
+                        {loadingFee ? '...' : deliveryFee !== null ? `${deliveryFee.toLocaleString()} ${localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}` : '-'}
+                      </span>
+                    </div>
+                  )}
+                  {/* Grand Total */}
                   <div className="flex items-center justify-between mb-3 sm:mb-4">
                     <span className="text-sm sm:text-base" style={{ color: textMuted }}>
-                      {localText(language, { ar: 'المجموع', en: 'Total', fr: 'Total' })}
+                      {localText(language, { ar: 'المجموع الكلي', en: 'Total', fr: 'Total' })}
                     </span>
                     <span className="text-lg sm:text-xl font-bold" style={{ color: accentColor }}>
-                      {totalPrice.toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
+                      {(totalPrice + (deliveryFee || 0)).toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
                     </span>
                   </div>
                   <p className="text-xs sm:text-sm mb-3 sm:mb-4" style={{ color: textMuted }}>

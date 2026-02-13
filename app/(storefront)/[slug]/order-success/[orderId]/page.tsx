@@ -118,10 +118,26 @@ export default function OrderSuccessPage() {
                 <span style={{ color: textMuted }}>{localText(language, { ar: 'الكمية', en: 'Quantity', fr: 'Quantite' })}</span>
                 <span className="font-medium" style={{ color: textColor }}>{order.quantity}</span>
               </div>
+              {order.deliveryFee != null && order.deliveryFee > 0 && (
+                <>
+                  <div className="flex justify-between">
+                    <span style={{ color: textMuted }}>{localText(language, { ar: 'المجموع الفرعي', en: 'Subtotal', fr: 'Sous-total' })}</span>
+                    <span className="font-medium" style={{ color: textColor }}>
+                      {order.amount.toLocaleString()} {currency}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span style={{ color: textMuted }}>{localText(language, { ar: 'رسوم التوصيل', en: 'Delivery Fee', fr: 'Frais de livraison' })}</span>
+                    <span className="font-medium" style={{ color: textColor }}>
+                      {order.deliveryFee.toLocaleString()} {currency}
+                    </span>
+                  </div>
+                </>
+              )}
               <div className="flex justify-between">
-                <span style={{ color: textMuted }}>{localText(language, { ar: 'المجموع', en: 'Total', fr: 'Total' })}</span>
+                <span style={{ color: textMuted }}>{localText(language, { ar: 'المجموع الكلي', en: 'Total', fr: 'Total' })}</span>
                 <span className="font-bold" style={{ color: accentColor }}>
-                  {order.amount.toLocaleString()} {currency}
+                  {(order.amount + (order.deliveryFee || 0)).toLocaleString()} {currency}
                 </span>
               </div>
               <div className="flex justify-between">
