@@ -114,6 +114,7 @@ export const createPublicOrder = mutation({
     deliveryType: v.optional(v.union(v.literal("office"), v.literal("home"))),
     deliveryAddress: v.string(),
     deliveryFee: v.optional(v.number()),
+    source: v.optional(v.union(v.literal("storefront"), v.literal("landing_page"))),
   },
   handler: async (ctx, args) => {
     const storefront = await ctx.db
@@ -166,7 +167,7 @@ export const createPublicOrder = mutation({
         amount: unitPrice * item.quantity,
         deliveryFee: args.deliveryFee,
         status: "pending",
-        source: "storefront",
+        source: args.source || "storefront",
         storefrontId: storefront._id,
         fulfillmentStatus: storefront.settings.autoFulfillment
           ? "submitted_to_ma5zani"
@@ -229,7 +230,7 @@ export const getPublicOrder = query({
   args: { orderId: v.id("orders") },
   handler: async (ctx, args) => {
     const order = await ctx.db.get(args.orderId);
-    if (!order || order.source !== "storefront") {
+    if (!order || (order.source !== "storefront" && order.source !== "landing_page")) {
       return null;
     }
 

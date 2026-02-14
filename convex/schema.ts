@@ -76,7 +76,7 @@ export default defineSchema({
       v.literal("cancelled")
     ),
     // Storefront fields
-    source: v.optional(v.union(v.literal("dashboard"), v.literal("storefront"))),
+    source: v.optional(v.union(v.literal("dashboard"), v.literal("storefront"), v.literal("landing_page"))),
     storefrontId: v.optional(v.id("storefronts")),
     fulfillmentStatus: v.optional(v.union(
       v.literal("pending_submission"),
@@ -333,6 +333,47 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_telegram_user", ["telegramUserId"]),
+
+  // ============ AI LANDING PAGES ============
+
+  landingPages: defineTable({
+    sellerId: v.id("sellers"),
+    storefrontId: v.id("storefronts"),
+    productId: v.id("products"),
+    pageId: v.string(), // nanoid 8-char for URL: /slug/lp/abc12345
+    content: v.object({
+      headline: v.string(),
+      subheadline: v.string(),
+      featureBullets: v.array(v.object({
+        title: v.string(),
+        description: v.string(),
+      })),
+      ctaText: v.string(),
+      urgencyText: v.optional(v.string()),
+      productDescription: v.string(),
+      socialProof: v.optional(v.string()),
+    }),
+    design: v.object({
+      primaryColor: v.string(),
+      accentColor: v.string(),
+      backgroundColor: v.string(),
+      textColor: v.string(),
+    }),
+    isPublished: v.boolean(),
+    status: v.union(
+      v.literal("generating"),
+      v.literal("draft"),
+      v.literal("published"),
+      v.literal("archived")
+    ),
+    viewCount: v.optional(v.number()),
+    orderCount: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_seller", ["sellerId"])
+    .index("by_pageId", ["pageId"])
+    .index("by_product", ["productId"]),
 
   // Messages in chatbot conversations
   chatbotMessages: defineTable({

@@ -22,6 +22,7 @@ export default function Sidebar({ seller }: SidebarProps) {
     { label: t.dashboard.productsNav, href: '/dashboard/products' },
     { label: t.dashboard.storefrontNav, href: '/dashboard/storefront' },
     { label: t.aiBuilder?.aiDesignerNav || 'AI Designer', href: '/dashboard/storefront/ai' },
+    { label: t.landingPages?.nav || 'Landing Pages', href: '/dashboard/landing-pages' },
     { label: t.dashboard.inventoryNav, href: '/dashboard/inventory' },
     { label: t.dashboard.analyticsNav, href: '/dashboard/analytics' },
     { label: t.dashboard.settingsNav, href: '/dashboard/settings' },
