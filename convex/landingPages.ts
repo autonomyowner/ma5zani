@@ -215,7 +215,8 @@ export const getPublicLandingPage = query({
       .withIndex("by_pageId", (q) => q.eq("pageId", args.pageId))
       .first();
 
-    if (!page || !page.isPublished || page.status !== "published") {
+    // Allow draft + published (pageId is unguessable). Block archived/generating.
+    if (!page || page.status === "archived" || page.status === "generating") {
       return null;
     }
 
