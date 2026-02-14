@@ -1,10 +1,10 @@
-// Vision API - Analyzes product images for color palette and product attributes
+// Vision API - Analyzes product images for color palette
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const VISION_MODEL = 'google/gemini-2.0-flash-001';
 
 export interface VisionAnalysis {
-  dominantColors: string[]; // hex colors
+  dominantColors: string[];
   productType: string;
   visualAttributes: string[];
   suggestedPalette: {
@@ -17,6 +17,7 @@ export interface VisionAnalysis {
 
 export async function analyzeProductImage(
   imageUrl: string,
+  productName: string,
   apiKey: string
 ): Promise<VisionAnalysis | null> {
   try {
@@ -40,27 +41,19 @@ export async function analyzeProductImage(
               },
               {
                 type: 'text',
-                text: `Analyze this product image. Return ONLY a JSON object with these exact fields:
+                text: `This is a product image for "${productName}". Extract ONLY colors for a landing page design. Return JSON:
 {
   "dominantColors": ["#hex1", "#hex2", "#hex3"],
-  "productType": "brief product category (e.g. clothing, electronics, cosmetics, food, accessories)",
-  "visualAttributes": ["list", "of", "visual", "qualities"],
+  "productType": "${productName}",
+  "visualAttributes": ["3-5 adjectives"],
   "suggestedPalette": {
-    "primary": "#hex - a rich color inspired by the product",
-    "accent": "#hex - a contrasting CTA color (warm orange or bright green work best)",
-    "background": "#hex - light neutral background",
-    "text": "#hex - dark readable text color"
+    "primary": "#hex - rich color from the product",
+    "accent": "#hex - warm CTA color (orange or green)",
+    "background": "#hex - light neutral (#f8f8f8 to #ffffff)",
+    "text": "#hex - dark readable"
   }
 }
-
-Rules:
-- dominantColors: extract 3 most prominent colors from the product itself
-- productType: one brief phrase
-- visualAttributes: 3-5 adjectives describing the product look (e.g. "elegant", "modern", "handmade")
-- suggestedPalette: colors that would make a high-converting landing page for this product
-- accent should be a warm, attention-grabbing color for CTA buttons
-- background should be light (#f8f8f8 to #ffffff range)
-- Return ONLY valid JSON, no markdown or explanations`,
+Return ONLY valid JSON.`,
               },
             ],
           },
@@ -79,7 +72,6 @@ Rules:
     const content = data.choices?.[0]?.message?.content;
     if (!content) return null;
 
-    // Parse JSON from response
     const jsonStr = extractJSON(content);
     return JSON.parse(jsonStr) as VisionAnalysis;
   } catch (error) {

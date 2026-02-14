@@ -19,6 +19,7 @@ export interface LandingPageGenerationResult {
 export interface GenerationInput {
   product: ProductData;
   imageUrl: string | null;
+  sellerPrompt: string;
   storefrontColors: {
     primaryColor: string;
     accentColor: string;
@@ -37,12 +38,12 @@ export async function generateLandingPage(
     };
   }
 
-  // Run vision + copywriting IN PARALLEL (don't wait for vision before copy)
+  // Run vision + copywriting IN PARALLEL
   const [visionResult, copyResult] = await Promise.all([
     input.imageUrl
-      ? analyzeProductImage(input.imageUrl, apiKey)
+      ? analyzeProductImage(input.imageUrl, input.product.name, apiKey)
       : Promise.resolve(null),
-    generateLandingPageCopy(input.product, null, apiKey),
+    generateLandingPageCopy(input.product, input.sellerPrompt, null, apiKey),
   ]);
 
   if (!copyResult) {

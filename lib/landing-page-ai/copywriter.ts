@@ -27,6 +27,7 @@ export interface LandingPageCopy {
 
 export async function generateLandingPageCopy(
   product: ProductData,
+  sellerPrompt: string,
   visionAnalysis: VisionAnalysis | null,
   apiKey: string
 ): Promise<LandingPageCopy | null> {
@@ -35,43 +36,56 @@ export async function generateLandingPageCopy(
     ? Math.round(((product.price - product.salePrice!) / product.price) * 100)
     : 0;
 
-  const productContext = `
-Product: ${product.name}
-Price: ${product.price} DZD${hasDiscount ? ` (Sale: ${product.salePrice} DZD, -${discountPercent}%)` : ''}
-${product.description ? `Description: ${product.description}` : ''}
-${product.sizes?.length ? `Sizes: ${product.sizes.join(', ')}` : ''}
-${product.colors?.length ? `Colors: ${product.colors.join(', ')}` : ''}
-${product.categoryName ? `Category: ${product.categoryName}` : ''}
-${visionAnalysis ? `Visual: ${visionAnalysis.productType}, looks ${visionAnalysis.visualAttributes.join(', ')}` : ''}
-`.trim();
-
   const systemPrompt = `You are a top-tier Algerian e-commerce copywriter. You write in ALGERIAN DARIJA (الدارجة الجزائرية) — NOT Modern Standard Arabic (MSA/فصحى).
 
-KEY RULES:
-1. Write in Darija as spoken in Algeria — mix Arabic script with French loanwords when natural
-2. Use words like: "بزاف" (a lot), "واش" (what), "كاين" (there is), "هاذ" (this), "خلاص" (done/already), "يخطيك" (please), "صح" (right/true), "بصح" (but), "كيفاش" (how), "علاش" (why)
-3. Include French loanwords naturally: "qualité", "livraison", "promotion", "gratuit", "offre"
-4. Mention "الدفع عند الاستلام" (COD/Cash on Delivery) — this is critical for Algerian buyers
-5. Mention "توصيل لكل 58 ولاية" (delivery to all 58 wilayas)
-6. Keep it punchy, persuasive, and conversational — like talking to a friend
-7. Use urgency and scarcity naturally
+CRITICAL RULE: The product name is "${product.name}". ALL text you write MUST be about THIS EXACT product. Do NOT invent a different product. Do NOT change the product type. If the product is a t-shirt, write about a t-shirt. If it's a cream, write about a cream.
 
-Return ONLY a JSON object with these exact fields:
+DARIJA RULES:
+1. Write in Darija as spoken in Algeria — mix Arabic script with French loanwords when natural
+2. Use: "بزاف" (a lot), "واش" (what), "كاين" (there is), "هاذ" (this), "خلاص" (done), "صح" (true), "بصح" (but)
+3. Include French loanwords naturally: "qualité", "livraison", "promotion", "gratuit", "offre"
+4. Mention "الدفع عند الاستلام" (COD) and "توصيل لكل 58 ولاية" (delivery to all 58 wilayas)
+5. Keep it punchy and conversational
+
+Return ONLY a JSON object:
 {
-  "headline": "Short, punchy main headline in Darija (max 10 words)",
-  "subheadline": "Supporting line that adds value proposition (max 20 words)",
+  "headline": "Short punchy headline about ${product.name} in Darija (max 10 words)",
+  "subheadline": "Value proposition for ${product.name} (max 20 words)",
   "featureBullets": [
-    { "title": "Short benefit title (2-4 words)", "description": "One sentence explaining the benefit" },
+    { "title": "Benefit title (2-4 words)", "description": "One sentence about this benefit of ${product.name}" },
     { "title": "...", "description": "..." },
     { "title": "...", "description": "..." }
   ],
-  "ctaText": "CTA button text (2-4 words, action-oriented)",
-  "urgencyText": "Urgency/scarcity message (e.g. limited stock, time-limited offer)",
-  "productDescription": "2-3 sentences describing the product in compelling Darija",
-  "socialProof": "Social proof line (e.g. +500 client satisfied)"
+  "ctaText": "CTA button text (2-4 words)",
+  "urgencyText": "Urgency message",
+  "productDescription": "2-3 sentences describing ${product.name} in Darija",
+  "socialProof": "Social proof line"
 }
 
-IMPORTANT: Return ONLY valid JSON. No markdown, no explanations.`;
+IMPORTANT: Return ONLY valid JSON. No markdown.`;
+
+  const userLines = [
+    `PRODUCT NAME: ${product.name}`,
+    `PRICE: ${product.price} DZD${hasDiscount ? ` (SALE: ${product.salePrice} DZD, -${discountPercent}%)` : ''}`,
+  ];
+
+  if (sellerPrompt) {
+    userLines.push(`SELLER DESCRIPTION: ${sellerPrompt}`);
+  }
+  if (product.description) {
+    userLines.push(`PRODUCT DESCRIPTION: ${product.description}`);
+  }
+  if (product.sizes?.length) {
+    userLines.push(`SIZES: ${product.sizes.join(', ')}`);
+  }
+  if (product.colors?.length) {
+    userLines.push(`COLORS: ${product.colors.join(', ')}`);
+  }
+  if (product.categoryName) {
+    userLines.push(`CATEGORY: ${product.categoryName}`);
+  }
+
+  userLines.push('', `Write a landing page for "${product.name}". Stay focused on this product ONLY.`);
 
   try {
     const response = await fetch(OPENROUTER_API_URL, {
@@ -86,7 +100,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown, no explanations.`;
         model: COPYWRITER_MODEL,
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: `Write landing page copy for this product:\n\n${productContext}` },
+          { role: 'user', content: userLines.join('\n') },
         ],
         max_tokens: 1500,
         temperature: 0.7,

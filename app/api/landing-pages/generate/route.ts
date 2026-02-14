@@ -12,7 +12,7 @@ const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { sellerId, productId, storefrontId, landingPageId } = body;
+  const { sellerId, productId, storefrontId, landingPageId, prompt } = body;
 
   if (!sellerId || !productId || !storefrontId || !landingPageId) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
         colors: productData.colors,
       },
       imageUrl,
+      sellerPrompt: prompt || '',
       storefrontColors: {
         primaryColor: storefront.theme.primaryColor,
         accentColor: storefront.theme.accentColor,

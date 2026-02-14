@@ -45,7 +45,7 @@ export default function LandingPagesPage() {
     )
   }
 
-  const handleProductSelect = async (product: Doc<'products'>) => {
+  const handleProductSelect = async (product: Doc<'products'>, prompt: string) => {
     if (!seller || !storefront) return
 
     setShowPicker(false)
@@ -71,6 +71,7 @@ export default function LandingPagesPage() {
           productId: product._id,
           storefrontId: storefront._id,
           landingPageId: lpId,
+          prompt,
         }),
       })
 
