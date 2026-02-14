@@ -48,6 +48,7 @@ export default function DashboardLayout({
     { label: t.dashboard.dashboardNav, href: '/dashboard' },
     { label: t.dashboard.ordersNav, href: '/dashboard/orders' },
     { label: t.dashboard.productsNav, href: '/dashboard/products' },
+    { label: t.landingPages?.nav || 'Landing Pages', href: '/dashboard/landing-pages' },
     { label: t.dashboard.storefrontNav, href: '/dashboard/storefront' },
     { label: t.chatbot.aiAssistant, href: '/dashboard/chatbot' },
     { label: t.telegram.telegramNav, href: '/dashboard/telegram' },
