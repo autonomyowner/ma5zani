@@ -1,5 +1,5 @@
 // AI Landing Page Generator - Orchestrator
-// Runs vision analysis + copywriting to generate landing page content
+// Runs vision + copywriting IN PARALLEL for speed
 
 import { analyzeProductImage, VisionAnalysis } from './vision';
 import { generateLandingPageCopy, ProductData, LandingPageCopy } from './copywriter';
@@ -37,19 +37,28 @@ export async function generateLandingPage(
     };
   }
 
-  // Step 1: Vision analysis (if image available)
-  let visionAnalysis: VisionAnalysis | null = null;
-  if (input.imageUrl) {
-    visionAnalysis = await analyzeProductImage(input.imageUrl, apiKey);
+  // Run vision + copywriting IN PARALLEL (don't wait for vision before copy)
+  const [visionResult, copyResult] = await Promise.all([
+    input.imageUrl
+      ? analyzeProductImage(input.imageUrl, apiKey)
+      : Promise.resolve(null),
+    generateLandingPageCopy(input.product, null, apiKey),
+  ]);
+
+  if (!copyResult) {
+    return {
+      success: false,
+      errors: ['Failed to generate landing page copy. Please try again.'],
+    };
   }
 
-  // Step 2: Determine design colors
-  const design = visionAnalysis?.suggestedPalette
+  // Use vision colors if available, otherwise storefront colors
+  const design = visionResult?.suggestedPalette
     ? {
-        primaryColor: visionAnalysis.suggestedPalette.primary,
-        accentColor: visionAnalysis.suggestedPalette.accent,
-        backgroundColor: visionAnalysis.suggestedPalette.background,
-        textColor: visionAnalysis.suggestedPalette.text,
+        primaryColor: visionResult.suggestedPalette.primary,
+        accentColor: visionResult.suggestedPalette.accent,
+        backgroundColor: visionResult.suggestedPalette.background,
+        textColor: visionResult.suggestedPalette.text,
       }
     : {
         primaryColor: input.storefrontColors.primaryColor,
@@ -58,19 +67,9 @@ export async function generateLandingPage(
         textColor: '#1a1a1a',
       };
 
-  // Step 3: Generate copy
-  const copy = await generateLandingPageCopy(input.product, visionAnalysis, apiKey);
-
-  if (!copy) {
-    return {
-      success: false,
-      errors: ['Failed to generate landing page copy. Please try again.'],
-    };
-  }
-
   return {
     success: true,
-    content: copy,
+    content: copyResult,
     design,
   };
 }

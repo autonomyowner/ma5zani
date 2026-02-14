@@ -14,9 +14,14 @@ export const getMyLandingPages = query({
       .withIndex("by_seller", (q) => q.eq("sellerId", seller._id))
       .collect();
 
-    // Filter out archived, sort by newest first
+    // Filter out archived + auto-expire stuck "generating" records (>2min)
+    const now = Date.now();
     const active = pages
-      .filter((p) => p.status !== "archived")
+      .filter((p) => {
+        if (p.status === "archived") return false;
+        if (p.status === "generating" && now - p.createdAt > 2 * 60 * 1000) return false;
+        return true;
+      })
       .sort((a, b) => b.createdAt - a.createdAt);
 
     // Attach product info

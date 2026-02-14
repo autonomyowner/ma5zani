@@ -5,49 +5,34 @@ import { Id } from '@/convex/_generated/dataModel';
 import { generateLandingPage } from '@/lib/landing-page-ai';
 import { getR2PublicUrl } from '@/lib/r2';
 
+// Allow up to 60s for AI generation
+export const maxDuration = 60;
+
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
 export async function POST(request: NextRequest) {
+  const body = await request.json();
+  const { sellerId, productId, storefrontId, landingPageId } = body;
+
+  if (!sellerId || !productId || !storefrontId || !landingPageId) {
+    return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+  }
+
   try {
-    const body = await request.json();
-    const { sellerId, productId, storefrontId, landingPageId } = body;
-
-    if (!sellerId || !productId || !storefrontId || !landingPageId) {
-      return NextResponse.json(
-        { error: 'Missing required fields' },
-        { status: 400 }
-      );
-    }
-
-    // Fetch product and storefront data
-    const [storefront, product] = await Promise.all([
+    // Fetch product + storefront in parallel (single query each)
+    const [storefront, products] = await Promise.all([
       convex.query(api.storefronts.getStorefrontBySeller, {
         sellerId: sellerId as Id<'sellers'>,
       }),
-      convex.query(api.publicOrders.getPublicProduct, {
-        slug: '', // We'll get product directly
-        productId: productId as Id<'products'>,
+      convex.query(api.products.getProductsBySeller, {
+        sellerId: sellerId as Id<'sellers'>,
       }),
     ]);
 
-    // Get product directly if public query didn't work
-    const products = await convex.query(api.products.getProductsBySeller, {
-      sellerId: sellerId as Id<'sellers'>,
-    });
     const productData = products?.find((p: { _id: string }) => p._id === productId);
 
-    if (!productData) {
-      return NextResponse.json(
-        { error: 'Product not found' },
-        { status: 404 }
-      );
-    }
-
-    if (!storefront) {
-      return NextResponse.json(
-        { error: 'Storefront not found' },
-        { status: 404 }
-      );
+    if (!productData || !storefront) {
+      return NextResponse.json({ error: 'Product or storefront not found' }, { status: 404 });
     }
 
     // Get product image URL
@@ -55,7 +40,7 @@ export async function POST(request: NextRequest) {
       ? getR2PublicUrl(productData.imageKeys[0])
       : null;
 
-    // Run AI generation
+    // Run AI generation (vision + copy in parallel inside)
     const result = await generateLandingPage({
       product: {
         name: productData.name,
@@ -73,6 +58,11 @@ export async function POST(request: NextRequest) {
     });
 
     if (!result.success || !result.content || !result.design) {
+      // Reset LP status so it doesn't stay stuck
+      await convex.mutation(api.landingPages.updateLandingPageStatus, {
+        id: landingPageId as Id<'landingPages'>,
+        status: 'archived',
+      });
       return NextResponse.json(
         { error: result.errors?.[0] || 'AI generation failed' },
         { status: 422 }
@@ -94,16 +84,18 @@ export async function POST(request: NextRequest) {
       design: result.design,
     });
 
-    return NextResponse.json({
-      success: true,
-      content: result.content,
-      design: result.design,
-    });
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Landing page generation error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+
+    // Clean up stuck record on any error
+    try {
+      await convex.mutation(api.landingPages.updateLandingPageStatus, {
+        id: landingPageId as Id<'landingPages'>,
+        status: 'archived',
+      });
+    } catch { /* ignore cleanup errors */ }
+
+    return NextResponse.json({ error: 'Generation failed' }, { status: 500 });
   }
 }

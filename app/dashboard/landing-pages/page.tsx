@@ -34,6 +34,7 @@ export default function LandingPagesPage() {
   const [showPicker, setShowPicker] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+  const [genError, setGenError] = useState('')
 
   // Activation gate
   if (seller && !seller.isActivated) {
@@ -49,6 +50,7 @@ export default function LandingPagesPage() {
 
     setShowPicker(false)
     setGenerating(true)
+    setGenError('')
 
     try {
       const pageId = generatePageId()
@@ -61,7 +63,7 @@ export default function LandingPagesPage() {
       })
 
       // Trigger AI generation
-      await fetch('/api/landing-pages/generate', {
+      const res = await fetch('/api/landing-pages/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -71,8 +73,14 @@ export default function LandingPagesPage() {
           landingPageId: lpId,
         }),
       })
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        setGenError(data.error || 'Generation failed. Please try again.')
+      }
     } catch (error) {
       console.error('Failed to generate landing page:', error)
+      setGenError('Network error. Please try again.')
     } finally {
       setGenerating(false)
     }
@@ -133,6 +141,13 @@ export default function LandingPagesPage() {
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-center gap-3">
           <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
           <p className="text-blue-700 font-medium">{lp?.generatingDesc || 'AI is writing your page content...'}</p>
+        </div>
+      )}
+
+      {/* Error state */}
+      {genError && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <p className="text-red-700 font-medium">{genError}</p>
         </div>
       )}
 
