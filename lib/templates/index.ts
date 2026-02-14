@@ -9,6 +9,7 @@ import {
   forestTemplate,
   sunsetTemplate,
   slateProTemplate,
+  ma5zaniTemplate,
 } from './themes';
 
 export interface TemplateConfig {
@@ -70,6 +71,7 @@ export const templates: Record<string, TemplateConfig> = {
   forest: forestTemplate,
   sunset: sunsetTemplate,
   'slate-pro': slateProTemplate,
+  ma5zani: ma5zaniTemplate,
 };
 
 export const getTemplate = (templateId: string): TemplateConfig => {

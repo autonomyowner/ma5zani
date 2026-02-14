@@ -110,3 +110,21 @@ export const slateProTemplate: TemplateConfig = {
   },
   footer: shopifyFooter,
 };
+
+export const ma5zaniTemplate: TemplateConfig = {
+  id: 'ma5zani',
+  name: 'ma5zani',
+  nameAr: 'مخزني',
+  description: 'Official ma5zani theme with orange-blue gradient palette',
+  descriptionAr: 'ثيم مخزني الرسمي بتدرج برتقالي أزرق',
+  sections: shopifyTemplate,
+  colors: {
+    primary: '#0054A6',
+    accent: '#F7941D',
+    background: '#ffffff',
+    text: '#1e293b',
+    headerBg: '#0054A6',
+    footerBg: '#0054A6',
+  },
+  footer: shopifyFooter,
+};
