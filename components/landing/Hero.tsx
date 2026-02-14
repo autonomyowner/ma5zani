@@ -5,11 +5,22 @@ import Image from 'next/image'
 import Button from '@/components/ui/Button'
 import { useLanguage } from '@/lib/LanguageContext'
 import { authClient } from '@/lib/auth-client'
+import { useEffect, useState } from 'react'
 
 export default function Hero() {
   const { t, dir, language } = useLanguage()
   const { data: session } = authClient.useSession()
   const isSignedIn = !!session
+  const [visibleWords, setVisibleWords] = useState(0)
+
+  useEffect(() => {
+    const timers = [
+      setTimeout(() => setVisibleWords(1), 300),
+      setTimeout(() => setVisibleWords(2), 700),
+      setTimeout(() => setVisibleWords(3), 1100),
+    ]
+    return () => timers.forEach(clearTimeout)
+  }, [])
 
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
@@ -43,14 +54,38 @@ export default function Hero() {
                 {t.hero.tagline}
               </p>
               <h1
-                className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#0054A6] leading-tight opacity-0 animate-fade-in-up stagger-1"
+                className="text-5xl md:text-6xl lg:text-7xl font-bold text-[#0054A6] leading-tight"
                 style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}
               >
-                {t.hero.title1}
+                <span
+                  className="inline-block transition-all duration-700 ease-out"
+                  style={{
+                    opacity: visibleWords >= 1 ? 1 : 0,
+                    transform: visibleWords >= 1 ? 'translateY(0)' : 'translateY(30px)',
+                  }}
+                >
+                  {t.hero.title1}
+                </span>
                 <br />
-                <span className="text-[#00AEEF]">{t.hero.title2}</span>
+                <span
+                  className="inline-block text-[#00AEEF] transition-all duration-700 ease-out"
+                  style={{
+                    opacity: visibleWords >= 2 ? 1 : 0,
+                    transform: visibleWords >= 2 ? 'translateY(0)' : 'translateY(30px)',
+                  }}
+                >
+                  {t.hero.title2}
+                </span>
                 <br />
-                {t.hero.title3}
+                <span
+                  className="inline-block transition-all duration-700 ease-out"
+                  style={{
+                    opacity: visibleWords >= 3 ? 1 : 0,
+                    transform: visibleWords >= 3 ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.95)',
+                  }}
+                >
+                  {t.hero.title3}
+                </span>
               </h1>
               <p className={`text-xl text-slate-600 opacity-0 animate-fade-in-up stagger-2 ${dir === 'rtl' ? 'max-w-xl' : 'max-w-lg'}`}>
                 {t.hero.description}
@@ -73,8 +108,8 @@ export default function Hero() {
             {/* Trust indicators */}
             <div className="flex items-center gap-6 pt-4 opacity-0 animate-fade-in-up stagger-4">
               <div className="flex items-center gap-2">
-                <span className="text-2xl font-bold text-[#22B14C]" style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}>58</span>
-                <span className="text-slate-600 text-sm">{t.hero.wilayasCovered}</span>
+                <span className="text-2xl font-bold text-[#22B14C]" style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}>100%</span>
+                <span className="text-slate-600 text-sm">{t.hero.trustBadge}</span>
               </div>
             </div>
           </div>

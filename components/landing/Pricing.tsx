@@ -102,16 +102,22 @@ export default function Pricing() {
             className="text-2xl font-bold text-[#F7941D] mb-2"
             style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}
           >
-            {language === 'ar' ? 'عرض خاص: 4,000 دج/السنة' : 'Founder Offer: 4,000 DA/year'}
+            {language === 'ar'
+              ? 'عرض المؤسسين: 4,000 دج/السنة — لأول 50 بائع'
+              : language === 'fr'
+                ? 'Offre Fondateur : 4 000 DA/an — pour les 50 premiers'
+                : 'Founder Offer: 4,000 DA/year — first 50 sellers'}
           </p>
           <p className="text-slate-600">
             {language === 'ar'
-              ? 'احصل على وصول كامل لمنصة ma5zani بـ 4,000 دج فقط في السنة — عرض لفترة محدودة!'
-              : 'Get full access to ma5zani for just 4,000 DA per year — limited time offer!'}
+              ? 'كل المميزات مفتوحة بأقل سعر — منتجات بلا حدود، مساعد ذكي، قوالب احترافية. عرض لن يتكرر!'
+              : language === 'fr'
+                ? 'Toutes les fonctionnalites au meilleur prix — produits illimites, chatbot IA, templates pro. Offre limitee !'
+                : 'All features unlocked at the lowest price — unlimited products, AI chatbot, pro templates. This offer won\'t last!'}
           </p>
-          <Link href="/signup">
+          <Link href="/offer">
             <Button variant="primary" size="lg" className="mt-4">
-              {language === 'ar' ? 'ابدأ الآن' : 'Claim Offer'}
+              {language === 'ar' ? 'احجز مكانك' : language === 'fr' ? 'Reservez votre place' : 'Claim Your Spot'}
             </Button>
           </Link>
         </div>

@@ -6,9 +6,9 @@ export default function Stats() {
   const { t } = useLanguage()
 
   const stats = [
-    { number: '0', label: t.stats.freeReturns, suffix: 'DZD' },
-    { number: '7/7', label: t.stats.availability, suffix: '24h' },
-    { number: '24-48', label: t.stats.fastDelivery, suffix: 'h' },
+    { number: '5', label: t.stats.freeReturns, suffix: 'min' },
+    { number: '\u221E', label: t.stats.availability, suffix: '' },
+    { number: '24/7', label: t.stats.fastDelivery, suffix: '' },
   ]
 
   return (
