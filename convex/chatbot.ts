@@ -619,6 +619,31 @@ export const updateContext = mutation({
       currentProductId: v.optional(v.id("products")),
       cartItems: v.optional(v.array(v.string())),
       wilaya: v.optional(v.string()),
+      // Order-taking fields
+      orderState: v.optional(v.union(
+        v.literal("idle"),
+        v.literal("selecting"),
+        v.literal("collecting_info"),
+        v.literal("confirming"),
+        v.literal("completed"),
+        v.literal("cancelled")
+      )),
+      orderItems: v.optional(v.array(v.object({
+        productId: v.string(),
+        productName: v.string(),
+        quantity: v.number(),
+        unitPrice: v.number(),
+        selectedSize: v.optional(v.string()),
+        selectedColor: v.optional(v.string()),
+      }))),
+      customerName: v.optional(v.string()),
+      customerPhone: v.optional(v.string()),
+      deliveryAddress: v.optional(v.string()),
+      deliveryType: v.optional(v.union(v.literal("office"), v.literal("home"))),
+      commune: v.optional(v.string()),
+      deliveryFee: v.optional(v.number()),
+      placedOrderIds: v.optional(v.array(v.string())),
+      placedOrderNumber: v.optional(v.string()),
     }),
   },
   handler: async (ctx, args) => {
@@ -626,8 +651,10 @@ export const updateContext = mutation({
     if (!conversation) throw new Error("Conversation not found");
     if (conversation.sessionId !== args.sessionId) throw new Error("Invalid session");
 
+    // Merge with existing context
+    const existingContext = conversation.context || {};
     await ctx.db.patch(args.conversationId, {
-      context: args.context,
+      context: { ...existingContext, ...args.context },
     });
   },
 });
@@ -714,6 +741,7 @@ export const getAIContext = query({
         answer: k.answer,
         keywords: k.keywords,
       })),
+      storefrontSlug: storefront.slug,
       products: storefrontProducts.map(p => ({
         id: p._id,
         name: p.name,
@@ -722,6 +750,8 @@ export const getAIContext = query({
         description: p.description,
         stock: p.stock,
         status: p.status,
+        sizes: p.sizes,
+        colors: p.colors,
       })),
       currentProduct: currentProduct ? {
         id: currentProduct._id,
@@ -746,10 +776,28 @@ export const addBotResponse = mutation({
       type: v.optional(v.union(
         v.literal("text"),
         v.literal("product"),
-        v.literal("order")
+        v.literal("order"),
+        v.literal("order_summary"),
+        v.literal("order_confirmed")
       )),
       productId: v.optional(v.id("products")),
       orderId: v.optional(v.id("orders")),
+      orderData: v.optional(v.object({
+        items: v.optional(v.array(v.object({
+          productName: v.string(),
+          quantity: v.number(),
+          unitPrice: v.number(),
+          selectedSize: v.optional(v.string()),
+          selectedColor: v.optional(v.string()),
+        }))),
+        subtotal: v.optional(v.number()),
+        deliveryFee: v.optional(v.number()),
+        total: v.optional(v.number()),
+        customerName: v.optional(v.string()),
+        wilaya: v.optional(v.string()),
+        orderNumber: v.optional(v.string()),
+        orderId: v.optional(v.string()),
+      })),
     })),
   },
   handler: async (ctx, args) => {

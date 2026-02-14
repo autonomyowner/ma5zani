@@ -13,11 +13,163 @@ interface ChatbotWidgetProps {
   currentProductId?: Id<'products'>
 }
 
+interface MessageMetadata {
+  type?: 'text' | 'product' | 'order' | 'order_summary' | 'order_confirmed'
+  productId?: Id<'products'>
+  orderId?: Id<'orders'>
+  orderData?: {
+    items?: Array<{
+      productName: string
+      quantity: number
+      unitPrice: number
+      selectedSize?: string
+      selectedColor?: string
+    }>
+    subtotal?: number
+    deliveryFee?: number
+    total?: number
+    customerName?: string
+    wilaya?: string
+    orderNumber?: string
+    orderId?: string
+  }
+}
+
 interface Message {
   _id: Id<'chatbotMessages'>
   sender: 'customer' | 'bot' | 'seller'
   content: string
   createdAt: number
+  metadata?: MessageMetadata
+}
+
+function OrderSummaryCard({
+  orderData,
+  primaryColor,
+  language,
+  onConfirm,
+  onCancel,
+}: {
+  orderData: MessageMetadata['orderData']
+  primaryColor: string
+  language: 'ar' | 'en' | 'fr'
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  if (!orderData) return null
+
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-3 mt-2 space-y-2">
+      <p className="font-semibold text-sm text-slate-800">
+        {localText(language, {
+          ar: 'ملخص الطلب',
+          en: 'Order Summary',
+          fr: 'Résumé de la commande',
+        })}
+      </p>
+
+      {orderData.items?.map((item, idx) => (
+        <div key={idx} className="flex justify-between text-xs text-slate-600">
+          <span>
+            {item.productName} x{item.quantity}
+            {item.selectedSize ? ` (${item.selectedSize})` : ''}
+            {item.selectedColor ? ` (${item.selectedColor})` : ''}
+          </span>
+          <span>{(item.unitPrice * item.quantity).toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}</span>
+        </div>
+      ))}
+
+      <div className="border-t border-slate-100 pt-1 space-y-1">
+        <div className="flex justify-between text-xs text-slate-500">
+          <span>{localText(language, { ar: 'المجموع الفرعي', en: 'Subtotal', fr: 'Sous-total' })}</span>
+          <span>{(orderData.subtotal || 0).toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}</span>
+        </div>
+        {(orderData.deliveryFee ?? 0) > 0 && (
+          <div className="flex justify-between text-xs text-slate-500">
+            <span>{localText(language, { ar: 'التوصيل', en: 'Delivery', fr: 'Livraison' })}</span>
+            <span>{(orderData.deliveryFee || 0).toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}</span>
+          </div>
+        )}
+        <div className="flex justify-between text-sm font-semibold text-slate-800">
+          <span>{localText(language, { ar: 'الإجمالي', en: 'Total', fr: 'Total' })}</span>
+          <span>{(orderData.total || 0).toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}</span>
+        </div>
+      </div>
+
+      {orderData.customerName && (
+        <div className="text-xs text-slate-500">
+          {orderData.customerName} - {orderData.wilaya || ''}
+        </div>
+      )}
+
+      <div className="flex gap-2 pt-1">
+        <button
+          onClick={onConfirm}
+          className="flex-1 py-2 rounded-lg text-white text-sm font-medium transition-opacity hover:opacity-90"
+          style={{ backgroundColor: primaryColor }}
+        >
+          {localText(language, { ar: 'تأكيد الطلب', en: 'Confirm Order', fr: 'Confirmer' })}
+        </button>
+        <button
+          onClick={onCancel}
+          className="flex-1 py-2 rounded-lg bg-slate-100 text-slate-600 text-sm font-medium hover:bg-slate-200 transition-colors"
+        >
+          {localText(language, { ar: 'إلغاء', en: 'Cancel', fr: 'Annuler' })}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function OrderConfirmedCard({
+  orderData,
+  primaryColor,
+  language,
+  storefrontSlug,
+}: {
+  orderData: MessageMetadata['orderData']
+  primaryColor: string
+  language: 'ar' | 'en' | 'fr'
+  storefrontSlug: string
+}) {
+  if (!orderData) return null
+
+  return (
+    <div className="bg-white border border-green-200 rounded-xl p-3 mt-2 space-y-2">
+      <div className="flex items-center gap-2">
+        <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        </svg>
+        <p className="font-semibold text-sm text-green-700">
+          {localText(language, {
+            ar: 'تم تأكيد الطلب!',
+            en: 'Order Confirmed!',
+            fr: 'Commande confirmée !',
+          })}
+        </p>
+      </div>
+
+      {orderData.orderNumber && (
+        <p className="text-xs text-slate-600">
+          {localText(language, { ar: 'رقم الطلب', en: 'Order #', fr: 'N° commande' })}: {orderData.orderNumber}
+        </p>
+      )}
+
+      <p className="text-sm font-semibold text-slate-800">
+        {localText(language, { ar: 'الإجمالي', en: 'Total', fr: 'Total' })}: {(orderData.total || 0).toLocaleString()} {localText(language, { ar: 'دج', en: 'DZD', fr: 'DZD' })}
+      </p>
+
+      {orderData.orderId && (
+        <a
+          href={`/${storefrontSlug}/order-success/${orderData.orderId}`}
+          className="block text-center py-2 rounded-lg text-white text-sm font-medium transition-opacity hover:opacity-90"
+          style={{ backgroundColor: primaryColor }}
+        >
+          {localText(language, { ar: 'تتبع الطلب', en: 'Track Order', fr: 'Suivre la commande' })}
+        </a>
+      )}
+    </div>
+  )
 }
 
 export default function ChatbotWidget({ storefrontSlug, primaryColor, currentProductId }: ChatbotWidgetProps) {
@@ -27,6 +179,7 @@ export default function ChatbotWidget({ storefrontSlug, primaryColor, currentPro
   const [sessionId, setSessionId] = useState<string>('')
   const [conversationId, setConversationId] = useState<Id<'chatbotConversations'> | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isSending, setIsSending] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -104,11 +257,12 @@ export default function ChatbotWidget({ storefrontSlug, primaryColor, currentPro
     }
   }, [conversationId, sessionId, chatbot, storefrontSlug, getOrCreateConversation])
 
-  const handleSendMessage = async () => {
-    if (!inputValue.trim() || !conversationId || !sessionId) return
+  const handleSendMessage = async (directMessage?: string) => {
+    const message = directMessage || inputValue.trim()
+    if (!message || !conversationId || !sessionId || isSending) return
 
-    const message = inputValue.trim()
-    setInputValue('')
+    if (!directMessage) setInputValue('')
+    setIsSending(true)
 
     try {
       // Send customer message to Convex
@@ -135,6 +289,8 @@ export default function ChatbotWidget({ storefrontSlug, primaryColor, currentPro
       // The AI response is saved directly to Convex and will appear via subscription
     } catch (error) {
       console.error('Failed to send message:', error)
+    } finally {
+      setIsSending(false)
     }
   }
 
@@ -156,6 +312,24 @@ export default function ChatbotWidget({ storefrontSlug, primaryColor, currentPro
       e.preventDefault()
       handleSendMessage()
     }
+  }
+
+  const handleOrderConfirm = () => {
+    const confirmMsg = localText(language, {
+      ar: 'نعم، أؤكد الطلب',
+      en: 'Yes, confirm the order',
+      fr: 'Oui, confirmer la commande',
+    })
+    handleSendMessage(confirmMsg)
+  }
+
+  const handleOrderCancel = () => {
+    const cancelMsg = localText(language, {
+      ar: 'لا، ألغي الطلب',
+      en: 'No, cancel the order',
+      fr: 'Non, annuler la commande',
+    })
+    handleSendMessage(cancelMsg)
   }
 
   // Don't render if chatbot is not enabled
@@ -231,28 +405,58 @@ export default function ChatbotWidget({ storefrontSlug, primaryColor, currentPro
             ) : (
               <>
                 {messages?.map((msg) => (
-                  <div
-                    key={msg._id}
-                    className={`flex ${
-                      msg.sender === 'customer' ? 'justify-end' :
-                      msg.sender === 'bot' || msg.sender === 'seller' ? 'justify-start' : ''
-                    }`}
-                  >
+                  <div key={msg._id}>
                     <div
-                      className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${
-                        msg.sender === 'customer'
-                          ? 'text-white rounded-br-md'
-                          : 'bg-white border border-slate-200 text-slate-800 rounded-bl-md'
+                      className={`flex ${
+                        msg.sender === 'customer' ? 'justify-end' :
+                        msg.sender === 'bot' || msg.sender === 'seller' ? 'justify-start' : ''
                       }`}
-                      style={msg.sender === 'customer' ? { backgroundColor: primaryColor } : undefined}
                     >
-                      {msg.sender === 'seller' && (
-                        <p className="text-[10px] text-slate-400 mb-1">
-                          {localText(language, { ar: 'فريق الدعم', en: 'Support Team', fr: 'Equipe support' })}
-                        </p>
-                      )}
-                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                      <div
+                        className={`max-w-[80%] px-4 py-2.5 rounded-2xl ${
+                          msg.sender === 'customer'
+                            ? 'text-white rounded-br-md'
+                            : 'bg-white border border-slate-200 text-slate-800 rounded-bl-md'
+                        }`}
+                        style={msg.sender === 'customer' ? { backgroundColor: primaryColor } : undefined}
+                      >
+                        {msg.sender === 'seller' && (
+                          <p className="text-[10px] text-slate-400 mb-1">
+                            {localText(language, { ar: 'فريق الدعم', en: 'Support Team', fr: 'Equipe support' })}
+                          </p>
+                        )}
+                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                      </div>
                     </div>
+
+                    {/* Order Summary Card */}
+                    {msg.metadata?.type === 'order_summary' && msg.sender === 'bot' && (
+                      <div className="flex justify-start">
+                        <div className="max-w-[85%]">
+                          <OrderSummaryCard
+                            orderData={msg.metadata.orderData}
+                            primaryColor={primaryColor}
+                            language={language}
+                            onConfirm={handleOrderConfirm}
+                            onCancel={handleOrderCancel}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Order Confirmed Card */}
+                    {msg.metadata?.type === 'order_confirmed' && msg.sender === 'bot' && (
+                      <div className="flex justify-start">
+                        <div className="max-w-[85%]">
+                          <OrderConfirmedCard
+                            orderData={msg.metadata.orderData}
+                            primaryColor={primaryColor}
+                            language={language}
+                            storefrontSlug={storefrontSlug}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
                 <div ref={messagesEndRef} />
@@ -282,10 +486,11 @@ export default function ChatbotWidget({ storefrontSlug, primaryColor, currentPro
                 placeholder={t.chatbot.typeMessage}
                 className="flex-1 px-4 py-2.5 border border-slate-200 rounded-full focus:ring-2 focus:border-transparent outline-none text-sm"
                 style={{ '--tw-ring-color': primaryColor } as React.CSSProperties}
+                disabled={isSending}
               />
               <button
-                onClick={handleSendMessage}
-                disabled={!inputValue.trim()}
+                onClick={() => handleSendMessage()}
+                disabled={!inputValue.trim() || isSending}
                 className="w-10 h-10 rounded-full flex items-center justify-center text-white disabled:opacity-50 transition-opacity"
                 style={{ backgroundColor: primaryColor }}
               >
