@@ -41,7 +41,7 @@ export default function FounderOfferGate() {
           <p className="text-slate-700 font-medium mb-3">{fo.paymentMethod}</p>
           <p className="text-slate-600 text-sm mb-1">{fo.sendProof}</p>
           <a
-            href={`https://wa.me/213658399645`}
+            href={`https://wa.me/213697339450`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block mt-2 px-6 py-3 bg-[#22B14C] text-white rounded-xl font-bold text-lg hover:opacity-90 transition-opacity"

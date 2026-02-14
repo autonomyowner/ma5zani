@@ -135,7 +135,7 @@ export default function OfferPage() {
   }
 
   const whatsappMessage = encodeURIComponent(s.whatsappMessage)
-  const whatsappLink = `https://wa.me/213658399645?text=${whatsappMessage}`
+  const whatsappLink = `https://wa.me/213697339450?text=${whatsappMessage}`
 
   const handleWhatsAppClick = () => {
     trackEvent('Lead', {

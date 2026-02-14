@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ma5zani is an e-commerce fulfillment platform for Algerian sellers. It's a trilingual (Arabic/English/French) Next.js application with RTL support, using Convex for real-time backend, better-auth for authentication, and Cloudflare R2 for image storage.
+ma5zani is an e-commerce store builder for Algerian sellers — positioned as the Shopify alternative for Algeria. It's a trilingual (Arabic/English/French) Next.js application with RTL support, using Convex for real-time backend, better-auth for authentication, and Cloudflare R2 for image storage. Sellers create online stores in minutes with professional templates, AI chatbot, unlimited products, and instant order notifications.
 
 **Production URL**: https://www.ma5zani.com
 
@@ -233,6 +233,24 @@ Storefront and AI chatbot features are locked behind `seller.isActivated`. Flow:
 4. Gated pages: `/dashboard/storefront/*`, `/dashboard/chatbot/*` — show `FounderOfferGate` component if not activated
 5. Dashboard shows orange unlock banner for non-activated sellers
 6. Pricing is hardcoded in: `lib/translations.ts` (founderOffer section), `app/onboarding/page.tsx`, `components/landing/Pricing.tsx`
+
+### Pricing Tiers (Current)
+
+| Plan | Arabic | English | Price |
+|------|--------|---------|-------|
+| Tier 1 | أساسي | Starter | 1,000 DZD/month |
+| Tier 2 | متقدم | Pro | 3,900 DZD/month |
+| Tier 3 | بزنس | Business | 7,900 DZD/month |
+
+**Founder Offer**: 4,000 DZD/year for first 50 sellers — all features unlocked. Hardcoded in `lib/translations.ts` (founderOffer section), `components/landing/Pricing.tsx` (banner), and `lib/vapi.ts` (voice assistant prompt).
+
+### Voice Assistant (Vapi)
+
+Houssam (حسام) is the AI voice support assistant on the homepage:
+- Config and system prompt in `lib/vapi.ts`
+- Uses GPT-4o-mini via Vapi with inline assistant config
+- `VoiceCallButton.tsx` component embedded in `SupportChat.tsx`
+- System prompt contains platform description, pricing, and how-it-works — **must be updated when pricing or positioning changes**
 
 ### Storefront Templates
 
