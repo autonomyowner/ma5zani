@@ -72,7 +72,8 @@ app/
 sellers: { email, name, phone?, businessAddress?, plan, isActivated?, activatedAt?, expoPushToken?, emailNotifications? }
 products: { sellerId, name, sku, stock, price, status, imageKeys?, categoryId?, showOnStorefront?, salePrice? }
 orders: { sellerId, productId, orderNumber, customerName, wilaya, amount, status, source?, storefrontId?, fulfillmentStatus? }
-storefronts: { sellerId, slug, boutiqueName, logoKey?, theme, settings, metaPixelId?, isPublished }
+storefronts: { sellerId, slug, boutiqueName, logoKey?, theme, settings, metaPixelId?, customDomain?, isPublished }
+customDomains: { storefrontId, sellerId, hostname, cloudflareHostnameId?, status, validationErrors?, sslStatus? }
 categories: { sellerId, name, nameAr, sortOrder }
 chats: { sessionId, recipientId?, recipientName?, recipientEmail?, status, lastMessageAt }
 chatMessages: { chatId, sender, content, createdAt }
@@ -124,7 +125,31 @@ Auth was migrated from Clerk to `@convex-dev/better-auth`. Supports email/passwo
 
 ### Middleware Logic
 
-`middleware.ts` redirects non-www (`ma5zani.com`) to `www.ma5zani.com` with a 301 redirect. All other requests pass through — auth is handled client-side.
+`middleware.ts` handles routing for multiple domain types:
+
+1. **Non-www redirect**: `ma5zani.com` → `www.ma5zani.com` (301)
+2. **Main site passthrough**: `www.ma5zani.com` and `localhost`
+3. **Subdomain rewrite**: `store.ma5zani.com/path` → rewrite to `/store/path` (free for all sellers)
+4. **Custom domain resolution**: `mystore.com/path` → query Convex for slug → rewrite to `/slug/path` (in-memory 5min cache)
+
+Reserved subdomains that pass through: `www`, `api`, `admin`, `dashboard`, `mail`, `smtp`, `ftp`, `cdn`, `static`, `dev`, `staging`, `app`.
+
+### Custom Domains
+
+Sellers can connect their own domain to their storefront:
+
+- **Subdomains** (free): `slug.ma5zani.com` — automatic, uses wildcard DNS + Workers route
+- **Custom domains** (premium): `mystore.com` — uses Cloudflare for SaaS custom hostnames
+
+**Key files**:
+- `convex/customDomains.ts` — Domain CRUD queries/mutations
+- `app/api/custom-domains/route.ts` — Cloudflare API proxy (provision/check/delete hostnames)
+- `components/dashboard/CustomDomainSection.tsx` — Dashboard UI
+- `convex/schema.ts` — `customDomains` table + `customDomain` field on `storefronts`
+
+**Flow**: Frontend calls Convex mutations directly (auth required), then calls `/api/custom-domains` for Cloudflare API operations (no auth needed — just proxies to CF).
+
+**Env vars**: `CLOUDFLARE_ZONE_ID` (in wrangler.jsonc vars), `CLOUDFLARE_CUSTOM_HOSTNAME_API_TOKEN` (secret via `npx wrangler secret put`).
 
 ### Cloudflare Workers Patterns
 
@@ -267,7 +292,7 @@ Storefront and AI chatbot features are locked behind `seller.isActivated`. Flow:
 1. New sellers get `isActivated: false` on signup
 2. Seller pays 4,000 DA/year, sends proof via WhatsApp
 3. Admin activates seller via `/admin/sellers` (toggles `isActivated` + sets `activatedAt`)
-4. Gated pages: `/dashboard/storefront/*`, `/dashboard/chatbot/*` — show `FounderOfferGate` component if not activated
+4. Gated pages: `/dashboard/storefront/*`, `/dashboard/chatbot/*`, `/dashboard/voice-studio` — show `FounderOfferGate` component if not activated
 5. Dashboard shows orange unlock banner for non-activated sellers
 6. Pricing is hardcoded in: `lib/translations.ts` (founderOffer section), `app/onboarding/page.tsx`, `components/landing/Pricing.tsx`
 
@@ -288,6 +313,19 @@ Houssam (حسام) is the AI voice support assistant on the homepage:
 - Uses GPT-4o-mini via Vapi with inline assistant config
 - `VoiceCallButton.tsx` component embedded in `SupportChat.tsx`
 - System prompt contains platform description, pricing, and how-it-works — **must be updated when pricing or positioning changes**
+
+### Voice Studio (Cartesia TTS)
+
+Sellers can generate professional AI audio from text at `/dashboard/voice-studio`:
+- **Cartesia Sonic-3** model — supports Arabic, English, French
+- API routes: `app/api/voice-studio/route.ts` (TTS generation + R2 upload), `app/api/voice-studio/voices/route.ts` (voice listing proxy with 1hr cache)
+- Convex CRUD: `convex/voiceClips.ts` — `listMyClips`, `saveClip`, `deleteClip`, `getTodayClipCount`
+- Generated MP3s stored in R2 under `audio/` prefix
+- Gated behind `sellerHasAccess()` + `FounderOfferGate` (same as chatbot/storefront)
+- **Cartesia API**: `POST https://api.cartesia.ai/tts/bytes` with `Cartesia-Version: 2025-04-16`, `model_id: sonic-3`
+- Speed control: `generation_config.speed` (number, 0.6–1.5)
+- Output format: `{ container: "mp3", bit_rate: 128000, sample_rate: 44100 }`
+- `CARTESIA_API_KEY` secret set in Cloudflare Workers + `.dev.vars`
 
 ### Storefront Templates
 
@@ -334,6 +372,8 @@ Secrets (set via `npx wrangler secret put`):
 - `OPENROUTER_API_KEY` - OpenRouter API key for AI chatbot
 - `NEXT_PUBLIC_VAPI_PUBLIC_KEY` - Vapi voice assistant public key
 - `META_CONVERSIONS_ACCESS_TOKEN` - Meta Conversions API token
+- `CARTESIA_API_KEY` - Cartesia TTS API key for Voice Studio
+- `CLOUDFLARE_CUSTOM_HOSTNAME_API_TOKEN` - Cloudflare API token for custom domain provisioning
 
 **Convex (set via `npx convex env set`)**:
 - `BETTER_AUTH_SECRET` - Secret for better-auth session signing

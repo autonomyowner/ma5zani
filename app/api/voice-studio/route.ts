@@ -41,11 +41,11 @@ export async function POST(request: Request) {
       method: 'POST',
       headers: {
         'X-API-Key': process.env.CARTESIA_API_KEY!,
-        'Cartesia-Version': '2024-06-10',
+        'Cartesia-Version': '2025-04-16',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model_id: 'sonic-2',
+        model_id: 'sonic-3',
         transcript,
         voice: { mode: 'id', id: voiceId },
         language: cartesiaLang,
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
         },
         ...(speed && speed !== 1 ? {
           generation_config: {
-            speed: String(speed),
+            speed: speed,
           },
         } : {}),
       }),

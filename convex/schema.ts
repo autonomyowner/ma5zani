@@ -179,12 +179,38 @@ export default defineSchema({
       }))),
     })),
 
+    customDomain: v.optional(v.string()),  // "mystore.com"
+
     isPublished: v.boolean(),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
     .index("by_seller", ["sellerId"])
-    .index("by_slug", ["slug"]),
+    .index("by_slug", ["slug"])
+    .index("by_customDomain", ["customDomain"]),
+
+  // ============ CUSTOM DOMAINS ============
+
+  customDomains: defineTable({
+    storefrontId: v.id("storefronts"),
+    sellerId: v.id("sellers"),
+    hostname: v.string(),               // "mystore.com"
+    cloudflareHostnameId: v.optional(v.string()),
+    status: v.union(
+      v.literal("pending"),              // Waiting for DNS
+      v.literal("pending_validation"),   // DNS found, SSL being issued
+      v.literal("active"),               // Live
+      v.literal("failed"),
+      v.literal("deleted")
+    ),
+    validationErrors: v.optional(v.array(v.string())),
+    sslStatus: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_hostname", ["hostname"])
+    .index("by_storefront", ["storefrontId"])
+    .index("by_seller", ["sellerId"]),
 
   categories: defineTable({
     sellerId: v.id("sellers"),

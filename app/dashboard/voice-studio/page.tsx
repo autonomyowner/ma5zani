@@ -55,7 +55,8 @@ export default function VoiceStudioPage() {
       const res = await fetch('/api/voice-studio/voices')
       if (res.ok) {
         const data = await res.json()
-        setVoices(Array.isArray(data) ? data : [])
+        const list = Array.isArray(data) ? data : (data?.data || [])
+        setVoices(list)
       }
     } catch (e) {
       console.error('Failed to fetch voices:', e)

@@ -16,7 +16,8 @@
   ],
   "routes": [
     { "pattern": "www.ma5zani.com", "custom_domain": true },
-    { "pattern": "ma5zani.com", "custom_domain": true }
+    { "pattern": "ma5zani.com", "custom_domain": true },
+    { "pattern": "*.ma5zani.com/*", "zone_name": "ma5zani.com" }
   ],
   "vars": {
     "NEXT_PUBLIC_CONVEX_URL": "https://colorless-cricket-513.convex.cloud",
@@ -24,6 +25,7 @@
     "CONVEX_SITE_URL": "https://colorless-cricket-513.convex.site",
     "NEXT_PUBLIC_R2_PUBLIC_URL": "https://pub-6f95df2287c74e40a3e0d525950d723c.r2.dev",
     "R2_ACCOUNT_ID": "069432d04ee8a3233a611234066ab66d",
-    "R2_BUCKET_NAME": "ma5zani"
+    "R2_BUCKET_NAME": "ma5zani",
+    "CLOUDFLARE_ZONE_ID": ""
   }
 }

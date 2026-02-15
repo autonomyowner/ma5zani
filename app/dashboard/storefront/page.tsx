@@ -15,6 +15,7 @@ import Input from '@/components/ui/Input';
 import SlugInput from '@/components/ui/SlugInput';
 import { sellerHasAccess } from '@/lib/sellerAccess';
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
+import CustomDomainSection from '@/components/dashboard/CustomDomainSection';
 
 export default function StorefrontPage() {
   const router = useRouter();
@@ -464,12 +465,13 @@ export default function StorefrontPage() {
               </p>
               {storefront.isPublished && (
                 <a
-                  href={`/${storefront.slug}`}
+                  href={`https://${storefront.slug}.ma5zani.com`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs sm:text-sm text-[#0054A6] hover:underline break-all"
+                  dir="ltr"
                 >
-                  ma5zani.com/{storefront.slug}
+                  {storefront.slug}.ma5zani.com
                 </a>
               )}
             </div>
@@ -505,11 +507,24 @@ export default function StorefrontPage() {
         </div>
       )}
 
-      {/* Step 5: Settings (Meta Pixel) */}
-      {storefront && (
+      {/* Step 5: Domain & Links */}
+      {storefront && storefront.isPublished && (
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">5</div>
+            <h2 className="text-base sm:text-lg font-semibold text-slate-900">
+              {localText(language, { ar: 'الدومين والروابط', en: 'Domain & Links', fr: 'Domaine et liens' })}
+            </h2>
+          </div>
+          <CustomDomainSection storefrontId={storefront._id} storefrontSlug={storefront.slug} />
+        </div>
+      )}
+
+      {/* Step 6: Settings (Meta Pixel) */}
+      {storefront && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6">
+          <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">6</div>
             <h2 className="text-base sm:text-lg font-semibold text-slate-900">
               {localText(language, { ar: 'الإعدادات', en: 'Settings', fr: 'Paramètres' })}
             </h2>
@@ -560,11 +575,11 @@ export default function StorefrontPage() {
         </div>
       )}
 
-      {/* Step 6: Social Media Links */}
+      {/* Step 7: Social Media Links */}
       {storefront && (
         <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6">
           <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">6</div>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#0054A6] text-white flex items-center justify-center font-bold text-sm sm:text-base">7</div>
             <h2 className="text-base sm:text-lg font-semibold text-slate-900">
               {localText(language, { ar: 'روابط التواصل الاجتماعي', en: 'Social Media Links', fr: 'Réseaux sociaux' })}
             </h2>
