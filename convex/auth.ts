@@ -65,6 +65,19 @@ export async function requireSeller(ctx: QueryCtx | MutationCtx) {
   return seller;
 }
 
+// Require seller with active access (activated OR trial not expired)
+// Use this for gated feature mutations (storefront, chatbot, landing pages)
+export async function requireActiveSeller(ctx: QueryCtx | MutationCtx) {
+  const seller = await requireSeller(ctx);
+  const hasAccess =
+    seller.isActivated ||
+    (seller.trialEndsAt !== undefined && seller.trialEndsAt > Date.now());
+  if (!hasAccess) {
+    throw new Error("Your trial has expired. Please subscribe to continue.");
+  }
+  return seller;
+}
+
 // Get auth user directly (for onboarding)
 export async function getAuthUser(ctx: QueryCtx | MutationCtx) {
   try {

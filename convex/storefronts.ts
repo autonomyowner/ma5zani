@@ -1,7 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { ConvexError } from "convex/values";
-import { requireSeller, getCurrentSeller } from "./auth";
+import { requireSeller, requireActiveSeller, getCurrentSeller } from "./auth";
 
 export const getMyStorefront = query({
   args: {},
@@ -97,7 +97,7 @@ export const createStorefront = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     // Check if seller already has a storefront
     const existing = await ctx.db
@@ -168,7 +168,7 @@ export const updateStorefront = mutation({
     metaPixelId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const storefront = await ctx.db
       .query("storefronts")
@@ -197,7 +197,7 @@ export const updateStorefront = mutation({
 export const updateSlug = mutation({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const storefront = await ctx.db
       .query("storefronts")
@@ -234,7 +234,7 @@ export const updateSlug = mutation({
 export const publishStorefront = mutation({
   args: { isPublished: v.boolean() },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const storefront = await ctx.db
       .query("storefronts")
@@ -296,7 +296,7 @@ export const updateSections = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const storefront = await ctx.db
       .query("storefronts")
@@ -328,7 +328,7 @@ export const updateColors = mutation({
     }),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const storefront = await ctx.db
       .query("storefronts")
@@ -367,7 +367,7 @@ export const updateFooter = mutation({
     }),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const storefront = await ctx.db
       .query("storefronts")
@@ -423,7 +423,7 @@ export const applyTemplate = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const storefront = await ctx.db
       .query("storefronts")
@@ -464,7 +464,7 @@ export const updateFonts = mutation({
     aestheticDirection: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const storefront = await ctx.db
       .query("storefronts")

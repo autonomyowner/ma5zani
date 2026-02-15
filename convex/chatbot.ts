@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSeller } from "./auth";
+import { requireSeller, requireActiveSeller } from "./auth";
 
 // ============ SELLER CHATBOT MANAGEMENT ============
 
@@ -41,7 +41,7 @@ export const upsertChatbot = mutation({
     isEnabled: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     // Get seller's storefront
     const storefront = await ctx.db
@@ -92,7 +92,7 @@ export const toggleChatbot = mutation({
     isEnabled: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const storefront = await ctx.db
       .query("storefronts")
@@ -165,7 +165,7 @@ export const addKnowledge = mutation({
     keywords: v.array(v.string()),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const storefront = await ctx.db
       .query("storefronts")
@@ -205,7 +205,7 @@ export const updateKnowledge = mutation({
     keywords: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const knowledge = await ctx.db.get(args.knowledgeId);
     if (!knowledge) throw new Error("Knowledge entry not found");
@@ -231,7 +231,7 @@ export const deleteKnowledge = mutation({
     knowledgeId: v.id("chatbotKnowledge"),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const knowledge = await ctx.db.get(args.knowledgeId);
     if (!knowledge) throw new Error("Knowledge entry not found");
@@ -344,7 +344,7 @@ export const takeoverConversation = mutation({
     conversationId: v.id("chatbotConversations"),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const conversation = await ctx.db.get(args.conversationId);
     if (!conversation) throw new Error("Conversation not found");
@@ -375,7 +375,7 @@ export const sellerReply = mutation({
     content: v.string(),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const conversation = await ctx.db.get(args.conversationId);
     if (!conversation) throw new Error("Conversation not found");
@@ -405,7 +405,7 @@ export const returnToBot = mutation({
     conversationId: v.id("chatbotConversations"),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const conversation = await ctx.db.get(args.conversationId);
     if (!conversation) throw new Error("Conversation not found");
@@ -435,7 +435,7 @@ export const closeConversation = mutation({
     conversationId: v.id("chatbotConversations"),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     const conversation = await ctx.db.get(args.conversationId);
     if (!conversation) throw new Error("Conversation not found");

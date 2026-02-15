@@ -1,6 +1,6 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSeller } from "./auth";
+import { requireSeller, requireActiveSeller } from "./auth";
 
 // ============ AUTHENTICATED (SELLER) FUNCTIONS ============
 
@@ -74,7 +74,7 @@ export const createLandingPage = mutation({
     pageId: v.string(),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
 
     // Verify ownership
     const storefront = await ctx.db.get(args.storefrontId);
@@ -168,7 +168,7 @@ export const updateLandingPageStatus = mutation({
   handler: async (ctx, args) => {
     // Check auth if available, otherwise allow (for API route cleanup)
     let seller = null;
-    try { seller = await requireSeller(ctx); } catch { /* API route call */ }
+    try { seller = await requireActiveSeller(ctx); } catch { /* API route call */ }
 
     const page = await ctx.db.get(args.id);
     if (!page) {
@@ -191,7 +191,7 @@ export const updateLandingPageStatus = mutation({
 export const deleteLandingPage = mutation({
   args: { id: v.id("landingPages") },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await requireActiveSeller(ctx);
     const page = await ctx.db.get(args.id);
     if (!page || page.sellerId !== seller._id) {
       throw new Error("Landing page not found");

@@ -7,6 +7,7 @@ import { api } from '@/convex/_generated/api'
 import { useLanguage } from '@/lib/LanguageContext'
 import { useCurrentSeller } from '@/hooks/useCurrentSeller'
 import { authClient } from '@/lib/auth-client'
+import { sellerHasAccess } from '@/lib/sellerAccess'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import DeliverySettingsSection from '@/components/dashboard/DeliverySettingsSection'
 import Card from '@/components/ui/Card'
@@ -336,7 +337,7 @@ export default function SettingsPage() {
         </Card>
 
         {/* Delivery Settings - Only for activated sellers */}
-        {seller?.isActivated && <DeliverySettingsSection />}
+        {seller && sellerHasAccess(seller) && <DeliverySettingsSection />}
 
         {/* Account Security */}
         <Card className="p-4 lg:p-6">
