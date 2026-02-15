@@ -8,20 +8,25 @@ ma5zani is an e-commerce store builder for Algerian sellers — positioned as th
 
 **Production URL**: https://www.ma5zani.com
 
-## Commands
+## Hosting & Deployment
+
+Hosted on **Cloudflare Workers** via `@opennextjs/cloudflare`. Previously hosted on Vercel (migrated Feb 2025).
 
 ```bash
 npm run dev          # Start Next.js development server
-npm run build        # Production build
+npm run build        # Production build (Next.js only)
 npm run lint         # Run ESLint
+npm run preview      # Build + run locally on Workers runtime (wrangler dev)
+npm run deploy       # Build + deploy to Cloudflare Workers production
 npx convex dev       # Start Convex dev server (syncs schema & functions)
 npx convex deploy    # Deploy Convex to production
-vercel --prod        # Deploy to Vercel production
 ```
 
 **Development**: Run both `npm run dev` and `npx convex dev` in separate terminals for full functionality.
 
 **Windows builds**: Use `set NODE_OPTIONS=--max-old-space-size=4096 && npm run build` to avoid segfaults during production builds.
+
+**CI/CD**: GitHub Actions auto-deploys to Cloudflare Workers on push to `main` (`.github/workflows/deploy.yml`). Requires `CLOUDFLARE_API_TOKEN` secret in GitHub repo settings.
 
 **tsconfig**: `ma5zani_mobile` and `ma5zani-mobile-v2` directories are excluded in `tsconfig.json`. If adding new non-Next.js directories, add them to the exclude list to prevent build failures.
 
@@ -34,7 +39,8 @@ vercel --prod        # Deploy to Vercel production
 - Tailwind CSS 3.4
 - Convex (real-time backend)
 - better-auth with `@convex-dev/better-auth` (authentication — email/password + Google OAuth)
-- Cloudflare R2 (image storage via presigned URLs)
+- Cloudflare Workers (hosting via `@opennextjs/cloudflare`)
+- Cloudflare R2 (image storage via `aws4fetch` presigned URLs)
 - Resend (transactional email notifications)
 
 ### Key Features
@@ -89,9 +95,10 @@ telegramSessions: { telegramUserId, sellerId, command, step, data }
 ### Image Storage (R2)
 
 Images are stored in Cloudflare R2, not Convex storage:
-- Upload flow: Client → `/api/upload` (get presigned URL) → PUT to R2
+- Upload flow: Client → `/api/upload` (get presigned URL via `aws4fetch`) → PUT to R2
 - Display: `getR2PublicUrl(key)` from `lib/r2.ts`
 - Keys stored as strings in `imageKeys` (products) or `logoKey` (storefronts)
+- Server-side uploads (Telegram): `lib/r2-server.ts` uses `aws4fetch` with `Uint8Array` body
 
 ### Authentication (better-auth)
 
@@ -117,9 +124,38 @@ Auth was migrated from Clerk to `@convex-dev/better-auth`. Supports email/passwo
 
 ### Middleware Logic
 
-`middleware.ts` passes through all requests — auth is handled client-side. It distinguishes between:
-- Reserved paths (`dashboard`, `login`, `admin`, etc.) - standard auth rules
-- Dynamic slugs (`/[slug]`) - treated as public storefront routes
+`middleware.ts` redirects non-www (`ma5zani.com`) to `www.ma5zani.com` with a 301 redirect. All other requests pass through — auth is handled client-side.
+
+### Cloudflare Workers Patterns
+
+**CRITICAL: Lazy ConvexHttpClient initialization** — All API routes that use `ConvexHttpClient` from `convex/browser` MUST use lazy `require()` initialization. Top-level imports break the OpenNext bundler (`handler is not a function` error).
+
+```typescript
+// CORRECT — lazy init (Workers compatible)
+let _convex: import('convex/browser').ConvexHttpClient;
+function getConvex() {
+  if (!_convex) {
+    const { ConvexHttpClient } = require('convex/browser');
+    _convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+  }
+  return _convex;
+}
+// Use: getConvex().query(...) and getConvex().mutation(...)
+
+// WRONG — breaks OpenNext bundler
+import { ConvexHttpClient } from 'convex/browser';
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+```
+
+**Routes using this pattern**: `app/api/chatbot/route.ts`, `app/api/landing-pages/generate/route.ts`, `app/api/storefront/ai/route.ts`, `app/api/delivery/fees/route.ts`, `app/api/telegram/webhook/route.ts`
+
+**No `setInterval`** — Workers don't support persistent intervals. Use inline cleanup instead (see rate limiter in chatbot route).
+
+**No `export const maxDuration`** — Workers measure CPU time, not wall-clock. I/O wait is free.
+
+**`aws4fetch` for R2** — Workers don't support AWS SDK v3 (`fs.readFile not implemented`). Use `aws4fetch` instead for presigned URLs and uploads.
+
+**`node:crypto`** — Use `import crypto from 'node:crypto'` (not `'crypto'`) for Workers compatibility.
 
 ### Internationalization (i18n)
 
@@ -183,7 +219,7 @@ Both are scheduled as internal actions via `ctx.scheduler.runAfter(0, ...)` so t
 
 Sellers can link their Telegram account to manage products via bot:
 - `convex/telegram.ts` - Bot command handlers
-- Webhook endpoint at `/api/telegram/webhook`
+- Webhook endpoint at `/api/telegram/webhook` (registered to `https://www.ma5zani.com/api/telegram/webhook`)
 - Verification code flow to link seller account
 - Tables: `telegramLinks` (account linking), `telegramSessions` (multi-step command state)
 
@@ -193,12 +229,13 @@ Storefronts support Meta Pixel for conversion tracking:
 - Pixel ID configured in `/dashboard/storefront` settings
 - Script injected via `StorefrontLayout.tsx`
 - Events tracked: `PageView`, `InitiateCheckout`, `Purchase`
+- Server-side Conversions API via `/api/meta-conversions` route
 
 ### Support Chat System
 
 Real-time human support chat for customers:
 - Chat functions in `convex/chat.ts` (public user functions + admin functions)
-- Admin functions require password validation (hardcoded fallback: `csgo2026`)
+- Admin functions require password validation
 - Anonymous users identified by `sessionId` stored in localStorage
 - Admin panel at `/admin/chats` for managing conversations
 
@@ -207,7 +244,7 @@ Real-time human support chat for customers:
 Password-protected admin panel at `/admin/*`:
 - Login at `/admin` with password stored in sessionStorage
 - Dashboard, sellers, orders, products, and support chats management
-- Admin password: `csgo2026` (also set as `ADMIN_PASSWORD` env var in Convex)
+- Admin password set as `ADMIN_PASSWORD` env var in Convex
 
 ### AI Chatbot System
 
@@ -279,16 +316,37 @@ The storefront header (`components/storefront/StorefrontHeader.tsx`) uses `dir={
 
 ### Environment Variables
 
-**Vercel (Production)**:
+**Cloudflare Workers (wrangler.jsonc vars + secrets)**:
+
+Vars (public, in `wrangler.jsonc`):
 - `NEXT_PUBLIC_CONVEX_URL` - Convex deployment URL
 - `NEXT_PUBLIC_CONVEX_SITE_URL` - Convex site URL (for auth)
 - `CONVEX_SITE_URL` - Convex site URL (server-side)
-- `R2_*` - Cloudflare R2 credentials (R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_ACCOUNT_ID, R2_PUBLIC_URL)
-- `OPENROUTER_API_KEY` - OpenRouter API key for AI chatbot (Claude 3.5 Haiku)
+- `NEXT_PUBLIC_R2_PUBLIC_URL` - R2 public bucket URL
+- `R2_ACCOUNT_ID` - Cloudflare account ID
+- `R2_BUCKET_NAME` - R2 bucket name
+
+Secrets (set via `npx wrangler secret put`):
+- `R2_ACCESS_KEY_ID` - R2 access key
+- `R2_SECRET_ACCESS_KEY` - R2 secret key
+- `TELEGRAM_BOT_TOKEN` - Telegram bot token
+- `TELEGRAM_WEBHOOK_SECRET` - Telegram webhook verification secret
+- `OPENROUTER_API_KEY` - OpenRouter API key for AI chatbot
+- `NEXT_PUBLIC_VAPI_PUBLIC_KEY` - Vapi voice assistant public key
+- `META_CONVERSIONS_ACCESS_TOKEN` - Meta Conversions API token
 
 **Convex (set via `npx convex env set`)**:
 - `BETTER_AUTH_SECRET` - Secret for better-auth session signing
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - Google OAuth credentials
 - `SITE_URL` - Frontend URL (`https://www.ma5zani.com` in production)
 - `ADMIN_PASSWORD` - Admin panel access password
-- `RESEND_API_KEY` - Resend API key for email notifications (sends from `orders@ma5zani.com`)
+- `RESEND_API_KEY` - Resend API key for email notifications
+- `OPENROUTER_API_KEY` - OpenRouter API key (also in Convex for server-side AI)
+
+### Configuration Files
+
+- `wrangler.jsonc` - Cloudflare Workers config (custom domains, env vars, compatibility flags)
+- `open-next.config.ts` - OpenNext Cloudflare adapter config
+- `.dev.vars` - Local dev secrets for Workers (gitignored)
+- `.github/workflows/deploy.yml` - CI/CD auto-deploy on push to main
+- `next.config.ts` - Next.js config with `unoptimized` images for Workers
