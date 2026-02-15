@@ -14,6 +14,7 @@ import type * as categories from "../categories.js";
 import type * as chat from "../chat.js";
 import type * as chatbot from "../chatbot.js";
 import type * as crons from "../crons.js";
+import type * as customDomains from "../customDomains.js";
 import type * as delivery from "../delivery.js";
 import type * as http from "../http.js";
 import type * as landingPages from "../landingPages.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   chat: typeof chat;
   chatbot: typeof chatbot;
   crons: typeof crons;
+  customDomains: typeof customDomains;
   delivery: typeof delivery;
   http: typeof http;
   landingPages: typeof landingPages;

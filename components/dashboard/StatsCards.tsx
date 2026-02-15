@@ -46,19 +46,19 @@ export default function StatsCards({ stats }: StatsCardsProps) {
   ]
 
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
       {cards.map((card, index) => (
         <Card key={index} variant="bordered" className="relative overflow-hidden">
           <div className={`absolute top-0 left-0 right-0 h-1 ${card.color}`} />
-          <p className="text-sm text-slate-500 mb-1">{card.label}</p>
+          <p className="text-xs sm:text-sm text-slate-500 mb-1">{card.label}</p>
           <p
-            className={`text-3xl font-bold ${card.textColor}`}
+            className={`text-2xl sm:text-3xl font-bold ${card.textColor}`}
             style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
           >
             {card.value}
           </p>
           {card.suffix && (
-            <p className="text-sm text-slate-500">{card.suffix}</p>
+            <p className="text-xs sm:text-sm text-slate-500">{card.suffix}</p>
           )}
         </Card>
       ))}
