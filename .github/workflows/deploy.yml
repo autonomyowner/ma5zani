@@ -10,9 +10,11 @@ jobs:
     env:
       NEXT_PUBLIC_CONVEX_URL: https://colorless-cricket-513.convex.cloud
       NEXT_PUBLIC_CONVEX_SITE_URL: https://colorless-cricket-513.convex.site
+      CONVEX_SITE_URL: https://colorless-cricket-513.convex.site
       NEXT_PUBLIC_R2_PUBLIC_URL: https://pub-6f95df2287c74e40a3e0d525950d723c.r2.dev
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_dG91Y2hpbmctb2FyZmlzaC01NS5jbGVyay5hY2NvdW50cy5kZXYk
       NEXT_PUBLIC_VAPI_PUBLIC_KEY: 24909e59-44ee-420d-baeb-3ea2c01656e2
+      CONVEX_DEPLOYMENT: prod:colorless-cricket-513
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,6 +22,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - name: Create .dev.vars for build
+        run: echo "# CI build" > .dev.vars
       - run: npx opennextjs-cloudflare build
       - run: npx wrangler deploy
         env:
