@@ -376,6 +376,23 @@ export default defineSchema({
     .index("by_pageId", ["pageId"])
     .index("by_product", ["productId"]),
 
+  // ============ VOICE STUDIO ============
+
+  voiceClips: defineTable({
+    sellerId: v.id("sellers"),
+    title: v.string(),
+    transcript: v.string(),
+    audioKey: v.string(),        // R2 key e.g. "audio/1234-abc.mp3"
+    language: v.string(),         // "ar" | "en" | "fr"
+    voiceId: v.string(),          // Cartesia voice UUID
+    voiceName: v.optional(v.string()),
+    durationMs: v.optional(v.number()),
+    speed: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_seller", ["sellerId"])
+    .index("by_seller_created", ["sellerId", "createdAt"]),
+
   // Messages in chatbot conversations
   chatbotMessages: defineTable({
     conversationId: v.id("chatbotConversations"),

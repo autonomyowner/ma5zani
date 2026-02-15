@@ -51,6 +51,7 @@ export default function DashboardLayout({
     { label: t.landingPages?.nav || 'Landing Pages', href: '/dashboard/landing-pages' },
     { label: t.dashboard.storefrontNav, href: '/dashboard/storefront' },
     { label: t.chatbot.aiAssistant, href: '/dashboard/chatbot' },
+    { label: t.voiceStudio?.nav || 'Voice Studio', href: '/dashboard/voice-studio' },
     { label: t.telegram.telegramNav, href: '/dashboard/telegram' },
     { label: t.dashboard.inventoryNav, href: '/dashboard/inventory' },
     { label: t.dashboard.analyticsNav, href: '/dashboard/analytics' },
