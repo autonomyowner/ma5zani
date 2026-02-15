@@ -1,16 +1,6 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { AwsClient } from 'aws4fetch';
 import { isAuthenticated } from '@/lib/auth-server';
 import { NextResponse } from 'next/server';
-
-const R2 = new S3Client({
-  region: 'auto',
-  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
-  },
-});
 
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || 'ma5zani';
 
@@ -37,16 +27,26 @@ export async function POST(request: Request) {
     const extension = filename.split('.').pop() || 'jpg';
     const key = `${folder}/${timestamp}-${randomId}.${extension}`;
 
-    const command = new PutObjectCommand({
-      Bucket: BUCKET_NAME,
-      Key: key,
-      ContentType: contentType,
+    const r2 = new AwsClient({
+      accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
     });
 
-    const presignedUrl = await getSignedUrl(R2, command, { expiresIn: 3600 });
+    const url = new URL(
+      `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${BUCKET_NAME}/${key}`
+    );
+    url.searchParams.set('X-Amz-Expires', '3600');
+
+    const signed = await r2.sign(
+      new Request(url.toString(), {
+        method: 'PUT',
+        headers: { 'Content-Type': contentType },
+      }),
+      { aws: { signQuery: true } }
+    );
 
     return NextResponse.json({
-      uploadUrl: presignedUrl,
+      uploadUrl: signed.url,
       key,
       publicUrl: `${process.env.NEXT_PUBLIC_R2_PUBLIC_URL}/${key}`,
     });

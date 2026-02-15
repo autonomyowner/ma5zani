@@ -1,14 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { generateLandingPage } from '@/lib/landing-page-ai';
 import { getR2PublicUrl } from '@/lib/r2';
 
-// Allow up to 60s for AI generation
-export const maxDuration = 60;
-
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+let _convex: import('convex/browser').ConvexHttpClient;
+function getConvex() {
+  if (!_convex) {
+    const { ConvexHttpClient } = require('convex/browser');
+    _convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+  }
+  return _convex;
+}
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -21,10 +24,10 @@ export async function POST(request: NextRequest) {
   try {
     // Fetch product + storefront in parallel (single query each)
     const [storefront, products] = await Promise.all([
-      convex.query(api.storefronts.getStorefrontBySeller, {
+      getConvex().query(api.storefronts.getStorefrontBySeller, {
         sellerId: sellerId as Id<'sellers'>,
       }),
-      convex.query(api.products.getProductsBySeller, {
+      getConvex().query(api.products.getProductsBySeller, {
         sellerId: sellerId as Id<'sellers'>,
       }),
     ]);
@@ -60,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     if (!result.success || !result.content || !result.design) {
       // Reset LP status so it doesn't stay stuck
-      await convex.mutation(api.landingPages.updateLandingPageStatus, {
+      await getConvex().mutation(api.landingPages.updateLandingPageStatus, {
         id: landingPageId as Id<'landingPages'>,
         status: 'archived',
       });
@@ -71,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update the landing page record with AI content
-    await convex.mutation(api.landingPages.updateLandingPageContent, {
+    await getConvex().mutation(api.landingPages.updateLandingPageContent, {
       id: landingPageId as Id<'landingPages'>,
       content: {
         headline: result.content.headline,
@@ -91,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     // Clean up stuck record on any error
     try {
-      await convex.mutation(api.landingPages.updateLandingPageStatus, {
+      await getConvex().mutation(api.landingPages.updateLandingPageStatus, {
         id: landingPageId as Id<'landingPages'>,
         status: 'archived',
       });

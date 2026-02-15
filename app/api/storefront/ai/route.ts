@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { generateStorefrontConfig, GeneratedConfig } from '@/lib/storefront-ai';
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+let _convex: import('convex/browser').ConvexHttpClient;
+function getConvex() {
+  if (!_convex) {
+    const { ConvexHttpClient } = require('convex/browser');
+    _convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+  }
+  return _convex;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,16 +26,16 @@ export async function POST(request: NextRequest) {
 
     // Fetch storefront data from Convex
     const [storefront, products, categories, seller] = await Promise.all([
-      convex.query(api.storefronts.getStorefrontBySeller, {
+      getConvex().query(api.storefronts.getStorefrontBySeller, {
         sellerId: sellerId as Id<'sellers'>,
       }),
-      convex.query(api.products.getProductsBySeller, {
+      getConvex().query(api.products.getProductsBySeller, {
         sellerId: sellerId as Id<'sellers'>,
       }),
-      convex.query(api.categories.getCategoriesBySeller, {
+      getConvex().query(api.categories.getCategoriesBySeller, {
         sellerId: sellerId as Id<'sellers'>,
       }),
-      convex.query(api.sellers.getSellerById, {
+      getConvex().query(api.sellers.getSellerById, {
         sellerId: sellerId as Id<'sellers'>,
       }),
     ]);

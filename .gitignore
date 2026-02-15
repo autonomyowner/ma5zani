@@ -40,3 +40,7 @@ nul
 
 .vercel
 .env*.local
+
+# Cloudflare Workers
+.open-next
+.dev.vars

@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID || '1343395010814971';
 const META_ACCESS_TOKEN = process.env.META_CONVERSIONS_ACCESS_TOKEN;
