@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ma5zani",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-05-05",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "ma5zani"
+    }
+  ],
+  "routes": [
+    { "pattern": "www.ma5zani.com", "custom_domain": true },
+    { "pattern": "ma5zani.com", "custom_domain": true }
+  ],
+  "vars": {
+    "NEXT_PUBLIC_CONVEX_URL": "https://colorless-cricket-513.convex.cloud",
+    "NEXT_PUBLIC_CONVEX_SITE_URL": "https://colorless-cricket-513.convex.site",
+    "CONVEX_SITE_URL": "https://colorless-cricket-513.convex.site",
+    "NEXT_PUBLIC_R2_PUBLIC_URL": "https://pub-6f95df2287c74e40a3e0d525950d723c.r2.dev",
+    "R2_ACCOUNT_ID": "069432d04ee8a3233a611234066ab66d",
+    "R2_BUCKET_NAME": "ma5zani"
+  }
+}
