@@ -132,7 +132,7 @@ export default function LandingPagesPage() {
         <button
           onClick={() => setShowPicker(true)}
           disabled={generating || !storefront}
-          className="px-5 py-2.5 bg-[#0054A6] text-white rounded-xl font-medium hover:bg-[#004590] transition-colors disabled:opacity-50"
+          className="px-3 sm:px-5 py-2 sm:py-2.5 bg-[#0054A6] text-white rounded-xl text-sm sm:text-base font-medium hover:bg-[#004590] transition-colors disabled:opacity-50"
         >
           {generating ? (lp?.generating || 'Generating...') : (lp?.generate || 'Generate New Page')}
         </button>
@@ -179,77 +179,77 @@ export default function LandingPagesPage() {
           {landingPages.map((page) => (
             <div
               key={page._id}
-              className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4"
+              className="bg-white rounded-xl border border-slate-200 p-3 sm:p-4"
             >
-              {/* Product image */}
-              <div className="w-16 h-16 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
-                {page.productImage ? (
-                  <img
-                    src={getR2PublicUrl(page.productImage)}
-                    alt={page.productName}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">
-                    No img
-                  </div>
-                )}
-              </div>
+              <div className="flex items-center gap-3 sm:gap-4">
+                {/* Product image */}
+                <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
+                  {page.productImage ? (
+                    <img
+                      src={getR2PublicUrl(page.productImage)}
+                      alt={page.productName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">
+                      No img
+                    </div>
+                  )}
+                </div>
 
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-slate-900 truncate">
-                  {page.content.headline || page.productName}
-                </p>
-                <p className="text-sm text-slate-500 truncate">{page.productName}</p>
-                <div className="flex items-center gap-3 mt-1">
-                  {statusBadge(page.status)}
-                  <span className="text-xs text-slate-400">
-                    {lp?.views || 'Views'}: {page.viewCount || 0}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    {lp?.orders || 'Orders'}: {page.orderCount || 0}
-                  </span>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-slate-900 text-sm sm:text-base truncate">
+                    {page.content.headline || page.productName}
+                  </p>
+                  <p className="text-xs sm:text-sm text-slate-500 truncate">{page.productName}</p>
+                  <div className="flex items-center gap-2 sm:gap-3 mt-1">
+                    {statusBadge(page.status)}
+                    <span className="text-xs text-slate-400">
+                      {lp?.views || 'Views'}: {page.viewCount || 0}
+                    </span>
+                    <span className="text-xs text-slate-400">
+                      {lp?.orders || 'Orders'}: {page.orderCount || 0}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {page.status !== 'generating' && (
-                  <>
-                    <button
-                      onClick={() => handleCopyLink(page.storefrontSlug, page.pageId)}
-                      className="px-3 py-1.5 text-sm text-slate-600 hover:text-[#0054A6] hover:bg-slate-50 rounded-lg transition-colors"
-                    >
-                      {copiedId === page.pageId ? (lp?.copied || 'Copied') : (lp?.copyLink || 'Copy Link')}
-                    </button>
-                    <a
-                      href={`/${page.storefrontSlug}/lp/${page.pageId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-3 py-1.5 text-sm text-slate-600 hover:text-[#0054A6] hover:bg-slate-50 rounded-lg transition-colors"
-                    >
-                      {lp?.preview || 'Preview'}
-                    </a>
-                    <button
-                      onClick={() => handlePublish(page._id, page.status)}
-                      className={`px-3 py-1.5 text-sm rounded-lg transition-colors ${
-                        page.status === 'published'
-                          ? 'text-yellow-600 hover:bg-yellow-50'
-                          : 'text-green-600 hover:bg-green-50'
-                      }`}
-                    >
-                      {page.status === 'published' ? (lp?.unpublish || 'Unpublish') : (lp?.publish || 'Publish')}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(page._id)}
-                      className="px-3 py-1.5 text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      {lp?.delete || 'Delete'}
-                    </button>
-                  </>
-                )}
-              </div>
+              {/* Actions — below content on mobile, inline on desktop */}
+              {page.status !== 'generating' && (
+                <div className="flex items-center gap-1 sm:gap-2 mt-3 pt-3 border-t border-slate-100 sm:mt-0 sm:pt-0 sm:border-t-0 sm:justify-end">
+                  <button
+                    onClick={() => handleCopyLink(page.storefrontSlug, page.pageId)}
+                    className="flex-1 sm:flex-none px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-slate-600 hover:text-[#0054A6] hover:bg-slate-50 rounded-lg transition-colors text-center"
+                  >
+                    {copiedId === page.pageId ? (lp?.copied || 'Copied') : (lp?.copyLink || 'Copy Link')}
+                  </button>
+                  <a
+                    href={`/${page.storefrontSlug}/lp/${page.pageId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 sm:flex-none px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-slate-600 hover:text-[#0054A6] hover:bg-slate-50 rounded-lg transition-colors text-center"
+                  >
+                    {lp?.preview || 'Preview'}
+                  </a>
+                  <button
+                    onClick={() => handlePublish(page._id, page.status)}
+                    className={`flex-1 sm:flex-none px-2 sm:px-3 py-1.5 text-xs sm:text-sm rounded-lg transition-colors text-center ${
+                      page.status === 'published'
+                        ? 'text-yellow-600 hover:bg-yellow-50'
+                        : 'text-green-600 hover:bg-green-50'
+                    }`}
+                  >
+                    {page.status === 'published' ? (lp?.unpublish || 'Unpublish') : (lp?.publish || 'Publish')}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(page._id)}
+                    className="flex-1 sm:flex-none px-2 sm:px-3 py-1.5 text-xs sm:text-sm text-red-500 hover:bg-red-50 rounded-lg transition-colors text-center"
+                  >
+                    {lp?.delete || 'Delete'}
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
