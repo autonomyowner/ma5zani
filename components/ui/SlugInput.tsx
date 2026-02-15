@@ -66,12 +66,12 @@ export default function SlugInput({ value, onChange, disabled }: SlugInputProps)
     switch (availability.reason) {
       case 'taken':
         return {
-          text: language === 'ar' ? 'هذا الرابط محجوز' : 'Already taken',
+          text: language === 'ar' ? 'مستخدم من متجر آخر' : language === 'fr' ? 'Utilise par une autre boutique' : 'Used by another store',
           color: 'text-red-600',
         };
       case 'reserved':
         return {
-          text: language === 'ar' ? 'محجوز للنظام' : 'Reserved',
+          text: language === 'ar' ? 'محجوز للنظام' : language === 'fr' ? 'Reserve par le systeme' : 'Reserved by system',
           color: 'text-red-600',
         };
       case 'invalid':

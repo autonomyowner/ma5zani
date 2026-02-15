@@ -76,7 +76,17 @@ export const checkSlugAvailability = query({
       .withIndex("by_slug", (q) => q.eq("slug", slug))
       .first();
 
-    return { available: !existing, reason: existing ? "taken" : null };
+    if (!existing) {
+      return { available: true, reason: null };
+    }
+
+    // If the slug belongs to the current seller, it's their own — show as available
+    const seller = await getCurrentSeller(ctx);
+    if (seller && existing.sellerId === seller._id) {
+      return { available: true, reason: null };
+    }
+
+    return { available: false, reason: "taken" };
   },
 });
 
