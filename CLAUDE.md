@@ -337,6 +337,13 @@ Templates are in `lib/templates/`. Each template defines sections, colors, and f
 
 The storefront header (`components/storefront/StorefrontHeader.tsx`) uses `dir={isRTL ? 'rtl' : 'ltr'}` on the container for proper flex direction in Arabic. On mobile it shows SVG line icons instead of text labels.
 
+### Slug System
+
+- `components/ui/SlugInput.tsx` — real-time slug availability checker with debounce
+- `convex/storefronts.ts:checkSlugAvailability` — validates slug format, checks reserved words, checks uniqueness
+- **Excludes seller's own storefront** from the "taken" check so editing your own slug doesn't show an error
+- Slugs are used for both path URLs (`www.ma5zani.com/slug`) and subdomains (`slug.ma5zani.com`)
+
 ### Important Patterns
 
 **Tailwind Dynamic Classes**: Use inline styles for dynamic colors (e.g., toggle switches) because Tailwind purges dynamically constructed classes in production builds.
