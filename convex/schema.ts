@@ -16,6 +16,7 @@ export default defineSchema({
     plan: v.union(v.literal("basic"), v.literal("plus"), v.literal("gros")),
     isActivated: v.optional(v.boolean()),
     activatedAt: v.optional(v.number()),
+    trialEndsAt: v.optional(v.number()),
     expoPushToken: v.optional(v.string()),
     emailNotifications: v.optional(v.boolean()),
     deliverySettings: v.optional(v.object({

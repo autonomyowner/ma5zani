@@ -8,6 +8,7 @@ import { useLanguage } from '@/lib/LanguageContext';
 import { localText } from '@/lib/translations';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { sellerHasAccess } from '@/lib/sellerAccess';
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
 
 export default function CategoriesPage() {
@@ -67,7 +68,7 @@ export default function CategoriesPage() {
     setNameAr('');
   };
 
-  if (seller && !seller.isActivated) {
+  if (seller && !sellerHasAccess(seller)) {
     return <FounderOfferGate />;
   }
 

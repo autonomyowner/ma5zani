@@ -9,6 +9,7 @@ import { useLanguage } from '@/lib/LanguageContext'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { sellerHasAccess } from '@/lib/sellerAccess'
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate'
 
 type Category = 'shipping' | 'returns' | 'payment' | 'products' | 'general'
@@ -27,21 +28,21 @@ const trainingQuestions: TrainingQuestion[] = [
     id: 'shipping_time',
     category: 'shipping',
     question: 'How long does delivery take?',
-    questionAr: 'كم تستغرق مدة التوصيل؟',
+    questionAr: 'ÙƒÙ… ØªØ³ØªØºØ±Ù‚ Ù…Ø¯Ø© Ø§Ù„ØªÙˆØµÙŠÙ„ØŸ',
     keywords: ['delivery', 'shipping', 'time', 'how long', 'days'],
   },
   {
     id: 'shipping_cost',
     category: 'shipping',
     question: 'What are your shipping costs?',
-    questionAr: 'ما هي تكاليف الشحن؟',
+    questionAr: 'Ù…Ø§ Ù‡ÙŠ ØªÙƒØ§Ù„ÙŠÙ Ø§Ù„Ø´Ø­Ù†ØŸ',
     keywords: ['shipping', 'cost', 'price', 'delivery', 'fee'],
   },
   {
     id: 'shipping_wilayas',
     category: 'shipping',
     question: 'Which wilayas do you deliver to?',
-    questionAr: 'إلى أي ولايات توصلون؟',
+    questionAr: 'Ø¥Ù„Ù‰ Ø£ÙŠ ÙˆÙ„Ø§ÙŠØ§Øª ØªÙˆØµÙ„ÙˆÙ†ØŸ',
     keywords: ['wilayas', 'areas', 'regions', 'deliver', 'cities'],
   },
   // Returns
@@ -49,14 +50,14 @@ const trainingQuestions: TrainingQuestion[] = [
     id: 'return_policy',
     category: 'returns',
     question: "What's your return policy?",
-    questionAr: 'ما هي سياسة الإرجاع؟',
+    questionAr: 'Ù…Ø§ Ù‡ÙŠ Ø³ÙŠØ§Ø³Ø© Ø§Ù„Ø¥Ø±Ø¬Ø§Ø¹ØŸ',
     keywords: ['return', 'refund', 'exchange', 'policy'],
   },
   {
     id: 'return_time',
     category: 'returns',
     question: 'How long do I have to return an item?',
-    questionAr: 'كم من الوقت لدي لإرجاع المنتج؟',
+    questionAr: 'ÙƒÙ… Ù…Ù† Ø§Ù„ÙˆÙ‚Øª Ù„Ø¯ÙŠ Ù„Ø¥Ø±Ø¬Ø§Ø¹ Ø§Ù„Ù…Ù†ØªØ¬ØŸ',
     keywords: ['return', 'time', 'days', 'deadline'],
   },
   // Payment
@@ -64,14 +65,14 @@ const trainingQuestions: TrainingQuestion[] = [
     id: 'payment_methods',
     category: 'payment',
     question: 'What payment methods do you accept?',
-    questionAr: 'ما هي طرق الدفع المقبولة؟',
+    questionAr: 'Ù…Ø§ Ù‡ÙŠ Ø·Ø±Ù‚ Ø§Ù„Ø¯ÙØ¹ Ø§Ù„Ù…Ù‚Ø¨ÙˆÙ„Ø©ØŸ',
     keywords: ['payment', 'pay', 'methods', 'cash', 'card'],
   },
   {
     id: 'payment_cod',
     category: 'payment',
     question: 'Do you accept cash on delivery?',
-    questionAr: 'هل تقبلون الدفع عند الاستلام؟',
+    questionAr: 'Ù‡Ù„ ØªÙ‚Ø¨Ù„ÙˆÙ† Ø§Ù„Ø¯ÙØ¹ Ø¹Ù†Ø¯ Ø§Ù„Ø§Ø³ØªÙ„Ø§Ù…ØŸ',
     keywords: ['cod', 'cash', 'delivery', 'payment'],
   },
   // Products
@@ -79,14 +80,14 @@ const trainingQuestions: TrainingQuestion[] = [
     id: 'product_quality',
     category: 'products',
     question: 'How do you ensure product quality?',
-    questionAr: 'كيف تضمنون جودة المنتجات؟',
+    questionAr: 'ÙƒÙŠÙ ØªØ¶Ù…Ù†ÙˆÙ† Ø¬ÙˆØ¯Ø© Ø§Ù„Ù…Ù†ØªØ¬Ø§ØªØŸ',
     keywords: ['quality', 'guarantee', 'authentic', 'original'],
   },
   {
     id: 'product_availability',
     category: 'products',
     question: 'What if a product is out of stock?',
-    questionAr: 'ماذا لو كان المنتج غير متوفر؟',
+    questionAr: 'Ù…Ø§Ø°Ø§ Ù„Ùˆ ÙƒØ§Ù† Ø§Ù„Ù…Ù†ØªØ¬ ØºÙŠØ± Ù…ØªÙˆÙØ±ØŸ',
     keywords: ['stock', 'available', 'out of stock', 'inventory'],
   },
   // General
@@ -94,14 +95,14 @@ const trainingQuestions: TrainingQuestion[] = [
     id: 'contact_info',
     category: 'general',
     question: 'How can customers contact you?',
-    questionAr: 'كيف يمكن للعملاء التواصل معكم؟',
+    questionAr: 'ÙƒÙŠÙ ÙŠÙ…ÙƒÙ† Ù„Ù„Ø¹Ù…Ù„Ø§Ø¡ Ø§Ù„ØªÙˆØ§ØµÙ„ Ù…Ø¹ÙƒÙ…ØŸ',
     keywords: ['contact', 'phone', 'email', 'reach'],
   },
   {
     id: 'business_hours',
     category: 'general',
     question: 'What are your business hours?',
-    questionAr: 'ما هي ساعات العمل؟',
+    questionAr: 'Ù…Ø§ Ù‡ÙŠ Ø³Ø§Ø¹Ø§Øª Ø§Ù„Ø¹Ù…Ù„ØŸ',
     keywords: ['hours', 'open', 'available', 'time'],
   },
 ]
@@ -157,7 +158,7 @@ export default function TrainingPage() {
   useEffect(() => {
     if (messages.length === 0 && chatbot) {
       const greeting = language === 'ar'
-        ? `مرحباً! أنا مساعدك ${chatbot.name}. سأساعدك على تدريبي للإجابة على أسئلة العملاء. اختر موضوعاً للبدء.`
+        ? `Ù…Ø±Ø­Ø¨Ø§Ù‹! Ø£Ù†Ø§ Ù…Ø³Ø§Ø¹Ø¯Ùƒ ${chatbot.name}. Ø³Ø£Ø³Ø§Ø¹Ø¯Ùƒ Ø¹Ù„Ù‰ ØªØ¯Ø±ÙŠØ¨ÙŠ Ù„Ù„Ø¥Ø¬Ø§Ø¨Ø© Ø¹Ù„Ù‰ Ø£Ø³Ø¦Ù„Ø© Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡. Ø§Ø®ØªØ± Ù…ÙˆØ¶ÙˆØ¹Ø§Ù‹ Ù„Ù„Ø¨Ø¯Ø¡.`
         : `Hi! I'm your assistant ${chatbot.name}. I'll help you train me to answer customer questions. Choose a topic to start.`
 
       setMessages([{
@@ -181,7 +182,7 @@ export default function TrainingPage() {
     return null
   }
 
-  if (seller && !seller.isActivated) {
+  if (seller && !sellerHasAccess(seller)) {
     return (
       <DashboardLayout seller={seller} title={t.chatbot.training}>
         <FounderOfferGate />
@@ -213,7 +214,7 @@ export default function TrainingPage() {
     if (categoryQuestions.length === 0) {
       // All questions answered in this category
       const message = language === 'ar'
-        ? `أحسنت! لقد أجبت على جميع الأسئلة في هذا القسم. اختر قسماً آخر أو أضف معلومات إضافية.`
+        ? `Ø£Ø­Ø³Ù†Øª! Ù„Ù‚Ø¯ Ø£Ø¬Ø¨Øª Ø¹Ù„Ù‰ Ø¬Ù…ÙŠØ¹ Ø§Ù„Ø£Ø³Ø¦Ù„Ø© ÙÙŠ Ù‡Ø°Ø§ Ø§Ù„Ù‚Ø³Ù…. Ø§Ø®ØªØ± Ù‚Ø³Ù…Ø§Ù‹ Ø¢Ø®Ø± Ø£Ùˆ Ø£Ø¶Ù Ù…Ø¹Ù„ÙˆÙ…Ø§Øª Ø¥Ø¶Ø§ÙÙŠØ©.`
         : `Great! You've answered all questions in this section. Choose another topic or add more details.`
 
       setMessages(prev => [...prev, { id: Date.now().toString(), sender: 'bot', content: message }])
@@ -226,7 +227,7 @@ export default function TrainingPage() {
 
     const questionText = language === 'ar' ? question.questionAr : question.question
     const intro = language === 'ar'
-      ? `دعني أسألك عن ${categories.find(c => c.id === category)?.label}:`
+      ? `Ø¯Ø¹Ù†ÙŠ Ø£Ø³Ø£Ù„Ùƒ Ø¹Ù† ${categories.find(c => c.id === category)?.label}:`
       : `Let me ask you about ${categories.find(c => c.id === category)?.label}:`
 
     setMessages(prev => [
@@ -264,7 +265,7 @@ export default function TrainingPage() {
 
       // Bot confirmation
       const confirmation = language === 'ar'
-        ? `ممتاز! سأتذكر هذا. عندما يسأل العميل عن "${currentQuestion.questionAr}"، سأرد: "${userMessage.substring(0, 50)}${userMessage.length > 50 ? '...' : ''}"`
+        ? `Ù…Ù…ØªØ§Ø²! Ø³Ø£ØªØ°ÙƒØ± Ù‡Ø°Ø§. Ø¹Ù†Ø¯Ù…Ø§ ÙŠØ³Ø£Ù„ Ø§Ù„Ø¹Ù…ÙŠÙ„ Ø¹Ù† "${currentQuestion.questionAr}"ØŒ Ø³Ø£Ø±Ø¯: "${userMessage.substring(0, 50)}${userMessage.length > 50 ? '...' : ''}"`
         : `Perfect! I'll remember that. When a customer asks "${currentQuestion.question}", I'll respond: "${userMessage.substring(0, 50)}${userMessage.length > 50 ? '...' : ''}"`
 
       setMessages(prev => [
@@ -282,7 +283,7 @@ export default function TrainingPage() {
         setCurrentQuestion(nextQuestion)
 
         const nextText = language === 'ar' ? nextQuestion.questionAr : nextQuestion.question
-        const nextIntro = language === 'ar' ? 'السؤال التالي:' : 'Next question:'
+        const nextIntro = language === 'ar' ? 'Ø§Ù„Ø³Ø¤Ø§Ù„ Ø§Ù„ØªØ§Ù„ÙŠ:' : 'Next question:'
 
         setTimeout(() => {
           setMessages(prev => [
@@ -297,7 +298,7 @@ export default function TrainingPage() {
         setSelectedCategory(null)
 
         const complete = language === 'ar'
-          ? 'أحسنت! اكتملت الأسئلة في هذا القسم. اختر قسماً آخر للمتابعة.'
+          ? 'Ø£Ø­Ø³Ù†Øª! Ø§ÙƒØªÙ…Ù„Øª Ø§Ù„Ø£Ø³Ø¦Ù„Ø© ÙÙŠ Ù‡Ø°Ø§ Ø§Ù„Ù‚Ø³Ù…. Ø§Ø®ØªØ± Ù‚Ø³Ù…Ø§Ù‹ Ø¢Ø®Ø± Ù„Ù„Ù…ØªØ§Ø¨Ø¹Ø©.'
           : "Great job! You've completed this section. Choose another topic to continue."
 
         setTimeout(() => {
@@ -334,7 +335,7 @@ export default function TrainingPage() {
       headerActions={
         <Link href="/dashboard/chatbot">
           <Button variant="ghost" size="sm">
-            {language === 'ar' ? 'رجوع' : 'Back'}
+            {language === 'ar' ? 'Ø±Ø¬ÙˆØ¹' : 'Back'}
           </Button>
         </Link>
       }
@@ -418,7 +419,7 @@ export default function TrainingPage() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder={language === 'ar' ? 'اكتب إجابتك...' : 'Type your answer...'}
+                  placeholder={language === 'ar' ? 'Ø§ÙƒØªØ¨ Ø¥Ø¬Ø§Ø¨ØªÙƒ...' : 'Type your answer...'}
                   className="flex-1 px-4 py-2 border border-slate-200 rounded-full focus:ring-2 focus:ring-[#0054A6] focus:border-transparent outline-none text-sm lg:text-base"
                   autoFocus
                 />
@@ -438,7 +439,7 @@ export default function TrainingPage() {
         {/* Help Text */}
         <p className="text-center text-sm text-slate-500 mt-4">
           {language === 'ar'
-            ? 'نصيحة: أجب بالطريقة التي تريد أن يرد بها مساعدك على العملاء'
+            ? 'Ù†ØµÙŠØ­Ø©: Ø£Ø¬Ø¨ Ø¨Ø§Ù„Ø·Ø±ÙŠÙ‚Ø© Ø§Ù„ØªÙŠ ØªØ±ÙŠØ¯ Ø£Ù† ÙŠØ±Ø¯ Ø¨Ù‡Ø§ Ù…Ø³Ø§Ø¹Ø¯Ùƒ Ø¹Ù„Ù‰ Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡'
             : 'Tip: Answer the way you want your assistant to respond to customers'}
         </p>
       </div>

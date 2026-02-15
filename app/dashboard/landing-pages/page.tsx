@@ -6,6 +6,7 @@ import { api } from '@/convex/_generated/api'
 import { Doc } from '@/convex/_generated/dataModel'
 import { useLanguage } from '@/lib/LanguageContext'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
+import { sellerHasAccess } from '@/lib/sellerAccess'
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate'
 import ProductPickerModal from '@/components/dashboard/ProductPickerModal'
 import { getR2PublicUrl } from '@/lib/r2'
@@ -37,7 +38,7 @@ export default function LandingPagesPage() {
   const [genError, setGenError] = useState('')
 
   // Activation gate
-  if (seller && !seller.isActivated) {
+  if (seller && !sellerHasAccess(seller)) {
     return (
       <DashboardLayout seller={seller} title={lp?.title || 'Landing Pages'}>
         <FounderOfferGate />

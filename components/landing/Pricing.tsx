@@ -54,6 +54,9 @@ export default function Pricing() {
                 )}
 
                 <div className="text-center mb-6">
+                  <span className="inline-block px-3 py-1 bg-[#22B14C]/10 text-[#22B14C] rounded-full text-xs font-bold mb-2">
+                    {t.trial.trialIncluded}
+                  </span>
                   <h3
                     className="text-2xl font-bold text-[#0054A6] mb-2"
                     style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}
@@ -115,11 +118,18 @@ export default function Pricing() {
                 ? 'Toutes les fonctionnalites au meilleur prix — produits illimites, chatbot IA, templates pro. Offre limitee !'
                 : 'All features unlocked at the lowest price — unlimited products, AI chatbot, pro templates. This offer won\'t last!'}
           </p>
-          <Link href="/offer">
-            <Button variant="primary" size="lg" className="mt-4">
-              {language === 'ar' ? 'احجز مكانك' : language === 'fr' ? 'Reservez votre place' : 'Claim Your Spot'}
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
+            <Link href="/signup">
+              <Button variant="primary" size="lg">
+                {t.trial.startTrial}
+              </Button>
+            </Link>
+            <Link href="/offer">
+              <Button variant="outline" size="lg">
+                {language === 'ar' ? 'احجز مكانك' : language === 'fr' ? 'Reservez votre place' : 'Claim Your Spot'}
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </section>

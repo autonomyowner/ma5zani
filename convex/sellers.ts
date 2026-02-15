@@ -48,6 +48,7 @@ export const upsertSeller = mutation({
       phone: args.phone,
       plan: args.plan,
       isActivated: false,
+      trialEndsAt: now + 14 * 24 * 60 * 60 * 1000,
       createdAt: now,
       updatedAt: now,
     });

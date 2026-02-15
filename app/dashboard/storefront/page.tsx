@@ -13,6 +13,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import SlugInput from '@/components/ui/SlugInput';
+import { sellerHasAccess } from '@/lib/sellerAccess';
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
 
 export default function StorefrontPage() {
@@ -222,7 +223,7 @@ export default function StorefrontPage() {
     return null;
   }
 
-  if (seller && !seller.isActivated) {
+  if (seller && !sellerHasAccess(seller)) {
     return (
       <DashboardLayout seller={seller} title={localText(language, { ar: 'متجرك الإلكتروني', en: 'Your Online Store', fr: 'Votre boutique en ligne' })}>
         <FounderOfferGate />

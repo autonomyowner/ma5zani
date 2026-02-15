@@ -13,6 +13,7 @@ import { StorefrontSection } from '@/components/storefront/sections';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
+import { sellerHasAccess } from '@/lib/sellerAccess';
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
 
 // Generate unique ID for new sections
@@ -240,7 +241,7 @@ export default function StorefrontEditorPage() {
     return null;
   }
 
-  if (seller && !seller.isActivated) {
+  if (seller && !sellerHasAccess(seller)) {
     return (
       <DashboardLayout seller={seller} title={localText(language, { ar: 'محرر القالب', en: 'Template Editor', fr: 'Editeur de boutique' })}>
         <FounderOfferGate />

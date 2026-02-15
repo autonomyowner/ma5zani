@@ -26,6 +26,26 @@ export default function AdminSellersPage() {
   const updatePlan = useMutation(api.admin.updateSellerPlan)
   const deleteSeller = useMutation(api.admin.deleteSeller)
   const activateSeller = useMutation(api.admin.activateSeller)
+  const backfillTrials = useMutation(api.admin.backfillTrials)
+
+  const handleBackfillTrials = async () => {
+    if (!password) return
+    try {
+      const result = await backfillTrials({ password })
+      alert(`Backfilled ${result.updated} sellers with 14-day trials`)
+    } catch (error) {
+      console.error('Failed to backfill trials:', error)
+    }
+  }
+
+  const getTrialStatus = (seller: { isActivated?: boolean; trialEndsAt?: number }) => {
+    if (seller.isActivated) return { label: 'Active', color: 'bg-green-600 text-green-100' }
+    if (seller.trialEndsAt && seller.trialEndsAt > Date.now()) {
+      const days = Math.ceil((seller.trialEndsAt - Date.now()) / (24 * 60 * 60 * 1000))
+      return { label: `Trial (${days}d)`, color: 'bg-blue-600 text-blue-100' }
+    }
+    return { label: 'Expired', color: 'bg-red-600 text-red-100' }
+  }
 
   const handlePlanChange = async (sellerId: Id<'sellers'>, plan: 'basic' | 'plus' | 'gros') => {
     if (!password) return
@@ -138,13 +158,19 @@ export default function AdminSellersPage() {
 
       {/* Main Content */}
       <main className="ml-64 min-h-screen">
-        <header className="h-20 bg-slate-800 border-b border-slate-700 flex items-center px-8">
+        <header className="h-20 bg-slate-800 border-b border-slate-700 flex items-center justify-between px-8">
           <div>
             <h1 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-outfit)' }}>
               Manage Sellers
             </h1>
             <p className="text-slate-300 text-sm">{sellers?.length || 0} registered sellers</p>
           </div>
+          <button
+            onClick={handleBackfillTrials}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            Backfill Trials
+          </button>
         </header>
 
         <div className="p-8">
@@ -188,13 +214,14 @@ export default function AdminSellersPage() {
                           </select>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            seller.isActivated
-                              ? 'bg-green-600 text-green-100'
-                              : 'bg-slate-600 text-slate-300'
-                          }`}>
-                            {seller.isActivated ? 'Active' : 'Inactive'}
-                          </span>
+                          {(() => {
+                            const status = getTrialStatus(seller)
+                            return (
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${status.color}`}>
+                                {status.label}
+                              </span>
+                            )
+                          })()}
                         </td>
                         <td className="px-6 py-4 text-slate-300 text-sm">
                           {new Date(seller.createdAt).toLocaleDateString()}

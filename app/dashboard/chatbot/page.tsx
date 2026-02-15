@@ -10,6 +10,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import { sellerHasAccess } from '@/lib/sellerAccess'
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate'
 
 type Personality = 'friendly' | 'professional' | 'casual'
@@ -58,7 +59,7 @@ export default function ChatbotPage() {
     return null
   }
 
-  if (seller && !seller.isActivated) {
+  if (seller && !sellerHasAccess(seller)) {
     return (
       <DashboardLayout seller={seller} title={t.chatbot.aiAssistant}>
         <FounderOfferGate />
@@ -79,8 +80,8 @@ export default function ChatbotPage() {
     setIsSaving(true)
     try {
       await upsertChatbot({
-        name: formData.name || (language === 'ar' ? 'مساعد التسوق' : 'Shopping Assistant'),
-        greeting: formData.greeting || (language === 'ar' ? 'مرحباً! كيف يمكنني مساعدتك اليوم؟' : 'Hello! How can I help you today?'),
+        name: formData.name || (language === 'ar' ? 'Ù…Ø³Ø§Ø¹Ø¯ Ø§Ù„ØªØ³ÙˆÙ‚' : 'Shopping Assistant'),
+        greeting: formData.greeting || (language === 'ar' ? 'Ù…Ø±Ø­Ø¨Ø§Ù‹! ÙƒÙŠÙ ÙŠÙ…ÙƒÙ†Ù†ÙŠ Ù…Ø³Ø§Ø¹Ø¯ØªÙƒ Ø§Ù„ÙŠÙˆÙ…ØŸ' : 'Hello! How can I help you today?'),
         personality: formData.personality,
         isEnabled: formData.isEnabled || true,
       })
@@ -150,8 +151,8 @@ export default function ChatbotPage() {
               <p className="font-medium text-slate-900 text-sm lg:text-base">{t.chatbot.enableChatbot}</p>
               <p className="text-xs lg:text-sm text-slate-500">
                 {chatbot?.isEnabled
-                  ? (language === 'ar' ? 'المساعد يظهر في متجرك' : 'Assistant is visible on your storefront')
-                  : (language === 'ar' ? 'المساعد مخفي عن العملاء' : 'Assistant is hidden from customers')
+                  ? (language === 'ar' ? 'Ø§Ù„Ù…Ø³Ø§Ø¹Ø¯ ÙŠØ¸Ù‡Ø± ÙÙŠ Ù…ØªØ¬Ø±Ùƒ' : 'Assistant is visible on your storefront')
+                  : (language === 'ar' ? 'Ø§Ù„Ù…Ø³Ø§Ø¹Ø¯ Ù…Ø®ÙÙŠ Ø¹Ù† Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡' : 'Assistant is hidden from customers')
                 }
               </p>
             </div>
@@ -264,7 +265,7 @@ export default function ChatbotPage() {
                 {t.chatbot.knowledge}
               </h3>
               <p className="text-xs lg:text-sm text-slate-500">
-                {knowledgeCount} {language === 'ar' ? 'معلومة' : 'entries'}
+                {knowledgeCount} {language === 'ar' ? 'Ù…Ø¹Ù„ÙˆÙ…Ø©' : 'entries'}
               </p>
             </Card>
           </Link>
@@ -274,7 +275,7 @@ export default function ChatbotPage() {
                 {t.chatbot.liveChats}
               </h3>
               <p className="text-xs lg:text-sm text-slate-500">
-                {activeChats + handoffChats} {language === 'ar' ? 'محادثة نشطة' : 'active'}
+                {activeChats + handoffChats} {language === 'ar' ? 'Ù…Ø­Ø§Ø¯Ø«Ø© Ù†Ø´Ø·Ø©' : 'active'}
               </p>
               {handoffChats > 0 && (
                 <span className="absolute top-3 lg:top-4 right-3 lg:right-4 w-2 h-2 lg:w-3 lg:h-3 bg-[#F7941D] rounded-full animate-pulse" />

@@ -2,37 +2,66 @@
 
 import { useLanguage } from '@/lib/LanguageContext'
 
+const monthlyPlans = [
+  { nameAr: 'أساسي', nameEn: 'Starter', nameFr: 'Starter', price: '1,000' },
+  { nameAr: 'متقدم', nameEn: 'Pro', nameFr: 'Pro', price: '3,900' },
+  { nameAr: 'بزنس', nameEn: 'Business', nameFr: 'Business', price: '7,900' },
+]
+
 export default function FounderOfferGate() {
   const { language, t } = useLanguage()
   const isRTL = language === 'ar'
   const fo = t.founderOffer
+  const tr = t.trial
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
       <div className="bg-white rounded-2xl border-2 border-[#F7941D] p-6 sm:p-8 text-center">
-        {/* Badge */}
-        <span className="inline-block px-4 py-1.5 bg-[#F7941D]/10 text-[#F7941D] rounded-full text-sm font-bold mb-4">
-          {fo.title}
-        </span>
-
-        {/* Main offer */}
+        {/* Trial expired heading */}
         <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-outfit)' }}>
-          {fo.specialOffer}
+          {tr.trialExpired}
         </h2>
-        <p className="text-slate-600 mb-6">{fo.subtitle}</p>
+        <p className="text-slate-600 mb-6">{tr.trialExpiredSubtitle}</p>
 
-        {/* Features */}
-        <div className={`text-${isRTL ? 'right' : 'left'} bg-slate-50 rounded-xl p-4 sm:p-6 mb-6`}>
-          <ul className="space-y-3">
-            {fo.features.map((feature: string, i: number) => (
-              <li key={i} className="flex items-start gap-3">
-                <span className="w-5 h-5 rounded-full bg-[#22B14C] text-white flex items-center justify-center text-xs flex-shrink-0 mt-0.5">
-                  &#10003;
-                </span>
-                <span className="text-slate-700 text-sm sm:text-base">{feature}</span>
-              </li>
+        {/* Founder Offer — Best Deal */}
+        <div className="bg-[#F7941D]/10 border-2 border-[#F7941D] rounded-xl p-4 sm:p-6 mb-6">
+          <span className="inline-block px-3 py-1 bg-[#F7941D] text-white rounded-full text-xs font-bold mb-3">
+            {tr.yearlyDeal}
+          </span>
+          <h3 className="text-xl font-bold text-[#F7941D] mb-1" style={{ fontFamily: 'var(--font-outfit)' }}>
+            {fo.specialOffer}
+          </h3>
+          <p className="text-slate-600 text-sm mb-3">{fo.subtitle}</p>
+          <div style={{ textAlign: isRTL ? 'right' : 'left' }} className="bg-white rounded-lg p-3 mb-3">
+            <ul className="space-y-2">
+              {fo.features.map((feature: string, i: number) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className="w-4 h-4 rounded-full bg-[#22B14C] text-white flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">
+                    &#10003;
+                  </span>
+                  <span className="text-slate-700 text-sm">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Monthly Plans */}
+        <div className="mb-6">
+          <h3 className="font-semibold text-slate-700 mb-3">{tr.monthlyPlans}</h3>
+          <div className="grid grid-cols-3 gap-3">
+            {monthlyPlans.map((plan, i) => (
+              <div key={i} className="bg-slate-50 rounded-xl p-3 border border-slate-200">
+                <p className="font-bold text-[#0054A6] text-sm">
+                  {language === 'ar' ? plan.nameAr : language === 'fr' ? plan.nameFr : plan.nameEn}
+                </p>
+                <p className="text-lg font-bold text-slate-900 mt-1">
+                  {plan.price}
+                  <span className="text-xs text-slate-500 font-normal"> {language === 'ar' ? 'دج' : 'DZD'}{tr.perMonth}</span>
+                </p>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
 
         {/* Payment */}

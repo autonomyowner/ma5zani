@@ -7,6 +7,7 @@ import { api } from '@/convex/_generated/api'
 import { useLanguage } from '@/lib/LanguageContext'
 import { useCurrentSeller } from '@/hooks/useCurrentSeller'
 import { authClient } from '@/lib/auth-client'
+import { sellerHasAccess, isTrialActive, getTrialDaysLeft } from '@/lib/sellerAccess'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import StatsCards from '@/components/dashboard/StatsCards'
 import OrdersTable from '@/components/dashboard/OrdersTable'
@@ -90,7 +91,14 @@ export default function DashboardPage() {
       }
     >
       <div className="space-y-4 lg:space-y-8">
-        {seller && !seller.isActivated && (
+        {seller && isTrialActive(seller) && (
+          <div className="p-3 lg:p-4 bg-[#00AEEF]/10 border border-[#00AEEF]/30 rounded-xl">
+            <p className="text-sm lg:text-base font-bold text-[#00AEEF]">
+              {t.trial.trialBanner.replace('{days}', String(getTrialDaysLeft(seller)))}
+            </p>
+          </div>
+        )}
+        {seller && !sellerHasAccess(seller) && (
           <a
             href="/dashboard/storefront"
             className="block p-3 lg:p-4 bg-[#F7941D]/10 border border-[#F7941D]/30 rounded-xl hover:bg-[#F7941D]/15 transition-colors"

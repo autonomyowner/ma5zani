@@ -244,6 +244,28 @@ export const getAdminStats = query({
   },
 });
 
+// Backfill trials for existing non-activated sellers
+export const backfillTrials = mutation({
+  args: { password: v.string() },
+  handler: async (ctx, args) => {
+    if (args.password !== ADMIN_PASSWORD) {
+      throw new Error("Unauthorized");
+    }
+    const sellers = await ctx.db.query("sellers").collect();
+    let count = 0;
+    for (const seller of sellers) {
+      if (!seller.isActivated && seller.trialEndsAt === undefined) {
+        await ctx.db.patch(seller._id, {
+          trialEndsAt: Date.now() + 14 * 24 * 60 * 60 * 1000,
+          updatedAt: Date.now(),
+        });
+        count++;
+      }
+    }
+    return { updated: count };
+  },
+});
+
 // Get all storefronts with seller info
 export const getAllStorefronts = query({
   args: { password: v.string() },

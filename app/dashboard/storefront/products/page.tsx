@@ -10,6 +10,7 @@ import { getR2PublicUrl } from '@/lib/r2';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import ImageUpload from '@/components/ui/ImageUpload';
+import { sellerHasAccess } from '@/lib/sellerAccess';
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate';
 
 export default function StorefrontProductsPage() {
@@ -59,7 +60,7 @@ export default function StorefrontProductsPage() {
     setEditingProduct(null);
   };
 
-  if (seller && !seller.isActivated) {
+  if (seller && !sellerHasAccess(seller)) {
     return <FounderOfferGate />;
   }
 

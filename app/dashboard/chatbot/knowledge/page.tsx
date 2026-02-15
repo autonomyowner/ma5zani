@@ -11,6 +11,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
+import { sellerHasAccess } from '@/lib/sellerAccess'
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate'
 
 type Category = 'shipping' | 'returns' | 'payment' | 'products' | 'general'
@@ -59,7 +60,7 @@ export default function KnowledgePage() {
     return null
   }
 
-  if (seller && !seller.isActivated) {
+  if (seller && !sellerHasAccess(seller)) {
     return (
       <DashboardLayout seller={seller} title={t.chatbot.knowledge}>
         <FounderOfferGate />
@@ -147,7 +148,7 @@ export default function KnowledgePage() {
   }
 
   const handleDelete = async (id: Id<'chatbotKnowledge'>) => {
-    if (!confirm(language === 'ar' ? 'هل أنت متأكد من الحذف؟' : 'Are you sure you want to delete this?')) {
+    if (!confirm(language === 'ar' ? 'Ù‡Ù„ Ø£Ù†Øª Ù…ØªØ£ÙƒØ¯ Ù…Ù† Ø§Ù„Ø­Ø°ÙØŸ' : 'Are you sure you want to delete this?')) {
       return
     }
 
@@ -162,12 +163,12 @@ export default function KnowledgePage() {
     <DashboardLayout
       seller={seller}
       title={t.chatbot.knowledge}
-      subtitle={language === 'ar' ? 'إدارة قاعدة معرفة المساعد' : 'Manage your assistant\'s knowledge'}
+      subtitle={language === 'ar' ? 'Ø¥Ø¯Ø§Ø±Ø© Ù‚Ø§Ø¹Ø¯Ø© Ù…Ø¹Ø±ÙØ© Ø§Ù„Ù…Ø³Ø§Ø¹Ø¯' : 'Manage your assistant\'s knowledge'}
       headerActions={
         <div className="flex gap-2">
           <Link href="/dashboard/chatbot">
             <Button variant="ghost" size="sm">
-              {language === 'ar' ? 'رجوع' : 'Back'}
+              {language === 'ar' ? 'Ø±Ø¬ÙˆØ¹' : 'Back'}
             </Button>
           </Link>
           {!isAdding && !editingId && (
@@ -214,7 +215,7 @@ export default function KnowledgePage() {
                 label={t.chatbot.question}
                 value={formData.question}
                 onChange={(e) => setFormData({ ...formData, question: e.target.value })}
-                placeholder={language === 'ar' ? 'ما هي مدة التوصيل؟' : 'How long does delivery take?'}
+                placeholder={language === 'ar' ? 'Ù…Ø§ Ù‡ÙŠ Ù…Ø¯Ø© Ø§Ù„ØªÙˆØµÙŠÙ„ØŸ' : 'How long does delivery take?'}
               />
 
               <div>
@@ -224,7 +225,7 @@ export default function KnowledgePage() {
                 <textarea
                   value={formData.answer}
                   onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
-                  placeholder={language === 'ar' ? 'التوصيل يستغرق 2-5 أيام حسب الولاية...' : 'Delivery takes 2-5 days depending on the wilaya...'}
+                  placeholder={language === 'ar' ? 'Ø§Ù„ØªÙˆØµÙŠÙ„ ÙŠØ³ØªØºØ±Ù‚ 2-5 Ø£ÙŠØ§Ù… Ø­Ø³Ø¨ Ø§Ù„ÙˆÙ„Ø§ÙŠØ©...' : 'Delivery takes 2-5 days depending on the wilaya...'}
                   className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#0054A6] focus:border-transparent outline-none resize-none text-sm lg:text-base"
                   rows={4}
                 />
@@ -232,10 +233,10 @@ export default function KnowledgePage() {
 
               <Input
                 id="keywords"
-                label={`${t.chatbot.keywords} (${language === 'ar' ? 'مفصولة بفاصلة' : 'comma separated'})`}
+                label={`${t.chatbot.keywords} (${language === 'ar' ? 'Ù…ÙØµÙˆÙ„Ø© Ø¨ÙØ§ØµÙ„Ø©' : 'comma separated'})`}
                 value={formData.keywords}
                 onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
-                placeholder={language === 'ar' ? 'توصيل, شحن, مدة' : 'delivery, shipping, time'}
+                placeholder={language === 'ar' ? 'ØªÙˆØµÙŠÙ„, Ø´Ø­Ù†, Ù…Ø¯Ø©' : 'delivery, shipping, time'}
               />
 
               <div className="flex gap-3 pt-2">

@@ -88,20 +88,20 @@ export default function OnboardingPage() {
     {
       id: 'basic' as const,
       name: t.auth.onboarding.plans.basic.name,
-      price: '2,500',
+      price: '1,000',
       features: t.auth.onboarding.plans.basic.features,
     },
     {
       id: 'plus' as const,
       name: t.auth.onboarding.plans.plus.name,
-      price: '6,500',
+      price: '3,900',
       features: t.auth.onboarding.plans.plus.features,
       popular: true,
     },
     {
       id: 'gros' as const,
       name: t.auth.onboarding.plans.gros.name,
-      price: '15,000',
+      price: '7,900',
       features: t.auth.onboarding.plans.gros.features,
     },
   ]
@@ -185,19 +185,19 @@ export default function OnboardingPage() {
                 {t.auth.onboarding.choosePlan}
               </h2>
 
-              {/* Special Offer */}
-              <div className="mb-4 p-4 bg-[#F7941D]/10 border-2 border-[#F7941D] rounded-xl">
+              {/* Free Trial Banner */}
+              <div className="mb-4 p-4 bg-[#22B14C]/10 border-2 border-[#22B14C] rounded-xl">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div>
-                    <p className="font-bold text-[#F7941D] text-lg" style={{ fontFamily: language === 'ar' ? 'var(--font-cairo), sans-serif' : 'var(--font-outfit), sans-serif' }}>
-                      {t.auth.onboarding.specialOfferPrice}
+                    <p className="font-bold text-[#22B14C] text-lg" style={{ fontFamily: language === 'ar' ? 'var(--font-cairo), sans-serif' : 'var(--font-outfit), sans-serif' }}>
+                      {t.trial.startTrial}
                     </p>
                     <p className="text-sm text-slate-600">
-                      {t.auth.onboarding.specialOfferDesc}
+                      {t.trial.trialIncluded}
                     </p>
                   </div>
-                  <span className="bg-[#F7941D] text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
-                    {t.auth.onboarding.bestValue}
+                  <span className="bg-[#22B14C] text-white text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
+                    14 {language === 'ar' ? 'يوم' : language === 'fr' ? 'jours' : 'days'}
                   </span>
                 </div>
               </div>

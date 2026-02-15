@@ -16,6 +16,7 @@ import type * as chatbot from "../chatbot.js";
 import type * as crons from "../crons.js";
 import type * as delivery from "../delivery.js";
 import type * as http from "../http.js";
+import type * as landingPages from "../landingPages.js";
 import type * as notifications from "../notifications.js";
 import type * as orders from "../orders.js";
 import type * as products from "../products.js";
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   delivery: typeof delivery;
   http: typeof http;
+  landingPages: typeof landingPages;
   notifications: typeof notifications;
   orders: typeof orders;
   products: typeof products;

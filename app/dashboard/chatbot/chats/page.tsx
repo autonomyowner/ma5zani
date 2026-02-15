@@ -10,6 +10,7 @@ import { useLanguage } from '@/lib/LanguageContext'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
+import { sellerHasAccess } from '@/lib/sellerAccess'
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate'
 
 type ConversationStatus = 'active' | 'handoff' | 'closed'
@@ -97,7 +98,7 @@ export default function LiveChatsPage() {
     return null
   }
 
-  if (seller && !seller.isActivated) {
+  if (seller && !sellerHasAccess(seller)) {
     return (
       <DashboardLayout seller={seller} title={t.chatbot.liveChats}>
         <FounderOfferGate />
@@ -130,9 +131,9 @@ export default function LiveChatsPage() {
     const minutes = Math.floor(diff / 60000)
     const hours = Math.floor(diff / 3600000)
 
-    if (minutes < 1) return language === 'ar' ? 'الآن' : 'now'
-    if (minutes < 60) return `${minutes}${language === 'ar' ? ' د' : 'm'}`
-    if (hours < 24) return `${hours}${language === 'ar' ? ' س' : 'h'}`
+    if (minutes < 1) return language === 'ar' ? 'Ø§Ù„Ø¢Ù†' : 'now'
+    if (minutes < 60) return `${minutes}${language === 'ar' ? ' Ø¯' : 'm'}`
+    if (hours < 24) return `${hours}${language === 'ar' ? ' Ø³' : 'h'}`
     return date.toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'en-US', { month: 'short', day: 'numeric' })
   }
 
@@ -179,7 +180,7 @@ export default function LiveChatsPage() {
 
   const handleClose = async () => {
     if (!selectedConversation) return
-    if (!confirm(language === 'ar' ? 'هل تريد إغلاق هذه المحادثة؟' : 'Close this conversation?')) return
+    if (!confirm(language === 'ar' ? 'Ù‡Ù„ ØªØ±ÙŠØ¯ Ø¥ØºÙ„Ø§Ù‚ Ù‡Ø°Ù‡ Ø§Ù„Ù…Ø­Ø§Ø¯Ø«Ø©ØŸ' : 'Close this conversation?')) return
 
     try {
       await closeConversation({ conversationId: selectedConversation })
@@ -193,11 +194,11 @@ export default function LiveChatsPage() {
     <DashboardLayout
       seller={seller}
       title={t.chatbot.liveChats}
-      subtitle={language === 'ar' ? 'إدارة محادثات العملاء' : 'Manage customer conversations'}
+      subtitle={language === 'ar' ? 'Ø¥Ø¯Ø§Ø±Ø© Ù…Ø­Ø§Ø¯Ø«Ø§Øª Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡' : 'Manage customer conversations'}
       headerActions={
         <Link href="/dashboard/chatbot">
           <Button variant="ghost" size="sm">
-            {language === 'ar' ? 'رجوع' : 'Back'}
+            {language === 'ar' ? 'Ø±Ø¬ÙˆØ¹' : 'Back'}
           </Button>
         </Link>
       }
@@ -273,9 +274,9 @@ export default function LiveChatsPage() {
                         conv.status === 'handoff' ? 'bg-orange-100 text-orange-700' :
                         'bg-slate-100 text-slate-600'
                       }`}>
-                        {conv.status === 'active' ? (language === 'ar' ? 'نشط' : 'Active') :
-                         conv.status === 'handoff' ? (language === 'ar' ? 'بانتظار الرد' : 'Waiting') :
-                         (language === 'ar' ? 'مغلق' : 'Closed')}
+                        {conv.status === 'active' ? (language === 'ar' ? 'Ù†Ø´Ø·' : 'Active') :
+                         conv.status === 'handoff' ? (language === 'ar' ? 'Ø¨Ø§Ù†ØªØ¸Ø§Ø± Ø§Ù„Ø±Ø¯' : 'Waiting') :
+                         (language === 'ar' ? 'Ù…ØºÙ„Ù‚' : 'Closed')}
                       </span>
                       {conv.context?.wilaya && (
                         <span className="text-[10px] text-slate-400">
@@ -385,7 +386,7 @@ export default function LiveChatsPage() {
                   </div>
                   {selectedChat.status === 'active' && (
                     <p className="text-xs text-slate-500 mt-2 text-center">
-                      {language === 'ar' ? 'انقر "الانضمام" للرد على هذه المحادثة' : 'Click "Join Chat" to reply to this conversation'}
+                      {language === 'ar' ? 'Ø§Ù†Ù‚Ø± "Ø§Ù„Ø§Ù†Ø¶Ù…Ø§Ù…" Ù„Ù„Ø±Ø¯ Ø¹Ù„Ù‰ Ù‡Ø°Ù‡ Ø§Ù„Ù…Ø­Ø§Ø¯Ø«Ø©' : 'Click "Join Chat" to reply to this conversation'}
                     </p>
                   )}
                 </div>
@@ -393,7 +394,7 @@ export default function LiveChatsPage() {
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-slate-500">
-              {language === 'ar' ? 'اختر محادثة للعرض' : 'Select a conversation to view'}
+              {language === 'ar' ? 'Ø§Ø®ØªØ± Ù…Ø­Ø§Ø¯Ø«Ø© Ù„Ù„Ø¹Ø±Ø¶' : 'Select a conversation to view'}
             </div>
           )}
         </Card>
