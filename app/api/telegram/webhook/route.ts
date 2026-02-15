@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import {
@@ -18,7 +17,14 @@ import {
 } from "@/lib/telegram";
 import { uploadBufferToR2 } from "@/lib/r2-server";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+let _convex: import('convex/browser').ConvexHttpClient;
+function getConvex() {
+  if (!_convex) {
+    const { ConvexHttpClient } = require('convex/browser');
+    _convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+  }
+  return _convex;
+}
 
 // Telegram update types
 interface TelegramUser {
@@ -98,7 +104,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 3. Look up seller by Telegram userId
-    const seller = await convex.query(api.telegram.getSellerByTelegramUser, {
+    const seller = await getConvex().query(api.telegram.getSellerByTelegramUser, {
       telegramUserId,
     });
 
@@ -118,7 +124,7 @@ export async function POST(request: NextRequest) {
     // 4. Check for /cancel command first
     const parsed = parseCommand(text);
     if (parsed?.command === "cancel") {
-      await convex.mutation(api.telegram.deleteSession, { telegramUserId });
+      await getConvex().mutation(api.telegram.deleteSession, { telegramUserId });
       await sendMessage(
         chatId,
         lang === "ar" ? "تم الغاء العملية." : "Operation cancelled."
@@ -127,7 +133,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 5. Check for active session (guided flow)
-    const session = await convex.query(api.telegram.getSession, {
+    const session = await getConvex().query(api.telegram.getSession, {
       telegramUserId,
     });
 
@@ -190,7 +196,7 @@ async function handleVerification(
   telegramUsername: string | undefined,
   code: string
 ) {
-  const result = await convex.mutation(api.telegram.verifyTelegramCode, {
+  const result = await getConvex().mutation(api.telegram.verifyTelegramCode, {
     code: code.toUpperCase(),
     telegramUserId,
     telegramUsername,
@@ -292,7 +298,7 @@ async function handleProductsList(
   telegramUserId: string,
   lang: "ar" | "en"
 ) {
-  const products = await convex.query(api.telegram.getProductsBySeller, {
+  const products = await getConvex().query(api.telegram.getProductsBySeller, {
     telegramUserId,
   });
 
@@ -306,7 +312,7 @@ async function handleOrdersList(
   telegramUserId: string,
   lang: "ar" | "en"
 ) {
-  const orders = await convex.query(api.telegram.getOrdersBySeller, {
+  const orders = await getConvex().query(api.telegram.getOrdersBySeller, {
     telegramUserId,
     limit: 10,
   });
@@ -321,7 +327,7 @@ async function handleStats(
   telegramUserId: string,
   lang: "ar" | "en"
 ) {
-  const stats = await convex.query(api.telegram.getStatsBySeller, {
+  const stats = await getConvex().query(api.telegram.getStatsBySeller, {
     telegramUserId,
   });
 
@@ -367,7 +373,7 @@ async function handleQuickPrice(
   }
 
   const searchName = parts.slice(0, -1).join(" ");
-  const products = await convex.query(api.telegram.findProductByName, {
+  const products = await getConvex().query(api.telegram.findProductByName, {
     telegramUserId,
     searchName,
   });
@@ -383,7 +389,7 @@ async function handleQuickPrice(
   }
 
   const product = products[0];
-  await convex.mutation(api.telegram.updateProductViaTelegram, {
+  await getConvex().mutation(api.telegram.updateProductViaTelegram, {
     telegramUserId,
     productId: product._id as Id<"products">,
     price,
@@ -427,7 +433,7 @@ async function handleQuickStock(
   }
 
   const searchName = parts.slice(0, -1).join(" ");
-  const products = await convex.query(api.telegram.findProductByName, {
+  const products = await getConvex().query(api.telegram.findProductByName, {
     telegramUserId,
     searchName,
   });
@@ -443,7 +449,7 @@ async function handleQuickStock(
   }
 
   const product = products[0];
-  await convex.mutation(api.telegram.updateProductViaTelegram, {
+  await getConvex().mutation(api.telegram.updateProductViaTelegram, {
     telegramUserId,
     productId: product._id as Id<"products">,
     stock,
@@ -477,7 +483,7 @@ async function handleVisibility(
     return;
   }
 
-  const products = await convex.query(api.telegram.findProductByName, {
+  const products = await getConvex().query(api.telegram.findProductByName, {
     telegramUserId,
     searchName: args.trim(),
   });
@@ -493,7 +499,7 @@ async function handleVisibility(
   }
 
   const product = products[0];
-  await convex.mutation(api.telegram.updateProductViaTelegram, {
+  await getConvex().mutation(api.telegram.updateProductViaTelegram, {
     telegramUserId,
     productId: product._id as Id<"products">,
     showOnStorefront: show,
@@ -534,7 +540,7 @@ async function handleDeleteStart(
     return;
   }
 
-  const products = await convex.query(api.telegram.findProductByName, {
+  const products = await getConvex().query(api.telegram.findProductByName, {
     telegramUserId,
     searchName: args.trim(),
   });
@@ -595,7 +601,7 @@ async function handleCallbackQuery(query: TelegramCallbackQuery) {
     }
 
     try {
-      await convex.mutation(api.telegram.deleteProductViaTelegram, {
+      await getConvex().mutation(api.telegram.deleteProductViaTelegram, {
         telegramUserId,
         productId: productId as Id<"products">,
       });
@@ -617,7 +623,7 @@ async function handleCallbackQuery(query: TelegramCallbackQuery) {
     if (action === "yes") {
       await finalizeGuidedAdd(chatId, telegramUserId, lang);
     } else {
-      await convex.mutation(api.telegram.deleteSession, { telegramUserId });
+      await getConvex().mutation(api.telegram.deleteSession, { telegramUserId });
       await sendMessage(chatId, "Cancelled. / تم الالغاء.");
     }
   }
@@ -665,7 +671,7 @@ async function handleQuickPhotoAdd(
   }
 
   try {
-    await convex.mutation(api.telegram.createProductViaTelegram, {
+    await getConvex().mutation(api.telegram.createProductViaTelegram, {
       telegramUserId,
       name: parsed.name,
       price: parsed.price,
@@ -695,7 +701,7 @@ async function startGuidedAdd(
   sellerId: Id<"sellers">,
   lang: "ar" | "en"
 ) {
-  await convex.mutation(api.telegram.upsertSession, {
+  await getConvex().mutation(api.telegram.upsertSession, {
     telegramUserId,
     sellerId,
     command: "add",
@@ -741,7 +747,7 @@ async function handleSession(
   // Step 1: Photo
   if (step === 1) {
     if (text.toLowerCase() === "skip" || text === "تخطي") {
-      await convex.mutation(api.telegram.upsertSession, {
+      await getConvex().mutation(api.telegram.upsertSession, {
         telegramUserId,
         sellerId,
         command: "add",
@@ -775,7 +781,7 @@ async function handleSession(
         console.error("Photo upload error:", err);
       }
 
-      await convex.mutation(api.telegram.upsertSession, {
+      await getConvex().mutation(api.telegram.upsertSession, {
         telegramUserId,
         sellerId,
         command: "add",
@@ -810,7 +816,7 @@ async function handleSession(
       return;
     }
     data.name = text;
-    await convex.mutation(api.telegram.upsertSession, {
+    await getConvex().mutation(api.telegram.upsertSession, {
       telegramUserId,
       sellerId,
       command: "add",
@@ -839,7 +845,7 @@ async function handleSession(
       return;
     }
     data.price = price;
-    await convex.mutation(api.telegram.upsertSession, {
+    await getConvex().mutation(api.telegram.upsertSession, {
       telegramUserId,
       sellerId,
       command: "add",
@@ -868,7 +874,7 @@ async function handleSession(
       return;
     }
     data.stock = stock;
-    await convex.mutation(api.telegram.upsertSession, {
+    await getConvex().mutation(api.telegram.upsertSession, {
       telegramUserId,
       sellerId,
       command: "add",
@@ -890,7 +896,7 @@ async function handleSession(
       data.description = text;
     }
 
-    await convex.mutation(api.telegram.upsertSession, {
+    await getConvex().mutation(api.telegram.upsertSession, {
       telegramUserId,
       sellerId,
       command: "add",
@@ -929,7 +935,7 @@ async function finalizeGuidedAdd(
   telegramUserId: string,
   lang: "ar" | "en"
 ) {
-  const session = await convex.query(api.telegram.getSession, {
+  const session = await getConvex().query(api.telegram.getSession, {
     telegramUserId,
   });
 
@@ -948,12 +954,12 @@ async function finalizeGuidedAdd(
       chatId,
       lang === "ar" ? "بيانات ناقصة." : "Missing data."
     );
-    await convex.mutation(api.telegram.deleteSession, { telegramUserId });
+    await getConvex().mutation(api.telegram.deleteSession, { telegramUserId });
     return;
   }
 
   try {
-    await convex.mutation(api.telegram.createProductViaTelegram, {
+    await getConvex().mutation(api.telegram.createProductViaTelegram, {
       telegramUserId,
       name,
       price,
@@ -974,5 +980,5 @@ async function finalizeGuidedAdd(
     );
   }
 
-  await convex.mutation(api.telegram.deleteSession, { telegramUserId });
+  await getConvex().mutation(api.telegram.deleteSession, { telegramUserId });
 }

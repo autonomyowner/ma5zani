@@ -1,10 +1,16 @@
 import { NextResponse } from "next/server";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { getDeliveryFees } from "@/lib/yalidine";
 import { toYalidineId } from "@/lib/yalidine-wilaya-map";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+let _convex: import('convex/browser').ConvexHttpClient;
+function getConvex() {
+  if (!_convex) {
+    const { ConvexHttpClient } = require('convex/browser');
+    _convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+  }
+  return _convex;
+}
 
 export async function GET(request: Request) {
   try {
@@ -18,7 +24,7 @@ export async function GET(request: Request) {
     }
 
     // Get seller's delivery credentials via Convex
-    const creds = await convex.query(api.delivery.getDeliveryCredentialsBySlug, { slug });
+    const creds = await getConvex().query(api.delivery.getDeliveryCredentialsBySlug, { slug });
 
     if (!creds) {
       return NextResponse.json({ available: false });

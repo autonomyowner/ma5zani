@@ -1,28 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ConvexHttpClient } from 'convex/browser';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
 import { generateAIResponse, detectLanguage } from '@/lib/ai';
 import { getDeliveryFees } from '@/lib/yalidine';
 import { toYalidineId } from '@/lib/yalidine-wilaya-map';
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+let _convex: import('convex/browser').ConvexHttpClient;
+function getConvex() {
+  if (!_convex) {
+    const { ConvexHttpClient } = require('convex/browser');
+    _convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+  }
+  return _convex;
+}
 
 // Simple in-memory rate limiter
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT = 15; // max requests per window
 const RATE_WINDOW = 60 * 1000; // 1 minute
 
-// Clean up stale entries every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, val] of rateLimitMap) {
-    if (now > val.resetAt) rateLimitMap.delete(key);
-  }
-}, 5 * 60 * 1000);
-
 function isRateLimited(ip: string): boolean {
   const now = Date.now();
+  // Clean up expired entries inline (Workers don't support setInterval)
+  if (rateLimitMap.size > 100) {
+    for (const [key, val] of rateLimitMap) {
+      if (now > val.resetAt) rateLimitMap.delete(key);
+    }
+  }
   const entry = rateLimitMap.get(ip);
   if (!entry || now > entry.resetAt) {
     rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
@@ -127,7 +131,7 @@ async function processOrderAction(
 
         // Try to fetch delivery fee
         try {
-          const creds = await convex.query(api.delivery.getDeliveryCredentialsBySlug, { slug: storefrontSlug });
+          const creds = await getConvex().query(api.delivery.getDeliveryCredentialsBySlug, { slug: storefrontSlug });
           if (creds) {
             const fromWilayaId = parseInt(creds.originWilayaCode, 10);
             const toWilayaId = toYalidineId(data.wilaya as string);
@@ -151,7 +155,7 @@ async function processOrderAction(
       // Also update customer info on the conversation record
       if (data.customerName || data.customerPhone) {
         try {
-          await convex.mutation(api.chatbot.updateCustomerInfo, {
+          await getConvex().mutation(api.chatbot.updateCustomerInfo, {
             conversationId,
             sessionId,
             customerName: data.customerName as string | undefined,
@@ -204,7 +208,7 @@ async function processOrderAction(
       if (ctx.orderState === 'completed') return { contextUpdates: null, metadata: null };
 
       try {
-        const result = await convex.mutation(api.publicOrders.createPublicOrder, {
+        const result = await getConvex().mutation(api.publicOrders.createPublicOrder, {
           storefrontSlug,
           items: items.map(i => ({
             productId: i.productId as Id<'products'>,
@@ -296,7 +300,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get AI context from Convex
-    const context = await convex.query(api.chatbot.getAIContext, {
+    const context = await getConvex().query(api.chatbot.getAIContext, {
       conversationId: conversationId as Id<'chatbotConversations'>,
       sessionId,
     });
@@ -315,7 +319,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get conversation messages for context
-    const messages = await convex.query(api.chatbot.getPublicMessages, {
+    const messages = await getConvex().query(api.chatbot.getPublicMessages, {
       conversationId: conversationId as Id<'chatbotConversations'>,
       sessionId,
     });
@@ -381,7 +385,7 @@ export async function POST(request: NextRequest) {
         // Update context in Convex
         const existingContext = context.context || {};
         try {
-          await convex.mutation(api.chatbot.updateContext, {
+          await getConvex().mutation(api.chatbot.updateContext, {
             conversationId: conversationId as Id<'chatbotConversations'>,
             sessionId,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -396,7 +400,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Save bot response to Convex
-    await convex.mutation(api.chatbot.addBotResponse, {
+    await getConvex().mutation(api.chatbot.addBotResponse, {
       conversationId: conversationId as Id<'chatbotConversations'>,
       content: cleanResponse,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
