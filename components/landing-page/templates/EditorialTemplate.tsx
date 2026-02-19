@@ -3,13 +3,7 @@
 import { localText } from '@/lib/translations'
 import { getR2PublicUrl } from '@/lib/r2'
 import LandingPageOrderForm from '../LandingPageOrderForm'
-import { useScrollReveal } from '../useScrollReveal'
-import ImageGallery from '../ImageGallery'
 import StickyOrderBar from '../StickyOrderBar'
-import TrustBar from '../sections/TrustBar'
-import TestimonialSection from '../sections/TestimonialSection'
-import GuaranteeStrip from '../sections/GuaranteeStrip'
-import MicroCopyBar from '../sections/MicroCopyBar'
 import { V3TemplateProps } from './types'
 
 export default function EditorialTemplate({ page, product, storefront, language, isRTL }: V3TemplateProps) {
@@ -23,264 +17,154 @@ export default function EditorialTemplate({ page, product, storefront, language,
   const sceneKeys = page.sceneImageKeys || []
   const enhancedKey = page.enhancedImageKeys?.[0]
   const mainOriginalUrl = product.imageKeys[0] ? getR2PublicUrl(product.imageKeys[0]) : null
+  const productImg = enhancedKey ? getR2PublicUrl(enhancedKey) : mainOriginalUrl
+
+  const scene1 = sceneKeys[0] ? getR2PublicUrl(sceneKeys[0]) : null
+  const scene2 = sceneKeys[1] ? getR2PublicUrl(sceneKeys[1]) : null
+  const scene3 = sceneKeys[2] ? getR2PublicUrl(sceneKeys[2]) : null
+
+  const accent = design.accentColor
+  const primary = design.primaryColor
+  const bg1 = design.gradientFrom || primary
+  const bg2 = design.gradientTo || accent
 
   const scrollToOrder = () => {
     document.getElementById('order-form')?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const heroReveal = useScrollReveal()
-  const sceneReveal = useScrollReveal()
-  const altSectionReveal = useScrollReveal()
-  const benefitsReveal = useScrollReveal()
-  const galleryReveal = useScrollReveal()
-
   return (
-    <div
-      className="min-h-screen"
-      dir={isRTL ? 'rtl' : 'ltr'}
-      style={{ backgroundColor: design.backgroundColor, color: design.textColor }}
-    >
-      {/* === MAGAZINE HERO: Oversized headline + small floating product === */}
-      <section className="relative overflow-hidden">
-        <div
-          ref={heroReveal.ref}
-          className={`max-w-6xl mx-auto px-4 py-16 sm:py-24 transition-all duration-700 ${
-            heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
-            {/* Big headline area — 2/3 width */}
-            <div className="lg:col-span-2">
-              {content.scarcityText && (
-                <div
-                  className="inline-block px-4 py-1.5 rounded-full text-sm font-bold mb-6"
-                  style={{
-                    backgroundColor: design.accentColor + '15',
-                    color: design.accentColor,
-                  }}
-                >
-                  {content.scarcityText}
-                </div>
-              )}
+    <div dir={isRTL ? 'rtl' : 'ltr'} style={{ backgroundColor: '#eae6e0' }}>
+      {/* Editorial poster — narrow, centered, magazine-style */}
+      <div className="max-w-[520px] mx-auto" style={{ backgroundColor: design.backgroundColor }}>
 
-              <h1
-                className="font-bold leading-[0.95] mb-6"
-                style={{
-                  color: design.primaryColor,
-                  fontFamily: 'var(--font-outfit)',
-                  fontSize: 'clamp(2.5rem, 8vw, 5rem)',
-                  letterSpacing: '-0.02em',
-                }}
+        {/* ====== PANEL 1: EDITORIAL HERO — Big typography + scene ====== */}
+        <div className="relative overflow-hidden">
+          {/* Top bar accent */}
+          <div className="h-1.5" style={{ background: `linear-gradient(to right, ${accent}, ${bg1}, ${accent})` }} />
+
+          {/* Scarcity tag */}
+          {content.scarcityText && (
+            <div className="px-5 pt-4">
+              <span
+                className="inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                style={{ backgroundColor: accent + '18', color: accent, letterSpacing: '0.12em' }}
               >
-                {content.headline}
-              </h1>
+                {content.scarcityText}
+              </span>
+            </div>
+          )}
 
-              <p className="text-lg sm:text-xl mb-8 max-w-lg leading-relaxed" style={{ opacity: 0.6 }}>
-                {content.subheadline}
-              </p>
+          {/* Magazine headline — oversized */}
+          <div className="px-5 pt-4 pb-3">
+            <h1
+              className="font-bold leading-[0.95] mb-2"
+              style={{
+                color: design.primaryColor,
+                fontFamily: 'var(--font-outfit)',
+                fontSize: 'clamp(1.8rem, 8vw, 2.8rem)',
+                letterSpacing: '-0.02em',
+              }}
+            >
+              {content.headline}
+            </h1>
+            <p className="text-sm leading-relaxed" style={{ color: design.textColor, opacity: 0.6, maxWidth: '30ch' }}>
+              {content.subheadline}
+            </p>
+          </div>
 
-              {/* Price row */}
-              <div className="flex items-center gap-4 mb-8 flex-wrap">
+          {/* Scene image or product — full width, editorial crop */}
+          <div className="relative">
+            {scene1 ? (
+              <img src={scene1} alt={product.name} className="w-full object-cover" style={{ maxHeight: '400px' }} />
+            ) : productImg ? (
+              <div
+                className="w-full flex items-center justify-center py-8 px-6"
+                style={{ background: `linear-gradient(160deg, ${bg1}15 0%, ${bg2}08 100%)`, minHeight: '320px' }}
+              >
+                <img
+                  src={productImg}
+                  alt={product.name}
+                  className="max-h-[280px] object-contain"
+                  style={{ filter: 'drop-shadow(0 16px 40px rgba(0,0,0,0.12))' }}
+                />
+              </div>
+            ) : null}
+
+            {/* Price overlay at bottom of hero image */}
+            <div
+              className="absolute bottom-0 left-0 right-0 px-5 py-4"
+              style={{ background: `linear-gradient(to top, ${design.backgroundColor}f0 40%, transparent 100%)` }}
+            >
+              <div className="flex items-center gap-3 flex-wrap">
                 {hasDiscount ? (
                   <>
-                    <span className="text-3xl sm:text-4xl font-bold" style={{ color: design.accentColor }}>
+                    <span className="text-2xl font-bold" style={{ color: accent, fontFamily: 'var(--font-outfit)' }}>
                       {product.salePrice!.toLocaleString()} DZD
                     </span>
-                    <span className="text-xl line-through" style={{ opacity: 0.35 }}>
+                    <span className="text-sm line-through" style={{ color: design.textColor, opacity: 0.35 }}>
                       {product.price.toLocaleString()} DZD
                     </span>
                     <span
-                      className="px-3 py-1 rounded-lg text-sm font-bold"
-                      style={{ backgroundColor: design.accentColor + '15', color: design.accentColor }}
+                      className="px-2 py-0.5 rounded text-[10px] font-bold"
+                      style={{ backgroundColor: accent + '20', color: accent }}
                     >
                       -{discountPercent}%
                     </span>
                   </>
                 ) : (
-                  <span className="text-3xl sm:text-4xl font-bold" style={{ color: design.accentColor }}>
+                  <span className="text-2xl font-bold" style={{ color: accent, fontFamily: 'var(--font-outfit)' }}>
                     {product.price.toLocaleString()} DZD
                   </span>
                 )}
               </div>
-
-              <button
-                onClick={scrollToOrder}
-                className="px-10 py-4 rounded-xl text-white font-bold text-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  backgroundColor: design.accentColor,
-                  boxShadow: `0 8px 24px ${design.accentColor}40`,
-                }}
-              >
-                {content.ctaText}
-              </button>
-            </div>
-
-            {/* Small floating product — 1/3 width */}
-            <div className="hidden lg:flex items-center justify-center">
-              {enhancedKey ? (
-                <div
-                  className="relative w-full aspect-square flex items-center justify-center rounded-3xl p-6"
-                  style={{
-                    background: `linear-gradient(160deg, ${design.gradientFrom || design.primaryColor}12 0%, ${design.gradientTo || design.primaryColor}06 100%)`,
-                  }}
-                >
-                  <img
-                    src={getR2PublicUrl(enhancedKey)}
-                    alt={product.name}
-                    className="max-w-full max-h-full object-contain"
-                    style={{ filter: 'drop-shadow(0 16px 32px rgba(0,0,0,0.12))' }}
-                  />
-                  {hasDiscount && (
-                    <div
-                      className="absolute top-4 right-4 px-3 py-1.5 rounded-full text-white font-bold text-xs"
-                      style={{ backgroundColor: design.accentColor }}
-                    >
-                      -{discountPercent}%
-                    </div>
-                  )}
-                </div>
-              ) : mainOriginalUrl ? (
-                <div className="w-full aspect-square rounded-2xl overflow-hidden shadow-xl">
-                  <img src={mainOriginalUrl} alt={product.name} className="w-full h-full object-cover" />
-                </div>
-              ) : null}
             </div>
           </div>
         </div>
-      </section>
 
-      {/* === FULL-WIDTH SCENE #1 === */}
-      {sceneKeys[0] && (
-        <section
-          ref={sceneReveal.ref}
-          className={`transition-all duration-700 ${
-            sceneReveal.isVisible ? 'opacity-100' : 'opacity-0'
-          }`}
-        >
-          <div className="w-full aspect-[21/9] overflow-hidden">
-            <img
-              src={getR2PublicUrl(sceneKeys[0])}
-              alt=""
-              className="w-full h-full object-cover"
-            />
+        {/* Decorative editorial divider — thin line with number */}
+        <div className="mx-5 flex items-center gap-3 py-1">
+          <div className="flex-1 h-px" style={{ backgroundColor: primary + '15' }} />
+          <span className="text-[9px] font-bold tracking-widest" style={{ color: primary, opacity: 0.3 }}>01</span>
+          <div className="flex-1 h-px" style={{ backgroundColor: primary + '15' }} />
+        </div>
+
+        {/* ====== PANEL 2: BENEFITS — Editorial numbered list ====== */}
+        <div className="relative overflow-hidden">
+          {/* Scene 2 or product */}
+          <div className="relative" style={{ minHeight: '260px' }}>
+            {scene2 ? (
+              <img src={scene2} alt={product.name} className="w-full object-cover" style={{ maxHeight: '340px' }} />
+            ) : productImg ? (
+              <div
+                className="w-full flex items-end justify-center px-6 pt-8 pb-4"
+                style={{ background: `linear-gradient(180deg, ${design.backgroundColor} 0%, ${bg1}08 100%)`, minHeight: '260px' }}
+              >
+                <img
+                  src={productImg}
+                  alt={product.name}
+                  className="max-h-[220px] object-contain"
+                  style={{ filter: 'drop-shadow(0 12px 30px rgba(0,0,0,0.1))', transform: 'rotate(-3deg)' }}
+                />
+              </div>
+            ) : null}
           </div>
-        </section>
-      )}
 
-      {/* === TRUST BAR === */}
-      <TrustBar language={language} accentColor={design.accentColor} primaryColor={design.primaryColor} />
-
-      {/* === ALTERNATING SECTIONS: scene + text === */}
-      <section className="py-14 sm:py-20">
-        <div ref={altSectionReveal.ref} className="max-w-6xl mx-auto px-4 space-y-16 sm:space-y-24">
-          {/* Row 1: Scene #2 + text */}
-          {sceneKeys[1] && (
-            <div
-              className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center transition-all duration-700 ${
-                altSectionReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-            >
-              <div className={isRTL ? 'lg:order-2' : 'lg:order-1'}>
-                <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
-                  <img src={getR2PublicUrl(sceneKeys[1])} alt="" className="w-full h-full object-cover" />
-                </div>
-              </div>
-              <div className={isRTL ? 'lg:order-1' : 'lg:order-2'}>
-                {content.featureBullets[0] && (
-                  <>
-                    <h3
-                      className="text-2xl sm:text-3xl font-bold mb-4"
-                      style={{ color: design.primaryColor, fontFamily: 'var(--font-outfit)' }}
-                    >
-                      {content.featureBullets[0].title}
-                    </h3>
-                    <p className="text-lg leading-relaxed" style={{ opacity: 0.65 }}>
-                      {content.featureBullets[0].description}
-                    </p>
-                  </>
-                )}
-                {content.featureBullets[1] && (
-                  <div className="mt-8">
-                    <h3
-                      className="text-2xl sm:text-3xl font-bold mb-4"
-                      style={{ color: design.primaryColor, fontFamily: 'var(--font-outfit)' }}
-                    >
-                      {content.featureBullets[1].title}
-                    </h3>
-                    <p className="text-lg leading-relaxed" style={{ opacity: 0.65 }}>
-                      {content.featureBullets[1].description}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Row 2: text + Scene #3 (reversed) */}
-          {sceneKeys[2] && (
-            <div
-              className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center transition-all duration-700 ${
-                altSectionReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-              style={{ transitionDelay: '200ms' }}
-            >
-              <div className={isRTL ? 'lg:order-1' : 'lg:order-2'}>
-                <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg">
-                  <img src={getR2PublicUrl(sceneKeys[2])} alt="" className="w-full h-full object-cover" />
-                </div>
-              </div>
-              <div className={isRTL ? 'lg:order-2' : 'lg:order-1'}>
-                {content.featureBullets[2] && (
-                  <>
-                    <h3
-                      className="text-2xl sm:text-3xl font-bold mb-4"
-                      style={{ color: design.primaryColor, fontFamily: 'var(--font-outfit)' }}
-                    >
-                      {content.featureBullets[2].title}
-                    </h3>
-                    <p className="text-lg leading-relaxed" style={{ opacity: 0.65 }}>
-                      {content.featureBullets[2].description}
-                    </p>
-                  </>
-                )}
-                {content.featureBullets[3] && (
-                  <div className="mt-8">
-                    <h3
-                      className="text-2xl sm:text-3xl font-bold mb-4"
-                      style={{ color: design.primaryColor, fontFamily: 'var(--font-outfit)' }}
-                    >
-                      {content.featureBullets[3].title}
-                    </h3>
-                    <p className="text-lg leading-relaxed" style={{ opacity: 0.65 }}>
-                      {content.featureBullets[3].description}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Fallback: numbered benefits (if no scene images) */}
-          {!sceneKeys[1] && content.featureBullets.length > 0 && (
-            <div
-              ref={benefitsReveal.ref}
-              className={`space-y-6 max-w-3xl mx-auto transition-all duration-700 ${
-                benefitsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
-            >
-              {content.featureBullets.map((bullet, i) => (
-                <div key={i} className="flex items-start gap-6">
+          {/* Editorial numbered benefits */}
+          {content.featureBullets.length > 0 && (
+            <div className="px-5 py-5 space-y-5">
+              {content.featureBullets.slice(0, 4).map((bullet, i) => (
+                <div key={i} className="flex items-start gap-4">
                   <span
-                    className="text-4xl sm:text-5xl font-bold flex-shrink-0 leading-none"
-                    style={{ color: design.accentColor, opacity: 0.3, fontFamily: 'var(--font-outfit)' }}
+                    className="text-2xl font-bold flex-shrink-0 leading-none"
+                    style={{ color: accent, opacity: 0.35, fontFamily: 'var(--font-outfit)' }}
                   >
                     {String(i + 1).padStart(2, '0')}
                   </span>
                   <div>
-                    <h3 className="font-bold text-lg mb-1" style={{ color: design.primaryColor }}>
+                    <h3 className="font-bold text-sm mb-0.5" style={{ color: design.primaryColor, fontFamily: 'var(--font-outfit)' }}>
                       {bullet.title}
                     </h3>
-                    <p className="text-sm leading-relaxed" style={{ opacity: 0.65 }}>
+                    <p className="text-xs leading-relaxed" style={{ color: design.textColor, opacity: 0.55 }}>
                       {bullet.description}
                     </p>
                   </div>
@@ -289,77 +173,141 @@ export default function EditorialTemplate({ page, product, storefront, language,
             </div>
           )}
         </div>
-      </section>
 
-      {/* === TESTIMONIAL (pull-quote style) === */}
-      {content.testimonial && (
-        <TestimonialSection
-          testimonial={content.testimonial}
-          primaryColor={design.primaryColor}
-          accentColor={design.accentColor}
-        />
-      )}
+        {/* Decorative divider */}
+        <div className="mx-5 flex items-center gap-3 py-1">
+          <div className="flex-1 h-px" style={{ backgroundColor: primary + '15' }} />
+          <span className="text-[9px] font-bold tracking-widest" style={{ color: primary, opacity: 0.3 }}>02</span>
+          <div className="flex-1 h-px" style={{ backgroundColor: primary + '15' }} />
+        </div>
 
-      {/* === GALLERY + DESCRIPTION === */}
-      <section className="py-14 sm:py-20" style={{ backgroundColor: design.primaryColor + '04' }}>
-        <div ref={galleryReveal.ref} className="max-w-6xl mx-auto px-4">
-          <div
-            className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 transition-all duration-700 ${
-              galleryReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            }`}
-          >
-            {product.imageKeys.length > 0 && (
-              <div>
-                <ImageGallery
-                  images={product.imageKeys}
-                  enhancedImages={page.enhancedImageKeys}
-                  productName={product.name}
-                  accentColor={design.accentColor}
+        {/* ====== PANEL 3: DESCRIPTION + Scene 3 ====== */}
+        <div className="relative overflow-hidden">
+          <div className="relative" style={{ minHeight: '240px' }}>
+            {scene3 ? (
+              <img src={scene3} alt={product.name} className="w-full object-cover" style={{ maxHeight: '300px' }} />
+            ) : productImg ? (
+              <div
+                className="w-full flex items-center justify-center px-6 py-8"
+                style={{ background: `linear-gradient(200deg, ${bg2}10 0%, ${design.backgroundColor} 100%)`, minHeight: '240px' }}
+              >
+                <img
+                  src={productImg}
+                  alt={product.name}
+                  className="max-h-[200px] object-contain"
+                  style={{ filter: 'drop-shadow(0 12px 30px rgba(0,0,0,0.08))' }}
                 />
               </div>
-            )}
+            ) : null}
 
-            <div className={product.imageKeys.length === 0 ? 'lg:col-span-2 max-w-2xl mx-auto' : ''}>
-              <h2
-                className="text-2xl sm:text-3xl font-bold mb-5"
-                style={{ color: design.primaryColor, fontFamily: 'var(--font-outfit)' }}
-              >
+            {/* Description overlay */}
+            <div
+              className="absolute bottom-0 left-0 right-0 p-5"
+              style={{ background: `linear-gradient(to top, ${design.backgroundColor} 60%, transparent 100%)` }}
+            >
+              <h2 className="text-lg font-bold mb-2" style={{ color: design.primaryColor, fontFamily: 'var(--font-outfit)' }}>
                 {product.name}
               </h2>
-              <p className="text-base sm:text-lg leading-relaxed whitespace-pre-line mb-6" style={{ opacity: 0.75 }}>
+              <p className="text-sm leading-relaxed" style={{ color: design.textColor, opacity: 0.7 }}>
                 {content.productDescription}
               </p>
-
-              {content.guaranteeText && (
-                <div className="mb-6">
-                  <GuaranteeStrip text={content.guaranteeText} accentColor={design.accentColor} />
-                </div>
-              )}
-
-              {content.microCopy && (
-                <div className="mb-8">
-                  <MicroCopyBar microCopy={content.microCopy} accentColor={design.accentColor} />
-                </div>
-              )}
-
-              <button
-                onClick={scrollToOrder}
-                className="px-10 py-4 rounded-xl text-white font-bold text-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  backgroundColor: design.accentColor,
-                  boxShadow: `0 8px 24px ${design.accentColor}40`,
-                }}
-              >
-                {content.secondaryCta || content.ctaText}
-              </button>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* === ORDER FORM === */}
-      <section className="py-14 sm:py-20">
-        <div className="max-w-lg mx-auto px-4">
+        {/* Trust badges — editorial style */}
+        <div className="px-5 py-4 flex flex-wrap justify-center gap-2">
+          {[
+            localText(language, { ar: 'الدفع عند الاستلام', en: 'Cash on Delivery', fr: 'Paiement a la livraison' }),
+            localText(language, { ar: '58 ولاية', en: '58 wilayas', fr: '58 wilayas' }),
+            localText(language, { ar: 'منتج أصلي', en: 'Authentic', fr: 'Authentique' }),
+          ].map((text, i) => (
+            <span
+              key={i}
+              className="px-2.5 py-1 rounded-full text-[10px] font-medium"
+              style={{ backgroundColor: primary + '08', color: design.textColor, opacity: 0.6, border: `1px solid ${primary}12` }}
+            >
+              {text}
+            </span>
+          ))}
+        </div>
+
+        {/* ====== PANEL 4: CTA + FINAL PRICING ====== */}
+        <div
+          className="px-5 py-8 text-center"
+          style={{ background: `linear-gradient(180deg, ${design.backgroundColor} 0%, ${bg1}08 100%)` }}
+        >
+          {content.urgencyText && (
+            <p className="text-xs font-medium mb-3" style={{ color: accent }}>{content.urgencyText}</p>
+          )}
+
+          {/* Price display */}
+          <div className="mb-4">
+            {hasDiscount ? (
+              <>
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <span className="text-sm line-through" style={{ color: design.textColor, opacity: 0.4 }}>
+                    {product.price.toLocaleString()} DZD
+                  </span>
+                  <span
+                    className="px-2 py-0.5 rounded text-[10px] font-bold text-white"
+                    style={{ backgroundColor: accent }}
+                  >
+                    -{discountPercent}%
+                  </span>
+                </div>
+                <p className="text-3xl sm:text-4xl font-bold" style={{ color: accent, fontFamily: 'var(--font-outfit)' }}>
+                  {product.salePrice!.toLocaleString()} <span className="text-lg">DZD</span>
+                </p>
+                <p className="text-xs font-medium mt-1" style={{ color: accent, opacity: 0.8 }}>
+                  {localText(language, {
+                    ar: `وفّر ${savingsAmount.toLocaleString()} دج`,
+                    en: `Save ${savingsAmount.toLocaleString()} DZD`,
+                    fr: `Economisez ${savingsAmount.toLocaleString()} DZD`,
+                  })}
+                </p>
+              </>
+            ) : (
+              <p className="text-3xl sm:text-4xl font-bold" style={{ color: accent, fontFamily: 'var(--font-outfit)' }}>
+                {product.price.toLocaleString()} <span className="text-lg">DZD</span>
+              </p>
+            )}
+          </div>
+
+          {/* CTA Button */}
+          <button
+            onClick={scrollToOrder}
+            className="w-full max-w-[280px] py-3.5 rounded-xl text-white font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.98]"
+            style={{ backgroundColor: accent, boxShadow: `0 6px 20px ${accent}40` }}
+          >
+            {content.ctaText}
+          </button>
+
+          {/* Guarantee */}
+          {content.guaranteeText && (
+            <p className="mt-3 text-[11px]" style={{ color: design.textColor, opacity: 0.45 }}>
+              {content.guaranteeText}
+            </p>
+          )}
+
+          {/* MicroCopy */}
+          {content.microCopy && (
+            <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1">
+              {[content.microCopy.delivery, content.microCopy.payment, content.microCopy.returns].map((t, i) => (
+                <span key={i} className="flex items-center gap-1.5 text-[10px]" style={{ color: design.textColor, opacity: 0.45 }}>
+                  <span className="w-1 h-1 rounded-full" style={{ backgroundColor: accent + '60' }} />
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom accent bar */}
+        <div className="h-1.5" style={{ background: `linear-gradient(to right, ${accent}, ${bg1}, ${accent})` }} />
+
+        {/* ====== ORDER FORM ====== */}
+        <div className="px-5 py-8" style={{ backgroundColor: design.backgroundColor }}>
           <LandingPageOrderForm
             product={product}
             storefront={storefront}
@@ -368,19 +316,19 @@ export default function EditorialTemplate({ page, product, storefront, language,
             ctaText={content.ctaText}
           />
         </div>
-      </section>
 
-      {/* === FOOTER === */}
-      <footer className="py-8 text-center text-sm" style={{ opacity: 0.4, borderTop: `1px solid ${design.textColor}10` }}>
-        <p>{storefront.boutiqueName}</p>
-      </footer>
+        {/* Footer */}
+        <div className="py-4 text-center text-[11px]" style={{ color: design.textColor, opacity: 0.3, borderTop: `1px solid ${design.textColor}10` }}>
+          {storefront.boutiqueName}
+        </div>
+      </div>
 
-      {/* === STICKY MOBILE CTA === */}
+      {/* Sticky mobile CTA */}
       <StickyOrderBar
         price={product.price}
         salePrice={product.salePrice}
         ctaText={content.ctaText}
-        accentColor={design.accentColor}
+        accentColor={accent}
         onOrderClick={scrollToOrder}
       />
     </div>

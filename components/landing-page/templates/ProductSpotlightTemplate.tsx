@@ -3,13 +3,7 @@
 import { localText } from '@/lib/translations'
 import { getR2PublicUrl } from '@/lib/r2'
 import LandingPageOrderForm from '../LandingPageOrderForm'
-import { useScrollReveal } from '../useScrollReveal'
-import ImageGallery from '../ImageGallery'
 import StickyOrderBar from '../StickyOrderBar'
-import TrustBar from '../sections/TrustBar'
-import TestimonialSection from '../sections/TestimonialSection'
-import GuaranteeStrip from '../sections/GuaranteeStrip'
-import MicroCopyBar from '../sections/MicroCopyBar'
 import { V3TemplateProps } from './types'
 
 export default function ProductSpotlightTemplate({ page, product, storefront, language, isRTL }: V3TemplateProps) {
@@ -23,363 +17,347 @@ export default function ProductSpotlightTemplate({ page, product, storefront, la
   const sceneKeys = page.sceneImageKeys || []
   const enhancedKey = page.enhancedImageKeys?.[0]
   const mainOriginalUrl = product.imageKeys[0] ? getR2PublicUrl(product.imageKeys[0]) : null
+  const productImgUrl = enhancedKey ? getR2PublicUrl(enhancedKey) : mainOriginalUrl
+
+  const tile1 = sceneKeys[0] ? getR2PublicUrl(sceneKeys[0]) : null
+  const tile2 = sceneKeys[1] ? getR2PublicUrl(sceneKeys[1]) : null
+  const tile3 = sceneKeys[2] ? getR2PublicUrl(sceneKeys[2]) : null
+
+  const accent = design.accentColor
 
   const scrollToOrder = () => {
     document.getElementById('order-form')?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const heroReveal = useScrollReveal()
-  const priceReveal = useScrollReveal()
-  const featuresReveal = useScrollReveal()
-  const galleryReveal = useScrollReveal()
-  const descReveal = useScrollReveal()
-
-  // Dark theme bg colors
-  const darkBg = '#0a0a0a'
-  const cardBg = '#141414'
-  const elevatedBg = '#1a1a1a'
-
   return (
-    <div
-      className="min-h-screen"
-      dir={isRTL ? 'rtl' : 'ltr'}
-      style={{ backgroundColor: darkBg, color: design.textColor }}
-    >
-      {/* === DARK HERO: Radial spotlight behind product === */}
-      <section className="relative overflow-hidden min-h-[75vh] sm:min-h-[85vh] flex items-center">
-        {/* Scene #1 subtle bg */}
-        {sceneKeys[0] && (
-          <img
-            src={getR2PublicUrl(sceneKeys[0])}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{ opacity: 0.15 }}
-          />
-        )}
+    <div dir={isRTL ? 'rtl' : 'ltr'} style={{ backgroundColor: '#111' }}>
+      {/* Dark poster container — narrow, centered */}
+      <div className="max-w-[520px] mx-auto" style={{ backgroundColor: '#0a0a0a' }}>
 
-        {/* Radial spotlight glow */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `radial-gradient(ellipse 60% 50% at 50% 40%, ${design.accentColor}12 0%, transparent 70%), linear-gradient(to bottom, transparent 60%, ${darkBg} 100%)`,
-          }}
-        />
+        {/* ====== PANEL 1: SPOTLIGHT HERO ====== */}
+        <div className="relative overflow-hidden">
+          {/* Top glow line */}
+          <div className="h-0.5" style={{ background: `linear-gradient(to right, transparent, ${accent}, transparent)` }} />
 
-        <div
-          ref={heroReveal.ref}
-          className={`relative max-w-6xl mx-auto px-4 py-12 sm:py-20 w-full transition-all duration-700 ${
-            heroReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-            {/* Product with spotlight effect */}
-            <div className={`${isRTL ? 'lg:order-2' : 'lg:order-1'} order-1`}>
-              <div className="relative aspect-square flex items-center justify-center">
-                {/* Glow circle behind product */}
-                <div
-                  className="absolute inset-[10%] rounded-full"
-                  style={{
-                    background: `radial-gradient(circle, ${design.accentColor}10 0%, transparent 70%)`,
-                    filter: 'blur(30px)',
-                  }}
-                />
-                {enhancedKey ? (
-                  <img
-                    src={getR2PublicUrl(enhancedKey)}
-                    alt={product.name}
-                    className="relative max-w-[85%] max-h-[85%] object-contain"
-                    style={{
-                      filter: `drop-shadow(0 0 40px ${design.accentColor}20) drop-shadow(0 20px 40px rgba(0,0,0,0.4))`,
-                    }}
-                  />
-                ) : mainOriginalUrl ? (
-                  <div className="relative w-[85%] aspect-square rounded-2xl overflow-hidden">
-                    <img src={mainOriginalUrl} alt={product.name} className="w-full h-full object-cover" />
-                  </div>
-                ) : null}
-
-                {hasDiscount && (
-                  <div
-                    className="absolute top-4 right-4 px-4 py-2 rounded-full text-white font-bold text-sm"
-                    style={{
-                      backgroundColor: design.accentColor,
-                      boxShadow: `0 0 20px ${design.accentColor}50`,
-                    }}
-                  >
-                    -{discountPercent}%
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Text content */}
-            <div className={`${isRTL ? 'lg:order-1' : 'lg:order-2'} order-2`}>
-              {content.scarcityText && (
-                <div
-                  className="inline-block px-4 py-1.5 rounded-full text-sm font-bold mb-5"
-                  style={{
-                    backgroundColor: design.accentColor + '20',
-                    color: design.accentColor,
-                    boxShadow: `0 0 12px ${design.accentColor}15`,
-                  }}
-                >
-                  {content.scarcityText}
-                </div>
-              )}
-
-              <h1
-                className="font-bold mb-5 leading-tight"
-                style={{
-                  color: design.textColor,
-                  fontFamily: 'var(--font-outfit)',
-                  fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-                }}
+          {/* Scarcity badge */}
+          {content.scarcityText && (
+            <div className="px-5 pt-4">
+              <span
+                className="inline-block px-3 py-1 rounded-full text-[10px] font-bold"
+                style={{ backgroundColor: accent + '20', color: accent, boxShadow: `0 0 12px ${accent}15` }}
               >
-                {content.headline}
-              </h1>
+                {content.scarcityText}
+              </span>
+            </div>
+          )}
 
-              <p className="text-lg sm:text-xl mb-8 leading-relaxed" style={{ opacity: 0.6 }}>
-                {content.subheadline}
-              </p>
+          {/* Headline */}
+          <div className="px-5 pt-4 pb-3">
+            <h1
+              className="font-bold leading-tight mb-2"
+              style={{
+                color: '#f0f0f0',
+                fontFamily: 'var(--font-outfit)',
+                fontSize: 'clamp(1.5rem, 6vw, 2.2rem)',
+              }}
+            >
+              {content.headline}
+            </h1>
+            <p className="text-sm leading-relaxed" style={{ color: '#f0f0f0', opacity: 0.5 }}>
+              {content.subheadline}
+            </p>
+          </div>
 
-              {/* Price */}
-              <div className="flex items-center gap-3 mb-8 flex-wrap">
+          {/* Scene image or product with radial glow */}
+          <div className="relative" style={{ minHeight: '320px' }}>
+            {/* Radial glow behind product */}
+            <div
+              className="absolute inset-0"
+              style={{ background: `radial-gradient(ellipse 60% 50% at 50% 50%, ${accent}0c 0%, transparent 70%)` }}
+            />
+            {tile1 ? (
+              <img src={tile1} alt={product.name} className="w-full object-cover relative" style={{ maxHeight: '380px' }} />
+            ) : productImgUrl ? (
+              <div
+                className="w-full flex items-center justify-center py-8 px-6 relative"
+                style={{ minHeight: '320px' }}
+              >
+                <img
+                  src={productImgUrl}
+                  alt={product.name}
+                  className="max-h-[280px] object-contain"
+                  style={{ filter: `drop-shadow(0 0 40px ${accent}20) drop-shadow(0 16px 40px rgba(0,0,0,0.4))` }}
+                />
+              </div>
+            ) : null}
+
+            {/* Price overlay — glowing on dark */}
+            <div
+              className="absolute bottom-0 left-0 right-0 px-5 py-4"
+              style={{ background: 'linear-gradient(to top, #0a0a0a 40%, transparent 100%)' }}
+            >
+              <div className="flex items-center gap-3 flex-wrap">
                 {hasDiscount ? (
                   <>
-                    <span className="text-3xl sm:text-4xl font-bold" style={{ color: design.accentColor }}>
+                    <span
+                      className="text-3xl font-bold"
+                      style={{ color: accent, fontFamily: 'var(--font-outfit)', textShadow: `0 0 30px ${accent}40` }}
+                    >
                       {product.salePrice!.toLocaleString()} DZD
                     </span>
-                    <span className="text-xl line-through" style={{ opacity: 0.35 }}>
+                    <span className="text-sm line-through" style={{ color: '#f0f0f0', opacity: 0.3 }}>
                       {product.price.toLocaleString()} DZD
-                    </span>
-                    <span
-                      className="px-3 py-1 rounded-lg text-sm font-bold"
-                      style={{ backgroundColor: design.accentColor + '20', color: design.accentColor }}
-                    >
-                      {localText(language, {
-                        ar: `وفّر ${savingsAmount.toLocaleString()} دج`,
-                        en: `Save ${savingsAmount.toLocaleString()} DZD`,
-                        fr: `Economisez ${savingsAmount.toLocaleString()} DZD`,
-                      })}
                     </span>
                   </>
                 ) : (
-                  <span className="text-3xl sm:text-4xl font-bold" style={{ color: design.accentColor }}>
+                  <span
+                    className="text-3xl font-bold"
+                    style={{ color: accent, fontFamily: 'var(--font-outfit)', textShadow: `0 0 30px ${accent}40` }}
+                  >
                     {product.price.toLocaleString()} DZD
                   </span>
                 )}
               </div>
-
-              <button
-                onClick={scrollToOrder}
-                className="w-full sm:w-auto px-10 py-4 rounded-xl text-white font-bold text-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  backgroundColor: design.accentColor,
-                  boxShadow: `0 8px 30px ${design.accentColor}40, 0 0 20px ${design.accentColor}15`,
-                }}
-              >
-                {content.ctaText}
-              </button>
-
-              {content.socialProof && (
-                <p className="mt-5 text-sm" style={{ opacity: 0.4 }}>{content.socialProof}</p>
-              )}
             </div>
           </div>
         </div>
-      </section>
 
-      {/* === NEON TRUST BAR === */}
-      <section
-        className="py-4"
-        style={{
-          borderTop: `1px solid ${design.accentColor}15`,
-          borderBottom: `1px solid ${design.accentColor}15`,
-        }}
-      >
-        <TrustBar language={language} accentColor={design.accentColor} primaryColor={design.primaryColor} isDark />
-      </section>
+        {/* Decorative glow divider */}
+        <div className="mx-5 flex items-center gap-3">
+          <div className="flex-1 h-px" style={{ background: `linear-gradient(to right, transparent, ${accent}30, transparent)` }} />
+        </div>
 
-      {/* === LARGE PRICE DISPLAY CARD === */}
-      {hasDiscount && (
-        <section className="py-10 sm:py-14">
-          <div ref={priceReveal.ref} className="max-w-md mx-auto px-4">
-            <div
-              className={`rounded-2xl p-8 text-center transition-all duration-700 ${
-                priceReveal.isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-              }`}
-              style={{
-                backgroundColor: design.accentColor,
-                boxShadow: `0 0 40px ${design.accentColor}30`,
-              }}
-            >
-              <p className="text-white text-sm font-medium mb-2" style={{ opacity: 0.8 }}>
-                {localText(language, { ar: 'سعر خاص', en: 'Special Price', fr: 'Prix special' })}
-              </p>
-              <p className="text-white text-4xl sm:text-5xl font-bold mb-2" style={{ fontFamily: 'var(--font-outfit)' }}>
-                {product.salePrice!.toLocaleString()} DZD
-              </p>
-              <p className="text-white text-lg line-through mb-3" style={{ opacity: 0.5 }}>
-                {product.price.toLocaleString()} DZD
-              </p>
-              <p className="text-white text-sm font-bold">
-                {localText(language, {
-                  ar: `وفّر ${savingsAmount.toLocaleString()} دج`,
-                  en: `Save ${savingsAmount.toLocaleString()} DZD`,
-                  fr: `Economisez ${savingsAmount.toLocaleString()} DZD`,
-                })}
-              </p>
-            </div>
+        {/* ====== PANEL 2: FEATURES ====== */}
+        <div className="relative overflow-hidden">
+          {/* Scene 2 or product */}
+          <div className="relative" style={{ minHeight: '260px' }}>
+            {tile2 ? (
+              <img src={tile2} alt={product.name} className="w-full object-cover" style={{ maxHeight: '340px' }} />
+            ) : productImgUrl ? (
+              <div
+                className="w-full flex items-center justify-center px-6 py-8"
+                style={{ minHeight: '260px' }}
+              >
+                <img
+                  src={productImgUrl}
+                  alt={product.name}
+                  className="max-h-[220px] object-contain"
+                  style={{ filter: `drop-shadow(0 0 30px ${accent}15)`, transform: 'rotate(-4deg)' }}
+                />
+              </div>
+            ) : null}
+
+            {/* Floating feature card on image */}
+            {content.featureBullets[0] && (
+              <div
+                className="absolute bottom-5 left-4 right-4 rounded-xl p-4"
+                style={{ backgroundColor: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(8px)', border: `1px solid ${accent}15` }}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0"
+                    style={{ backgroundColor: accent + '20', color: accent }}
+                  >
+                    1
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm mb-0.5" style={{ color: '#f0f0f0' }}>{content.featureBullets[0].title}</h3>
+                    <p className="text-xs leading-relaxed" style={{ color: '#f0f0f0', opacity: 0.5 }}>{content.featureBullets[0].description}</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </section>
-      )}
 
-      {/* === FEATURE CARDS (glow borders on dark) === */}
-      {content.featureBullets.length > 0 && (
-        <section className="py-14 sm:py-20">
-          <div ref={featuresReveal.ref} className="max-w-6xl mx-auto px-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {content.featureBullets.slice(0, 4).map((bullet, i) => (
+          {/* More feature cards below */}
+          {content.featureBullets.length > 1 && (
+            <div className="px-5 py-5 space-y-3">
+              {content.featureBullets.slice(1, 4).map((bullet, i) => (
                 <div
                   key={i}
-                  className={`rounded-2xl p-7 transition-all duration-500 ${
-                    featuresReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-                  }`}
-                  style={{
-                    backgroundColor: cardBg,
-                    border: `1px solid ${design.accentColor}12`,
-                    transitionDelay: featuresReveal.isVisible ? `${i * 100}ms` : '0ms',
-                  }}
+                  className="rounded-xl p-4"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.03)', border: `1px solid ${accent}10` }}
                 >
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm mb-4"
-                    style={{
-                      backgroundColor: design.accentColor + '20',
-                      color: design.accentColor,
-                    }}
-                  >
-                    {i + 1}
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0"
+                      style={{ backgroundColor: accent + '15', color: accent }}
+                    >
+                      {i + 2}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-sm mb-0.5" style={{ color: '#f0f0f0' }}>{bullet.title}</h3>
+                      <p className="text-xs leading-relaxed" style={{ color: '#f0f0f0', opacity: 0.45 }}>{bullet.description}</p>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-lg mb-2" style={{ color: design.textColor }}>
-                    {bullet.title}
-                  </h3>
-                  <p className="text-sm leading-relaxed" style={{ opacity: 0.5 }}>
-                    {bullet.description}
-                  </p>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-      )}
+          )}
+        </div>
 
-      {/* === TESTIMONIAL (dark variant) === */}
-      {content.testimonial && (
-        <TestimonialSection
-          testimonial={content.testimonial}
-          primaryColor={design.primaryColor}
-          accentColor={design.accentColor}
-          isDark
-        />
-      )}
+        {/* Glow divider */}
+        <div className="mx-5 flex items-center gap-3">
+          <div className="flex-1 h-px" style={{ background: `linear-gradient(to right, transparent, ${accent}30, transparent)` }} />
+        </div>
 
-      {/* === DARK GALLERY === */}
-      <section className="py-14 sm:py-20" style={{ backgroundColor: cardBg }}>
-        <div ref={galleryReveal.ref} className="max-w-6xl mx-auto px-4">
-          <div
-            className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 transition-all duration-700 ${
-              galleryReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-            }`}
-          >
-            {/* Gallery with scene images */}
-            <div>
-              <ImageGallery
-                images={[...sceneKeys, ...product.imageKeys]}
-                enhancedImages={page.enhancedImageKeys}
-                productName={product.name}
-                accentColor={design.accentColor}
-              />
-            </div>
+        {/* ====== PANEL 3: DESCRIPTION + Scene 3 ====== */}
+        <div className="relative overflow-hidden">
+          <div className="relative" style={{ minHeight: '240px' }}>
+            {tile3 ? (
+              <img src={tile3} alt={product.name} className="w-full object-cover" style={{ maxHeight: '300px' }} />
+            ) : productImgUrl ? (
+              <div className="w-full flex items-center justify-center px-6 py-8" style={{ minHeight: '240px' }}>
+                <img
+                  src={productImgUrl}
+                  alt={product.name}
+                  className="max-h-[200px] object-contain"
+                  style={{ filter: `drop-shadow(0 0 30px ${accent}10)` }}
+                />
+              </div>
+            ) : null}
 
-            {/* Description */}
+            {/* Description overlay */}
             <div
-              ref={descReveal.ref}
-              className={`transition-all duration-700 ${
-                descReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-              }`}
+              className="absolute bottom-0 left-0 right-0 p-5"
+              style={{ background: 'linear-gradient(to top, #0a0a0a 60%, transparent 100%)' }}
             >
-              <h2
-                className="text-2xl sm:text-3xl font-bold mb-5"
-                style={{ color: design.textColor, fontFamily: 'var(--font-outfit)' }}
-              >
+              <h2 className="text-lg font-bold mb-2" style={{ color: '#f0f0f0', fontFamily: 'var(--font-outfit)' }}>
                 {product.name}
               </h2>
-              <p className="text-base sm:text-lg leading-relaxed whitespace-pre-line mb-6" style={{ opacity: 0.6 }}>
+              <p className="text-sm leading-relaxed" style={{ color: '#f0f0f0', opacity: 0.6 }}>
                 {content.productDescription}
               </p>
-
-              {content.guaranteeText && (
-                <div className="mb-6">
-                  <GuaranteeStrip text={content.guaranteeText} accentColor={design.accentColor} isDark />
-                </div>
-              )}
-
-              {content.microCopy && (
-                <div className="mb-8">
-                  <MicroCopyBar microCopy={content.microCopy} accentColor={design.accentColor} isDark />
-                </div>
-              )}
-
-              <button
-                onClick={scrollToOrder}
-                className="px-10 py-4 rounded-xl text-white font-bold text-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  backgroundColor: design.accentColor,
-                  boxShadow: `0 8px 30px ${design.accentColor}40`,
-                }}
-              >
-                {content.secondaryCta || content.ctaText}
-              </button>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* === ORDER FORM (on slightly lighter card) === */}
-      <section className="py-14 sm:py-20">
-        <div className="max-w-lg mx-auto px-4">
-          <div
-            className="rounded-2xl p-6 sm:p-8"
+        {/* Trust badges — dark neon style */}
+        <div className="px-5 py-4 flex flex-wrap justify-center gap-2">
+          {[
+            localText(language, { ar: 'الدفع عند الاستلام', en: 'Cash on Delivery', fr: 'Paiement a la livraison' }),
+            localText(language, { ar: '58 ولاية', en: '58 wilayas', fr: '58 wilayas' }),
+            localText(language, { ar: 'منتج أصلي', en: 'Authentic', fr: 'Authentique' }),
+          ].map((text, i) => (
+            <span
+              key={i}
+              className="px-2.5 py-1 rounded-full text-[10px] font-medium"
+              style={{ backgroundColor: 'rgba(255,255,255,0.04)', color: '#f0f0f0', opacity: 0.6, border: `1px solid ${accent}15` }}
+            >
+              {text}
+            </span>
+          ))}
+        </div>
+
+        {/* ====== PANEL 4: FINAL CTA ====== */}
+        <div className="px-5 py-8 text-center">
+          {content.urgencyText && (
+            <p className="text-xs font-medium mb-3" style={{ color: accent }}>{content.urgencyText}</p>
+          )}
+
+          {/* Price — large, glowing */}
+          <div className="mb-5">
+            {hasDiscount ? (
+              <>
+                <div className="flex items-center justify-center gap-2 mb-1">
+                  <span className="text-sm line-through" style={{ color: '#f0f0f0', opacity: 0.3 }}>
+                    {product.price.toLocaleString()} DZD
+                  </span>
+                  <span
+                    className="px-2 py-0.5 rounded text-[10px] font-bold"
+                    style={{ backgroundColor: accent + '25', color: accent }}
+                  >
+                    -{discountPercent}%
+                  </span>
+                </div>
+                <p
+                  className="text-3xl sm:text-4xl font-bold"
+                  style={{ color: accent, fontFamily: 'var(--font-outfit)', textShadow: `0 0 30px ${accent}30` }}
+                >
+                  {product.salePrice!.toLocaleString()} <span className="text-lg">DZD</span>
+                </p>
+                <p className="text-xs font-medium mt-1" style={{ color: accent, opacity: 0.7 }}>
+                  {localText(language, {
+                    ar: `وفّر ${savingsAmount.toLocaleString()} دج`,
+                    en: `Save ${savingsAmount.toLocaleString()} DZD`,
+                    fr: `Economisez ${savingsAmount.toLocaleString()} DZD`,
+                  })}
+                </p>
+              </>
+            ) : (
+              <p
+                className="text-3xl sm:text-4xl font-bold"
+                style={{ color: accent, fontFamily: 'var(--font-outfit)', textShadow: `0 0 30px ${accent}30` }}
+              >
+                {product.price.toLocaleString()} <span className="text-lg">DZD</span>
+              </p>
+            )}
+          </div>
+
+          {/* CTA Button — glowing */}
+          <button
+            onClick={scrollToOrder}
+            className="w-full max-w-[280px] py-3.5 rounded-xl text-white font-bold text-base transition-all hover:scale-[1.02] active:scale-[0.98]"
             style={{
-              backgroundColor: elevatedBg,
-              border: `1px solid ${design.accentColor}10`,
+              backgroundColor: accent,
+              boxShadow: `0 6px 24px ${accent}50, 0 0 40px ${accent}15`,
             }}
           >
-            <LandingPageOrderForm
-              product={product}
-              storefront={storefront}
-              pageId={page.pageId}
-              design={design}
-              ctaText={content.ctaText}
-            />
-          </div>
+            {content.ctaText}
+          </button>
+
+          {/* Guarantee */}
+          {content.guaranteeText && (
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ backgroundColor: accent + '20' }}>
+                <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 5" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </div>
+              <p className="text-[11px]" style={{ color: '#f0f0f0', opacity: 0.45 }}>{content.guaranteeText}</p>
+            </div>
+          )}
+
+          {/* MicroCopy */}
+          {content.microCopy && (
+            <div className="mt-3 flex flex-wrap justify-center gap-x-4 gap-y-1">
+              {[content.microCopy.delivery, content.microCopy.payment, content.microCopy.returns].map((t, i) => (
+                <span key={i} className="flex items-center gap-1.5 text-[10px]" style={{ color: '#f0f0f0', opacity: 0.35 }}>
+                  <span className="w-1 h-1 rounded-full" style={{ backgroundColor: accent }} />
+                  {t}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
-      </section>
 
-      {/* === FOOTER === */}
-      <footer
-        className="py-8 text-center text-sm"
-        style={{ opacity: 0.3, borderTop: `1px solid #ffffff10` }}
-      >
-        <p>{storefront.boutiqueName}</p>
-      </footer>
+        {/* Bottom glow line */}
+        <div className="h-0.5" style={{ background: `linear-gradient(to right, transparent, ${accent}, transparent)` }} />
 
-      {/* === STICKY MOBILE CTA (dark variant) === */}
+        {/* ====== ORDER FORM ====== */}
+        <div
+          className="px-5 py-8 rounded-t-2xl"
+          style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderTop: `1px solid ${accent}10` }}
+        >
+          <LandingPageOrderForm
+            product={product}
+            storefront={storefront}
+            pageId={page.pageId}
+            design={{ ...design, backgroundColor: 'transparent', textColor: '#f0f0f0' }}
+            ctaText={content.ctaText}
+          />
+        </div>
+
+        {/* Footer */}
+        <div className="py-4 text-center text-[11px]" style={{ color: '#f0f0f0', opacity: 0.2 }}>
+          {storefront.boutiqueName}
+        </div>
+      </div>
+
+      {/* Sticky mobile CTA */}
       <StickyOrderBar
         price={product.price}
         salePrice={product.salePrice}
         ctaText={content.ctaText}
-        accentColor={design.accentColor}
+        accentColor={accent}
         onOrderClick={scrollToOrder}
       />
     </div>

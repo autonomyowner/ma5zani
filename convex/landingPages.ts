@@ -133,11 +133,6 @@ export const updateLandingPageContent = mutation({
       productDescription: v.string(),
       socialProof: v.optional(v.string()),
       // v3 fields
-      testimonial: v.optional(v.object({
-        text: v.string(),
-        author: v.string(),
-        location: v.string(),
-      })),
       guaranteeText: v.optional(v.string()),
       secondaryCta: v.optional(v.string()),
       scarcityText: v.optional(v.string()),

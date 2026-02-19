@@ -1,4 +1,5 @@
-// Vision API - Analyzes product images for color palette
+// Vision API - Analyzes product images for landing page generation
+// Returns: detailed product description, color palette, 3 scene prompts, template type
 
 import { adjustForContrast, generateGradient } from './contrast';
 
@@ -8,7 +9,10 @@ const VISION_MODEL = 'google/gemini-2.0-flash-001';
 export interface VisionAnalysis {
   dominantColors: string[];
   productType: string;
+  productCategory?: string;
+  productDescription?: string;
   visualAttributes: string[];
+  productMood?: string;
   suggestedPalette: {
     primary: string;
     accent: string;
@@ -16,10 +20,8 @@ export interface VisionAnalysis {
     text: string;
   };
   scenePrompt?: string;
-  productCategory?: string;
   scenePrompts?: string[];
   templateType?: string;
-  productMood?: string;
 }
 
 export async function analyzeProductImage(
@@ -48,32 +50,67 @@ export async function analyzeProductImage(
               },
               {
                 type: 'text',
-                text: `This is a product image for "${productName}". Analyze it for a premium landing page design. Return JSON:
+                text: `You are a product photography expert. Analyze this product image for "${productName}".
+
+TASK 1 — DESCRIBE THE PRODUCT:
+Look carefully at the image. Describe EXACTLY what you see:
+- What specific product is this? (e.g. "white leather running shoes with red accents and thick rubber sole", NOT just "shoes")
+- What colors and materials can you identify? Be precise (e.g. "matte black plastic with brushed gold trim")
+- What style/aesthetic? (sporty, luxury, casual, minimalist, etc.)
+- Any visible brand elements, logos, patterns, or text?
+
+TASK 2 — COLOR PALETTE:
+Extract 3 dominant colors from the product. Then suggest a landing page palette:
+- primary: a rich color from the product itself
+- accent: a warm CTA-friendly color (orange, coral, or green work best)
+- background: light neutral (#f5f5f5 to #ffffff)
+- text: dark readable color
+
+TASK 3 — 3 SCENE PROMPTS FOR AI IMAGE GENERATION:
+Generate 3 prompts to place this product in different professional photography scenes.
+
+CRITICAL: Each prompt MUST describe this specific product's appearance (colors, material, shape) so the AI generates a consistent product. Each scene must be COMPLETELY DIFFERENT from the others.
+
+Scene 1 (HERO): This specific product elegantly displayed on a premium surface. Describe exact surface material (marble, wood, concrete, fabric), lighting setup (key light direction, fill, rim), and 1-2 complementary props. Clean composition.
+
+Scene 2 (LIFESTYLE): This specific product in a real-world context where it would be used/worn/displayed. Describe the exact environment (gym, kitchen, bathroom, outdoor trail, office desk), natural lighting, and mood. Aspirational and warm.
+
+Scene 3 (CREATIVE): An artistic close-up or dramatic angle of this product. Describe creative lighting (side light, backlight, spotlight), interesting composition, and minimal background with gradient or solid color.
+
+ALL prompts must end with "professional commercial product photography, sharp focus, 4k, ultra detailed"
+
+TASK 4 — TEMPLATE TYPE:
+Pick ONE based on the product:
+- "lifestyle-hero": beauty, fashion, skincare, food, home decor
+- "editorial": luxury, jewelry, watches, accessories, perfume
+- "product-spotlight": electronics, tech gadgets, sports equipment, tools
+
+Return ONLY valid JSON:
 {
-  "dominantColors": ["#hex1", "#hex2", "#hex3"],
+  "productDescription": "2-3 detailed sentences describing exactly what you see in this image",
   "productType": "${productName}",
-  "productCategory": "specific type (e.g. face cream, wireless headphones, sneakers, gold necklace)",
-  "visualAttributes": ["3-5 adjectives describing look/feel"],
+  "productCategory": "specific category (e.g. running shoes, face serum, wireless earbuds)",
+  "dominantColors": ["#hex1", "#hex2", "#hex3"],
+  "visualAttributes": ["4-5 adjectives: material, color, style, texture, aesthetic"],
   "productMood": "luxury | casual | professional | fun | natural",
   "suggestedPalette": {
-    "primary": "#hex - rich color from the product",
-    "accent": "#hex - warm CTA color (orange or green)",
-    "background": "#hex - light neutral (#f8f8f8 to #ffffff)",
-    "text": "#hex - dark readable"
+    "primary": "#hex",
+    "accent": "#hex",
+    "background": "#hex",
+    "text": "#hex"
   },
-  "templateType": "lifestyle-hero | editorial | product-spotlight (pick ONE: beauty/fashion/food=lifestyle-hero, luxury/jewelry/accessories=editorial, electronics/tech/sports=product-spotlight)",
+  "templateType": "lifestyle-hero | editorial | product-spotlight",
   "scenePrompts": [
-    "HERO: premium product photography of ${productName} on elegant surface, soft studio lighting, clean background, commercial quality, 4k",
-    "LIFESTYLE: ${productName} being used in real context, warm natural lighting, blurred lifestyle background, commercial photography, 4k",
-    "DETAIL: close-up detail shot of ${productName}, studio macro photography, sharp focus, premium texture visible, 4k"
+    "Full hero scene prompt with specific product description...",
+    "Full lifestyle scene prompt with specific product description...",
+    "Full creative scene prompt with specific product description..."
   ]
-}
-IMPORTANT: scenePrompts must describe the product IN a scene - include surface, lighting, mood. Return ONLY valid JSON.`,
+}`,
               },
             ],
           },
         ],
-        max_tokens: 900,
+        max_tokens: 1200,
         temperature: 0.3,
       }),
     });
@@ -89,9 +126,9 @@ IMPORTANT: scenePrompts must describe the product IN a scene - include surface, 
 
     const parsed = JSON.parse(extractJSON(content)) as VisionAnalysis;
 
-    // Ensure scenePrompts fallback
+    // Ensure scenePrompts fallback (need 3 for poster tiles)
     if (!parsed.scenePrompts || parsed.scenePrompts.length < 3) {
-      parsed.scenePrompts = getDefaultScenePrompts(productName);
+      parsed.scenePrompts = getDefaultScenePrompts(productName, parsed.productDescription);
     }
 
     // Default templateType if missing
@@ -111,10 +148,6 @@ IMPORTANT: scenePrompts must describe the product IN a scene - include surface, 
     parsed.suggestedPalette.background = adjusted.backgroundColor;
     parsed.suggestedPalette.text = adjusted.textColor;
 
-    // Add gradient info
-    const gradient = generateGradient(parsed.suggestedPalette.primary);
-    (parsed as VisionAnalysis & { gradient?: { gradientFrom: string; gradientTo: string } }).gradient = gradient;
-
     return parsed;
   } catch (error) {
     console.error('Vision analysis error:', error);
@@ -124,8 +157,6 @@ IMPORTANT: scenePrompts must describe the product IN a scene - include surface, 
 
 /**
  * Enhanced vision analysis for marketing images — returns palette + scene prompt
- * for lifestyle image generation. The scene prompt describes an ideal photography
- * setup for the product.
  */
 export async function analyzeProductForMarketing(
   imageUrl: string,
@@ -160,6 +191,7 @@ Return JSON with:
   "dominantColors": ["#hex1", "#hex2", "#hex3"],
   "productType": "category (e.g. skincare, electronics, clothing, food, accessories)",
   "productCategory": "specific type (e.g. face cream, wireless headphones, sneakers)",
+  "productDescription": "2-3 sentences describing exactly what you see",
   "visualAttributes": ["3-5 adjectives describing the product look"],
   "suggestedPalette": {
     "primary": "#hex - rich color from the product for backgrounds",
@@ -202,9 +234,6 @@ Return ONLY valid JSON.`,
     parsed.suggestedPalette.background = adjusted.backgroundColor;
     parsed.suggestedPalette.text = adjusted.textColor;
 
-    const gradient = generateGradient(parsed.suggestedPalette.primary);
-    (parsed as VisionAnalysis & { gradient?: { gradientFrom: string; gradientTo: string } }).gradient = gradient;
-
     return parsed;
   } catch (error) {
     console.error('Marketing vision analysis error:', error);
@@ -212,11 +241,12 @@ Return ONLY valid JSON.`,
   }
 }
 
-export function getDefaultScenePrompts(productName: string): string[] {
+export function getDefaultScenePrompts(productName: string, productDescription?: string): string[] {
+  const desc = productDescription || productName;
   return [
-    `professional product photography of ${productName}, elegant studio setup, soft lighting, white marble surface, commercial quality, 4k`,
-    `${productName} in lifestyle context, warm natural lighting, blurred background, commercial photography, 4k`,
-    `close-up detail shot of ${productName}, studio macro photography, sharp focus, premium quality, 4k`,
+    `${desc} elegantly placed on polished white marble surface, soft diffused studio key light from upper left, clean minimal background, subtle shadow, professional commercial product photography, sharp focus, 4k, ultra detailed`,
+    `${desc} in a stylish real-life setting with warm golden hour natural lighting, shallow depth of field, aspirational lifestyle context, blurred complementary background, professional commercial product photography, sharp focus, 4k, ultra detailed`,
+    `artistic close-up of ${desc}, dramatic side lighting revealing texture and detail, soft gradient background, creative composition with negative space, professional commercial product photography, sharp focus, 4k, ultra detailed`,
   ];
 }
 

@@ -116,6 +116,17 @@ input:focus, button:focus, a:focus {
   outline-offset: 2px;
 }
 
+/* Scroll reveal animations for landing pages */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: all 0.6s ease-out;
+}
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Selection */
 ::selection {
   background-color: rgba(0, 174, 239, 0.2);

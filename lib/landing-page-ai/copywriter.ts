@@ -1,4 +1,5 @@
 // Copywriter AI - Generates Algerian Darija marketing copy for landing pages
+// Now receives vision analysis to write accurate, product-aware copy
 
 import { VisionAnalysis } from './vision';
 
@@ -24,7 +25,6 @@ export interface LandingPageCopy {
   productDescription: string;
   socialProof: string;
   // v3 fields
-  testimonial?: { text: string; author: string; location: string };
   guaranteeText?: string;
   secondaryCta?: string;
   scarcityText?: string;
@@ -44,57 +44,49 @@ export async function generateLandingPageCopy(
 
   const systemPrompt = `You are a top-tier Algerian e-commerce copywriter. You write in ALGERIAN DARIJA (الدارجة الجزائرية) — NOT Modern Standard Arabic (MSA/فصحى).
 
-CRITICAL RULE: The product name is "${product.name}". ALL text you write MUST be about THIS EXACT product. Do NOT invent a different product. Do NOT change the product type. If the product is a t-shirt, write about a t-shirt. If it's a cream, write about a cream.
+CRITICAL RULES:
+- The product name is "${product.name}". ALL text MUST be about THIS EXACT product.
+- Do NOT invent features the product doesn't have. Only describe what is provided in the product info below.
+- If the seller provided a description, USE IT as the basis for your copy.
+- If AI vision analysis is provided, USE IT to describe the product accurately (colors, materials, style).
+- Do NOT use emoji or icons. No emoticons, no Unicode symbols.
 
 DARIJA RULES:
 1. Write in Darija as spoken in Algeria — mix Arabic script with French loanwords when natural
-2. Use: "بزاف" (a lot), "واش" (what), "كاين" (there is), "هاذ" (this), "خلاص" (done), "صح" (true), "بصح" (but)
+2. Use: "بزاف", "واش", "كاين", "هاذ", "خلاص", "صح", "بصح"
 3. Include French loanwords naturally: "qualité", "livraison", "promotion", "gratuit", "offre"
-4. Mention "الدفع عند الاستلام" (COD) and "توصيل لكل 58 ولاية" (delivery to all 58 wilayas)
-5. Keep it punchy and conversational
-6. Do NOT use emoji or icons in any text. No emoticons, no Unicode symbols.
+4. Keep it punchy and conversational
 
-HEADLINE FORMULAS (pick the best one for this product):
-- Curiosity gap: "واش [unexpected claim]? هاذ [product] غير [result]..."
-- Bold claim: "[Benefit] في [timeframe]"
-- Pain point: "عييت من [problem]? [product] يخلصك"
-- Number hook: "[Number] حوايج لي [product] يديرهم لك"
-
-BENEFIT-FOCUSED BULLETS: Each bullet must use an emotional frame:
-- Status: "صحابك يسقسوك وين شريت هاذ..."
-- FOMO: "كل يوم بلا [product] راك خاسر..."
-- Transformation: "من [before] ل [after]..."
-- Ease: "بلا ما [difficulty], غير [simple action]..."
+COPY RULES:
+- Headline: Short, punchy, about ${product.name} specifically (max 8 words)
+- Feature bullets: Describe REAL benefits based on the product info given. Don't invent capabilities.
+- productDescription: Accurately describe the product. Use the AI vision data if provided — mention actual colors, materials, style that were observed.
+- Mention "الدفع عند الاستلام" (COD) and "توصيل لكل 58 ولاية" in the microCopy, NOT in the main copy.
 
 Return ONLY a JSON object:
 {
-  "headline": "Short punchy headline about ${product.name} in Darija (max 10 words)",
-  "subheadline": "Value proposition for ${product.name} (max 20 words)",
+  "headline": "Short headline about ${product.name} in Darija (max 8 words)",
+  "subheadline": "Value proposition (max 15 words)",
   "featureBullets": [
-    { "title": "Benefit title (2-4 words)", "description": "One sentence about what the customer gains from ${product.name}" },
+    { "title": "Benefit title (2-3 words)", "description": "One sentence about a REAL benefit" },
     { "title": "...", "description": "..." },
     { "title": "...", "description": "..." }
   ],
-  "ctaText": "CTA button text (2-4 words)",
-  "urgencyText": "Urgency message",
-  "productDescription": "2-3 sentences describing ${product.name} in Darija",
-  "socialProof": "Social proof line",
-  "testimonial": {
-    "text": "A realistic customer testimonial in Darija (2-3 sentences, enthusiastic but believable)",
-    "author": "Common Algerian first name",
-    "location": "Real Algerian wilaya name"
-  },
-  "guaranteeText": "Return/guarantee promise in Darija (e.g. ارجع المنتوج في 7 ايام اذا ما عجبكش)",
-  "secondaryCta": "Secondary CTA text for gallery section (2-4 words)",
-  "scarcityText": "Stock-based scarcity line in Darija (e.g. غير 15 وحدة باقية)",
+  "ctaText": "CTA button (2-3 words, e.g. اطلب الان)",
+  "urgencyText": "Short urgency line",
+  "productDescription": "2-3 sentences describing ${product.name} accurately based on all available info",
+  "socialProof": "General trust line (e.g. +500 طلبية هاذ الشهر)",
+  "guaranteeText": "Return/guarantee promise (e.g. ارجع المنتوج في 7 ايام اذا ما عجبكش)",
+  "secondaryCta": "Secondary CTA (2-3 words)",
+  "scarcityText": "Stock urgency (e.g. غير 15 وحدة باقية)",
   "microCopy": {
-    "delivery": "Short delivery trust line (e.g. توصيل سريع لباب دارك)",
-    "payment": "Short payment trust line (e.g. الدفع عند الاستلام فقط)",
-    "returns": "Short returns trust line (e.g. ارجاع مجاني)"
+    "delivery": "توصيل سريع لباب دارك",
+    "payment": "الدفع عند الاستلام",
+    "returns": "ارجاع مجاني"
   }
 }
 
-IMPORTANT: Return ONLY valid JSON. No markdown. No emoji.`;
+IMPORTANT: Return ONLY valid JSON. No markdown. No emoji. No fake testimonials or reviews.`;
 
   const userLines = [
     `PRODUCT NAME: ${product.name}`,
@@ -117,7 +109,30 @@ IMPORTANT: Return ONLY valid JSON. No markdown. No emoji.`;
     userLines.push(`CATEGORY: ${product.categoryName}`);
   }
 
-  userLines.push('', `Write a landing page for "${product.name}". Stay focused on this product ONLY.`);
+  // Feed vision analysis for product-aware copy
+  if (visionAnalysis) {
+    userLines.push('');
+    userLines.push('--- AI VISION ANALYSIS (from analyzing the product image) ---');
+    if (visionAnalysis.productDescription) {
+      userLines.push(`WHAT THE AI SEES: ${visionAnalysis.productDescription}`);
+    }
+    if (visionAnalysis.visualAttributes?.length) {
+      userLines.push(`VISUAL CHARACTERISTICS: ${visionAnalysis.visualAttributes.join(', ')}`);
+    }
+    if (visionAnalysis.productCategory) {
+      userLines.push(`PRODUCT CATEGORY: ${visionAnalysis.productCategory}`);
+    }
+    if (visionAnalysis.productMood) {
+      userLines.push(`PRODUCT STYLE: ${visionAnalysis.productMood}`);
+    }
+    if (visionAnalysis.dominantColors?.length) {
+      userLines.push(`DOMINANT COLORS: ${visionAnalysis.dominantColors.join(', ')}`);
+    }
+    userLines.push('Use this vision data to write ACCURATE descriptions. Describe the product as it actually appears.');
+    userLines.push('---');
+  }
+
+  userLines.push('', `Write a landing page for "${product.name}". Stay focused on this product ONLY. Be accurate about what the product looks like.`);
 
   try {
     const response = await fetch(OPENROUTER_API_URL, {
@@ -135,7 +150,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown. No emoji.`;
           { role: 'user', content: userLines.join('\n') },
         ],
         max_tokens: 2500,
-        temperature: 0.7,
+        temperature: 0.5,
       }),
     });
 

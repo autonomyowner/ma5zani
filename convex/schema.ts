@@ -379,7 +379,7 @@ export default defineSchema({
       urgencyText: v.optional(v.string()),
       productDescription: v.string(),
       socialProof: v.optional(v.string()),
-      // v3 fields
+      // v3 fields (testimonial kept for backward compat with existing data)
       testimonial: v.optional(v.object({
         text: v.string(),
         author: v.string(),

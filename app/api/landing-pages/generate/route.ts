@@ -164,7 +164,6 @@ export async function POST(request: NextRequest) {
         productDescription: result.content.productDescription,
         socialProof: result.content.socialProof || undefined,
         // v3 fields
-        testimonial: result.content.testimonial || undefined,
         guaranteeText: result.content.guaranteeText || undefined,
         secondaryCta: result.content.secondaryCta || undefined,
         scarcityText: result.content.scarcityText || undefined,

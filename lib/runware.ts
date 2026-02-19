@@ -182,8 +182,11 @@ export async function generateSceneWithCanny(
 }
 
 /**
- * Generates multiple scene images for a product.
- * Tries ControlNet (canny edge map) first, falls back to img2img if canny fails.
+ * Generates multiple scene images for a product using img2img with varied strengths.
+ * Each scene uses a different strength for genuine visual variety:
+ * - Scene 1 (hero): 0.50 — product clearly recognizable, new background
+ * - Scene 2 (lifestyle): 0.62 — more creative, product in different context
+ * - Scene 3 (creative): 0.72 — most artistic, dramatic reinterpretation
  */
 export async function generateMultipleScenes(
   originalImageUrl: string,
@@ -195,21 +198,13 @@ export async function generateMultipleScenes(
     return scenePrompts.map(() => null)
   }
 
-  // Step 1: Try canny edge map preprocessing
-  const edgeMapUrl = await preprocessCanny(originalImageUrl)
+  // Varied strengths produce genuinely different scenes
+  const strengths = [0.50, 0.62, 0.72]
 
-  if (edgeMapUrl) {
-    // Step 2a: Use ControlNet for each scene prompt
-    const results = await Promise.all(
-      scenePrompts.map((prompt) => generateSceneWithCanny(edgeMapUrl, prompt))
-    )
-    return results
-  }
-
-  // Step 2b: Fallback to img2img for each scene prompt
-  console.log('Runware: Canny preprocessing failed, falling back to img2img')
   const results = await Promise.all(
-    scenePrompts.map((prompt) => generateLifestyleScene(originalImageUrl, prompt))
+    scenePrompts.map((prompt, i) =>
+      generateLifestyleScene(originalImageUrl, prompt, strengths[Math.min(i, strengths.length - 1)])
+    )
   )
   return results
 }
@@ -222,6 +217,7 @@ export async function generateMultipleScenes(
 export async function generateLifestyleScene(
   imageUrl: string,
   scenePrompt: string,
+  strength: number = 0.55,
 ): Promise<string | null> {
   const apiKey = process.env.RUNWARE_API_KEY
   if (!apiKey) {
@@ -248,7 +244,7 @@ export async function generateLifestyleScene(
           positivePrompt: scenePrompt,
           negativePrompt: 'blurry, low quality, distorted, watermark, text overlay, collage, split image, cartoon, illustration, anime, painting',
           seedImage: imageUrl,
-          strength: 0.55,
+          strength,
           model: 'runware:101@1',
           width: 1024,
           height: 1024,

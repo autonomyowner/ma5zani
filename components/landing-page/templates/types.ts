@@ -12,7 +12,6 @@ export interface V3TemplateProps {
       urgencyText?: string
       productDescription: string
       socialProof?: string
-      testimonial?: { text: string; author: string; location: string }
       guaranteeText?: string
       secondaryCta?: string
       scarcityText?: string
