@@ -3,7 +3,7 @@
 import { VisionAnalysis } from './vision';
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const COPYWRITER_MODEL = 'anthropic/claude-3.5-sonnet';
+const COPYWRITER_MODEL = 'anthropic/claude-sonnet-4.5';
 
 export interface ProductData {
   name: string;
@@ -140,16 +140,28 @@ IMPORTANT: Return ONLY valid JSON. No markdown. No emoji.`;
     });
 
     if (!response.ok) {
-      console.error('Copywriter API error:', await response.text());
+      const errText = await response.text();
+      console.error('Copywriter API error:', response.status, errText);
       return null;
     }
 
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content;
-    if (!content) return null;
+    if (!content) {
+      console.error('Copywriter: No content in response', JSON.stringify(data).slice(0, 500));
+      return null;
+    }
 
     const jsonStr = extractJSON(content);
-    return JSON.parse(jsonStr) as LandingPageCopy;
+    const parsed = JSON.parse(jsonStr) as LandingPageCopy;
+
+    // Ensure required fields exist (graceful fallback for partial responses)
+    if (!parsed.headline || !parsed.ctaText || !parsed.productDescription) {
+      console.error('Copywriter: Missing required fields in parsed JSON');
+      return null;
+    }
+
+    return parsed;
   } catch (error) {
     console.error('Copywriter error:', error);
     return null;
