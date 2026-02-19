@@ -117,7 +117,7 @@ export default function Hero() {
           <div className={`relative hidden lg:flex items-center justify-center ${dir === 'rtl' ? 'lg:order-2' : ''}`}>
             <div className="relative w-full max-w-3xl animate-float" style={{ transform: 'scale(2.2)' }}>
               <img
-                src="/herobot.svg"
+                src="/hero2shape.svg"
                 alt="ma5zani - E-commerce Fulfillment"
                 className="w-full h-auto drop-shadow-2xl"
               />
