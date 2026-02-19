@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import Button from '@/components/ui/Button'
 import { useLanguage } from '@/lib/LanguageContext'
 import { authClient } from '@/lib/auth-client'
@@ -117,13 +116,10 @@ export default function Hero() {
           {/* Hero Image */}
           <div className={`relative hidden lg:flex items-center justify-center ${dir === 'rtl' ? 'lg:order-2' : ''}`}>
             <div className="relative w-full max-w-lg animate-float">
-              <Image
-                src="/hero.png"
+              <img
+                src="/herobot.svg"
                 alt="ma5zani - E-commerce Fulfillment"
-                width={600}
-                height={500}
                 className="w-full h-auto drop-shadow-2xl"
-                priority
               />
             </div>
           </div>
