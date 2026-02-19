@@ -132,13 +132,35 @@ export const updateLandingPageContent = mutation({
       urgencyText: v.optional(v.string()),
       productDescription: v.string(),
       socialProof: v.optional(v.string()),
+      // v3 fields
+      testimonial: v.optional(v.object({
+        text: v.string(),
+        author: v.string(),
+        location: v.string(),
+      })),
+      guaranteeText: v.optional(v.string()),
+      secondaryCta: v.optional(v.string()),
+      scarcityText: v.optional(v.string()),
+      microCopy: v.optional(v.object({
+        delivery: v.string(),
+        payment: v.string(),
+        returns: v.string(),
+      })),
     }),
     design: v.object({
       primaryColor: v.string(),
       accentColor: v.string(),
       backgroundColor: v.string(),
       textColor: v.string(),
+      gradientFrom: v.optional(v.string()),
+      gradientTo: v.optional(v.string()),
+      contrastValidated: v.optional(v.boolean()),
+      isDarkTheme: v.optional(v.boolean()),
     }),
+    enhancedImageKeys: v.optional(v.array(v.string())),
+    sceneImageKeys: v.optional(v.array(v.string())),
+    templateVersion: v.optional(v.number()),
+    templateType: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // No auth required — called from API route after generation
@@ -147,12 +169,27 @@ export const updateLandingPageContent = mutation({
       throw new Error("Landing page not found");
     }
 
-    await ctx.db.patch(args.id, {
+    const patch: Record<string, unknown> = {
       content: args.content,
       design: args.design,
       status: "draft",
       updatedAt: Date.now(),
-    });
+    };
+
+    if (args.enhancedImageKeys) {
+      patch.enhancedImageKeys = args.enhancedImageKeys;
+    }
+    if (args.sceneImageKeys) {
+      patch.sceneImageKeys = args.sceneImageKeys;
+    }
+    if (args.templateVersion) {
+      patch.templateVersion = args.templateVersion;
+    }
+    if (args.templateType) {
+      patch.templateType = args.templateType;
+    }
+
+    await ctx.db.patch(args.id, patch);
   },
 });
 

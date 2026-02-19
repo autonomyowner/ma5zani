@@ -379,13 +379,35 @@ export default defineSchema({
       urgencyText: v.optional(v.string()),
       productDescription: v.string(),
       socialProof: v.optional(v.string()),
+      // v3 fields
+      testimonial: v.optional(v.object({
+        text: v.string(),
+        author: v.string(),
+        location: v.string(),
+      })),
+      guaranteeText: v.optional(v.string()),
+      secondaryCta: v.optional(v.string()),
+      scarcityText: v.optional(v.string()),
+      microCopy: v.optional(v.object({
+        delivery: v.string(),
+        payment: v.string(),
+        returns: v.string(),
+      })),
     }),
     design: v.object({
       primaryColor: v.string(),
       accentColor: v.string(),
       backgroundColor: v.string(),
       textColor: v.string(),
+      gradientFrom: v.optional(v.string()),
+      gradientTo: v.optional(v.string()),
+      contrastValidated: v.optional(v.boolean()),
+      isDarkTheme: v.optional(v.boolean()),
     }),
+    enhancedImageKeys: v.optional(v.array(v.string())),
+    sceneImageKeys: v.optional(v.array(v.string())),
+    templateVersion: v.optional(v.number()),
+    templateType: v.optional(v.string()),
     isPublished: v.boolean(),
     status: v.union(
       v.literal("generating"),
@@ -418,6 +440,21 @@ export default defineSchema({
   })
     .index("by_seller", ["sellerId"])
     .index("by_seller_created", ["sellerId", "createdAt"]),
+
+  // ============ MARKETING IMAGES ============
+
+  marketingImages: defineTable({
+    sellerId: v.id("sellers"),
+    productId: v.id("products"),
+    templateId: v.string(),        // e.g. "gradient-float", "bold-price"
+    format: v.string(),            // "square" | "story" | "facebook"
+    imageKey: v.string(),          // R2 key for the generated PNG
+    headline: v.optional(v.string()),
+    subheadline: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_seller", ["sellerId"])
+    .index("by_product", ["productId"]),
 
   // Messages in chatbot conversations
   chatbotMessages: defineTable({

@@ -23,6 +23,12 @@ export interface LandingPageCopy {
   urgencyText: string;
   productDescription: string;
   socialProof: string;
+  // v3 fields
+  testimonial?: { text: string; author: string; location: string };
+  guaranteeText?: string;
+  secondaryCta?: string;
+  scarcityText?: string;
+  microCopy?: { delivery: string; payment: string; returns: string };
 }
 
 export async function generateLandingPageCopy(
@@ -46,23 +52,49 @@ DARIJA RULES:
 3. Include French loanwords naturally: "qualité", "livraison", "promotion", "gratuit", "offre"
 4. Mention "الدفع عند الاستلام" (COD) and "توصيل لكل 58 ولاية" (delivery to all 58 wilayas)
 5. Keep it punchy and conversational
+6. Do NOT use emoji or icons in any text. No emoticons, no Unicode symbols.
+
+HEADLINE FORMULAS (pick the best one for this product):
+- Curiosity gap: "واش [unexpected claim]? هاذ [product] غير [result]..."
+- Bold claim: "[Benefit] في [timeframe]"
+- Pain point: "عييت من [problem]? [product] يخلصك"
+- Number hook: "[Number] حوايج لي [product] يديرهم لك"
+
+BENEFIT-FOCUSED BULLETS: Each bullet must use an emotional frame:
+- Status: "صحابك يسقسوك وين شريت هاذ..."
+- FOMO: "كل يوم بلا [product] راك خاسر..."
+- Transformation: "من [before] ل [after]..."
+- Ease: "بلا ما [difficulty], غير [simple action]..."
 
 Return ONLY a JSON object:
 {
   "headline": "Short punchy headline about ${product.name} in Darija (max 10 words)",
   "subheadline": "Value proposition for ${product.name} (max 20 words)",
   "featureBullets": [
-    { "title": "Benefit title (2-4 words)", "description": "One sentence about this benefit of ${product.name}" },
+    { "title": "Benefit title (2-4 words)", "description": "One sentence about what the customer gains from ${product.name}" },
     { "title": "...", "description": "..." },
     { "title": "...", "description": "..." }
   ],
   "ctaText": "CTA button text (2-4 words)",
   "urgencyText": "Urgency message",
   "productDescription": "2-3 sentences describing ${product.name} in Darija",
-  "socialProof": "Social proof line"
+  "socialProof": "Social proof line",
+  "testimonial": {
+    "text": "A realistic customer testimonial in Darija (2-3 sentences, enthusiastic but believable)",
+    "author": "Common Algerian first name",
+    "location": "Real Algerian wilaya name"
+  },
+  "guaranteeText": "Return/guarantee promise in Darija (e.g. ارجع المنتوج في 7 ايام اذا ما عجبكش)",
+  "secondaryCta": "Secondary CTA text for gallery section (2-4 words)",
+  "scarcityText": "Stock-based scarcity line in Darija (e.g. غير 15 وحدة باقية)",
+  "microCopy": {
+    "delivery": "Short delivery trust line (e.g. توصيل سريع لباب دارك)",
+    "payment": "Short payment trust line (e.g. الدفع عند الاستلام فقط)",
+    "returns": "Short returns trust line (e.g. ارجاع مجاني)"
+  }
 }
 
-IMPORTANT: Return ONLY valid JSON. No markdown.`;
+IMPORTANT: Return ONLY valid JSON. No markdown. No emoji.`;
 
   const userLines = [
     `PRODUCT NAME: ${product.name}`,
@@ -102,7 +134,7 @@ IMPORTANT: Return ONLY valid JSON. No markdown.`;
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userLines.join('\n') },
         ],
-        max_tokens: 1500,
+        max_tokens: 2500,
         temperature: 0.7,
       }),
     });

@@ -18,6 +18,7 @@ import type * as customDomains from "../customDomains.js";
 import type * as delivery from "../delivery.js";
 import type * as http from "../http.js";
 import type * as landingPages from "../landingPages.js";
+import type * as marketingImages from "../marketingImages.js";
 import type * as notifications from "../notifications.js";
 import type * as orders from "../orders.js";
 import type * as products from "../products.js";
@@ -45,6 +46,7 @@ declare const fullApi: ApiFromModules<{
   delivery: typeof delivery;
   http: typeof http;
   landingPages: typeof landingPages;
+  marketingImages: typeof marketingImages;
   notifications: typeof notifications;
   orders: typeof orders;
   products: typeof products;

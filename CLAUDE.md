@@ -286,6 +286,85 @@ Each seller can enable an AI-powered chatbot for their storefront:
 - Sellers can takeover conversations (handoff) and return control to bot
 - Support chat (ma5zani's) only shows on home/dashboard, not on storefronts
 
+### AI Landing Pages
+
+Sellers generate AI-powered product landing pages from the dashboard (`/dashboard/landing-pages`):
+
+**Architecture (v3 — 2-phase pipeline)**:
+- Phase 1 (parallel): Vision (Gemini) + Copywriting (Claude) + Background removal (Runware)
+- Phase 2 (after vision): Scene generation via Runware FLUX Canny ControlNet (3 scene images)
+- Vision: Gemini 2.0 Flash via OpenRouter — extracts palette, scene prompts, template type, product mood
+- Copywriter: Claude 3.5 Sonnet via OpenRouter — Darija copy with testimonial, guarantee, scarcity, micro-copy
+- Background removal: Runware.ai REST API (`lib/runware.ts`) — removes product image backgrounds
+- Scene generation: Runware Canny ControlNet (`lib/runware.ts`) — 3 scene images preserving product edges
+- Contrast validation: `lib/landing-page-ai/contrast.ts` — WCAG AA auto-fix (light + dark themes)
+
+**Template versions**:
+- `templateVersion: 1` (or undefined) — legacy template (basic layout, 2x2 image grid)
+- `templateVersion: 2` — premium template (floating product on gradient, scroll-reveal, gallery, sticky CTA)
+- `templateVersion: 3` — v3 premium with AI scene images + template dispatch by `templateType`:
+  - `lifestyle-hero` — full-bleed scene hero, split benefits, testimonial (beauty/fashion/food)
+  - `editorial` — magazine-style oversized headline, full-width scenes, alternating sections (luxury/jewelry)
+  - `product-spotlight` — dark theme (#0a0a0a), radial spotlight glow, neon accents (electronics/tech/sports)
+
+**Key files**:
+- `lib/landing-page-ai/index.ts` — 2-phase orchestrator
+- `lib/landing-page-ai/vision.ts` — image analysis + palette + scenePrompts + templateType
+- `lib/landing-page-ai/copywriter.ts` — Darija copywriting with testimonial/guarantee/scarcity
+- `lib/landing-page-ai/contrast.ts` — WCAG contrast: `adjustForContrast()` + `adjustForDarkTheme()`
+- `lib/runware.ts` — Runware REST API: `removeBackground`, `preprocessCanny`, `generateSceneWithCanny`, `generateMultipleScenes`, `generateLifestyleScene`
+- `app/api/landing-pages/generate/route.ts` — generation API + R2 upload for enhanced + scene images
+- `components/landing-page/LandingPageRenderer.tsx` — dispatches v1/v2/v3 templates
+- `components/landing-page/templates/` — v3 templates: `LifestyleHeroTemplate`, `EditorialTemplate`, `ProductSpotlightTemplate`
+- `components/landing-page/sections/` — shared sections: `TrustBar`, `TestimonialSection`, `GuaranteeStrip`, `SceneShowcase`, `MicroCopyBar`
+- `components/landing-page/ImageGallery.tsx` — thumbnail gallery with swipe
+- `components/landing-page/StickyOrderBar.tsx` — mobile fixed bottom CTA
+- `components/landing-page/useScrollReveal.ts` — IntersectionObserver scroll animation hook
+
+**Schema fields** (on `landingPages` table):
+- `design.gradientFrom` / `design.gradientTo` — hero gradient colors
+- `design.contrastValidated` — whether WCAG check passed
+- `design.isDarkTheme` — true for product-spotlight template
+- `enhancedImageKeys` — R2 keys for bg-removed product images
+- `sceneImageKeys` — R2 keys for AI-generated scene images (3 per page)
+- `templateVersion` — 1 = legacy, 2 = premium, 3 = v3 premium
+- `templateType` — `lifestyle-hero` | `editorial` | `product-spotlight`
+- `content.testimonial` — `{ text, author, location }` — AI-generated customer quote
+- `content.guaranteeText` — return/guarantee promise in Darija
+- `content.scarcityText` — stock-based urgency text
+- `content.microCopy` — `{ delivery, payment, returns }` — trust-building micro-copy
+
+**Runware ControlNet flow**: `preprocessCanny(imageUrl)` → edge map → `generateSceneWithCanny(edgeMap, prompt)` x3. Falls back to `generateLifestyleScene()` (img2img) if canny fails. Falls back to original images if all scene generation fails.
+
+**Runware fallback**: If `RUNWARE_API_KEY` is not set, generation works normally with original images (no bg removal, no scenes).
+
+### AI Marketing Images
+
+Sellers generate professional marketing images from the dashboard (`/dashboard/marketing-images`):
+
+**AI Pipeline** (4 parallel tasks):
+- Vision: `analyzeProductForMarketing()` in `lib/landing-page-ai/vision.ts` — extracts palette + generates `scenePrompt` for lifestyle scene
+- Copywriter: `lib/marketing-image-ai.ts` — short Darija headline + subheadline + ctaText via Claude
+- Background removal: `lib/runware.ts:removeBackground()` — transparent PNG
+- Lifestyle scene: `lib/runware.ts:generateLifestyleScene()` — Runware image-to-image places product in professional photography scene
+
+**5 Templates** (in `components/marketing-image/templates/`):
+- `LifestyleHero` — full-bleed scene bg, floating product, frosted glass info card
+- `SplitScene` — scene on one half, clean product on other, curved divider
+- `Spotlight` — dark/moody, radial spotlight, glowing price bar
+- `PromoCard` — discount-focused, scene inset thumbnail, large price, CTA button, savings callout
+- `MinimalLuxe` — white Apple-style, product reflection, editorial typography
+
+**Image capture**: `html-to-image` library renders templates at full resolution (1080x1080, 1080x1920, 1200x628), captures via `toPng()`. Cross-origin R2 images proxied through `/api/image-proxy` and converted to base64 data URLs before capture.
+
+**Key files**:
+- `app/api/marketing-image/generate/route.ts` — AI generation endpoint (lazy ConvexHttpClient)
+- `components/marketing-image/ImagePreview.tsx` — preview + capture component
+- `components/marketing-image/templates/index.ts` — template registry, `MarketingTemplateProps` interface
+- `convex/marketingImages.ts` — CRUD (getMyMarketingImages, saveMarketingImage, deleteMarketingImage)
+
+**Formats**: square (1080x1080), story (1080x1920), facebook (1200x628). Scene images stored in R2 under `images/scenes/{sellerId}/`, enhanced under `images/enhanced/{sellerId}/`.
+
 ### Founder Offer / Activation Gate
 
 Storefront and AI chatbot features are locked behind `seller.isActivated`. Flow:
@@ -381,6 +460,7 @@ Secrets (set via `npx wrangler secret put`):
 - `META_CONVERSIONS_ACCESS_TOKEN` - Meta Conversions API token
 - `CARTESIA_API_KEY` - Cartesia TTS API key for Voice Studio
 - `CLOUDFLARE_CUSTOM_HOSTNAME_API_TOKEN` - Cloudflare API token for custom domain provisioning
+- `RUNWARE_API_KEY` - Runware.ai API key for product image background removal
 
 **Convex (set via `npx convex env set`)**:
 - `BETTER_AUTH_SECRET` - Secret for better-auth session signing

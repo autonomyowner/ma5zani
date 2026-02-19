@@ -203,14 +203,37 @@ export default function LandingPagesPage() {
                     {page.content.headline || page.productName}
                   </p>
                   <p className="text-xs sm:text-sm text-slate-500 truncate">{page.productName}</p>
-                  <div className="flex items-center gap-2 sm:gap-3 mt-1">
+                  <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
                     {statusBadge(page.status)}
+                    {(page as any).templateType && (
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        (page as any).templateType === 'lifestyle-hero' ? 'bg-emerald-100 text-emerald-700' :
+                        (page as any).templateType === 'editorial' ? 'bg-violet-100 text-violet-700' :
+                        (page as any).templateType === 'product-spotlight' ? 'bg-slate-800 text-slate-200' :
+                        'bg-purple-100 text-purple-700'
+                      }`}>
+                        {(page as any).templateType === 'lifestyle-hero' ? 'Lifestyle' :
+                         (page as any).templateType === 'editorial' ? 'Editorial' :
+                         (page as any).templateType === 'product-spotlight' ? 'Spotlight' :
+                         (page as any).templateType}
+                      </span>
+                    )}
+                    {(page as any).enhancedImageKeys?.length > 0 && !(page as any).templateType && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                        {lp?.enhanced || 'Enhanced'}
+                      </span>
+                    )}
                     <span className="text-xs text-slate-400">
                       {lp?.views || 'Views'}: {page.viewCount || 0}
                     </span>
                     <span className="text-xs text-slate-400">
                       {lp?.orders || 'Orders'}: {page.orderCount || 0}
                     </span>
+                    {(page.viewCount || 0) > 0 && (
+                      <span className="text-xs text-slate-400">
+                        {lp?.conversionRate || 'Conversion'}: {((page.orderCount || 0) / (page.viewCount || 1) * 100).toFixed(1)}%
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
