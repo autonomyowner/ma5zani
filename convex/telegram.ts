@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSeller } from "./auth";
+import { requireSeller, getAuthenticatedSeller } from "./auth";
 
 // ============ DASHBOARD FUNCTIONS (Clerk auth) ============
 
@@ -51,7 +51,8 @@ export const generateVerificationCode = mutation({
 export const getTelegramLink = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return null;
 
     const link = await ctx.db
       .query("telegramLinks")

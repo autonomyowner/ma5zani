@@ -1,11 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSeller } from "./auth";
+import { requireSeller, getAuthenticatedSeller } from "./auth";
 
 export const getProducts = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return [];
 
     const products = await ctx.db
       .query("products")
@@ -19,7 +20,8 @@ export const getProducts = query({
 export const getProduct = query({
   args: { productId: v.id("products") },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return null;
 
     const product = await ctx.db.get(args.productId);
     if (!product || product.sellerId !== seller._id) {

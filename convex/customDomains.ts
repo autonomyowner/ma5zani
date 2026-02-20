@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSeller, requireActiveSeller } from "./auth";
+import { requireSeller, requireActiveSeller, getAuthenticatedSeller } from "./auth";
 
 // Public query: resolve hostname → storefront slug (used by middleware)
 export const getStorefrontSlugByDomain = query({
@@ -31,7 +31,8 @@ export const getStorefrontSlugByDomain = query({
 export const getMyCustomDomain = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return null;
     const domain = await ctx.db
       .query("customDomains")
       .withIndex("by_seller", (q) => q.eq("sellerId", seller._id))

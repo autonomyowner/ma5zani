@@ -1,10 +1,11 @@
 import { query } from "./_generated/server";
-import { requireSeller } from "./auth";
+import { getAuthenticatedSeller } from "./auth";
 
 export const getDashboardStats = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return { ordersToday: 0, pendingOrders: 0, monthlyRevenue: 0, totalProducts: 0 };
 
     const now = Date.now();
     const startOfToday = new Date();

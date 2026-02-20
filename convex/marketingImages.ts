@@ -1,11 +1,12 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { requireSeller, requireActiveSeller } from "./auth";
+import { requireSeller, requireActiveSeller, getAuthenticatedSeller } from "./auth";
 
 export const getMyMarketingImages = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return [];
     return await ctx.db
       .query("marketingImages")
       .withIndex("by_seller", (q) => q.eq("sellerId", seller._id))

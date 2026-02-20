@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSeller } from "./auth";
+import { requireSeller, getAuthenticatedSeller } from "./auth";
 
 export const getOrders = query({
   args: {
@@ -13,7 +13,8 @@ export const getOrders = query({
     )),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return [];
 
     if (args.status) {
       return await ctx.db
@@ -34,7 +35,8 @@ export const getOrders = query({
 export const getOrder = query({
   args: { orderId: v.id("orders") },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return null;
 
     const order = await ctx.db.get(args.orderId);
     if (!order || order.sellerId !== seller._id) {
@@ -201,7 +203,8 @@ export const deleteOrder = mutation({
 export const getStorefrontOrders = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return [];
 
     const orders = await ctx.db
       .query("orders")

@@ -1,11 +1,12 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSeller } from "./auth";
+import { requireSeller, getAuthenticatedSeller } from "./auth";
 
 export const getCategories = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return [];
 
     const categories = await ctx.db
       .query("categories")

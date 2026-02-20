@@ -1,14 +1,15 @@
 import { query, mutation, internalQuery, internalMutation, internalAction } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { requireSeller } from "./auth";
+import { requireSeller, getAuthenticatedSeller } from "./auth";
 
 // ============ QUERIES ============
 
 export const getDeliverySettings = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return null;
     if (!seller.deliverySettings) return null;
     return {
       provider: seller.deliverySettings.provider,

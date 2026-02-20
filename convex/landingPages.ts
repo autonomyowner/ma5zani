@@ -1,13 +1,14 @@
 import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSeller, requireActiveSeller } from "./auth";
+import { requireSeller, requireActiveSeller, getAuthenticatedSeller } from "./auth";
 
 // ============ AUTHENTICATED (SELLER) FUNCTIONS ============
 
 export const getMyLandingPages = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return [];
     const pages = await ctx.db
       .query("landingPages")
       .withIndex("by_seller", (q) => q.eq("sellerId", seller._id))
@@ -46,7 +47,8 @@ export const getMyLandingPages = query({
 export const getLandingPage = query({
   args: { id: v.id("landingPages") },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return null;
     const page = await ctx.db.get(args.id);
     if (!page || page.sellerId !== seller._id) return null;
 

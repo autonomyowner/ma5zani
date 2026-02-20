@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSeller, requireActiveSeller } from "./auth";
+import { requireSeller, requireActiveSeller, getAuthenticatedSeller } from "./auth";
 
 // ============ SELLER CHATBOT MANAGEMENT ============
 
@@ -8,7 +8,8 @@ import { requireSeller, requireActiveSeller } from "./auth";
 export const getChatbot = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return null;
 
     // Get seller's storefront
     const storefront = await ctx.db
@@ -123,7 +124,8 @@ export const getKnowledge = query({
     category: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return [];
 
     const storefront = await ctx.db
       .query("storefronts")
@@ -257,7 +259,8 @@ export const getConversations = query({
     )),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return [];
 
     const storefront = await ctx.db
       .query("storefronts")
@@ -319,14 +322,15 @@ export const getConversationMessages = query({
     conversationId: v.id("chatbotConversations"),
   },
   handler: async (ctx, args) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return [];
 
     const conversation = await ctx.db.get(args.conversationId);
-    if (!conversation) throw new Error("Conversation not found");
+    if (!conversation) return [];
 
     const chatbot = await ctx.db.get(conversation.chatbotId);
     if (!chatbot || chatbot.sellerId !== seller._id) {
-      throw new Error("Unauthorized");
+      return [];
     }
 
     const messages = await ctx.db
