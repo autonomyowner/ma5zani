@@ -1,43 +1,25 @@
 'use client'
 
-import { useLanguage } from '@/lib/LanguageContext'
-
 export default function Stats() {
-  const { t } = useLanguage()
-
-  const stats = [
-    { number: '5', label: t.stats.freeReturns, suffix: 'min' },
-    { number: '\u221E', label: t.stats.availability, suffix: '' },
-    { number: '24/7', label: t.stats.fastDelivery, suffix: '' },
+  const logos = [
+    { src: '/logos/yalidine.png', alt: 'Yalidine Express' },
+    { src: '/logos/algerie-poste.svg', alt: 'Algérie Poste' },
+    { src: '/logos/satim.png', alt: 'SATIM CIB' },
+    { src: '/logos/algerie-telecom.png', alt: 'Algérie Télécom' },
   ]
 
   return (
-    <section className="py-16 bg-[#0054A6]">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <div className="grid md:grid-cols-3 gap-8">
-          {stats.map((stat, index) => (
-            <div
-              key={index}
-              className="text-center"
-            >
-              <div className="flex items-baseline justify-center gap-1">
-                <span
-                  className="text-5xl md:text-6xl font-bold text-white"
-                  style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}
-                >
-                  {stat.number}
-                </span>
-                {stat.suffix && (
-                  <span
-                    className="text-2xl font-bold text-[#00AEEF]"
-                    style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}
-                  >
-                    {stat.suffix}
-                  </span>
-                )}
-              </div>
-              <p className="mt-2 text-white/80 font-medium">{stat.label}</p>
-            </div>
+    <section className="py-8 bg-white border-y border-slate-100">
+      <div className="max-w-5xl mx-auto px-6 lg:px-8">
+        <div className="flex items-center justify-center gap-10 md:gap-16 flex-wrap">
+          {logos.map((logo) => (
+            <img
+              key={logo.alt}
+              src={logo.src}
+              alt={logo.alt}
+              className="h-8 md:h-10 object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+              style={{ mixBlendMode: 'multiply' }}
+            />
           ))}
         </div>
       </div>
