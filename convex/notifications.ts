@@ -80,7 +80,7 @@ export const sendOrderEmailNotification = internalAction({
       sellerId: args.sellerId,
     });
 
-    if (!seller?.email || !seller.emailNotifications) {
+    if (!seller?.email || seller.emailNotifications === false) {
       return;
     }
 
