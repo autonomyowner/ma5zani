@@ -210,6 +210,74 @@ export async function generateMultipleScenes(
 }
 
 /**
+ * Generates a professional studio background using pure text-to-image (no seed image).
+ * The product is NOT included — only the background environment is generated.
+ * Used for marketing images where the real product photo is composited on top.
+ */
+export async function generateStudioBackground(
+  backgroundPrompt: string,
+): Promise<string | null> {
+  const apiKey = process.env.RUNWARE_API_KEY
+  if (!apiKey) {
+    console.log('Runware: RUNWARE_API_KEY not set, skipping studio background generation')
+    return null
+  }
+
+  try {
+    const taskUUID = crypto.randomUUID()
+
+    const response = await fetch(RUNWARE_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify([
+        {
+          taskType: 'authentication',
+          apiKey,
+        },
+        {
+          taskType: 'imageInference',
+          taskUUID,
+          positivePrompt: backgroundPrompt,
+          negativePrompt: 'product, item, object in focus, hands, person, human, face, text, watermark, logo, label, packaging, bottle, box, blurry, low quality, distorted, cartoon, illustration, anime, painting, collage, split image, busy, cluttered',
+          model: 'runware:101@1',
+          width: 1024,
+          height: 1024,
+          numberResults: 1,
+          outputType: 'URL',
+          outputFormat: 'PNG',
+          steps: 40,
+          CFGScale: 9,
+        },
+      ]),
+    })
+
+    if (!response.ok) {
+      console.error('Runware studio background API error:', response.status, await response.text())
+      return null
+    }
+
+    const data = await response.json()
+
+    const result = data?.data?.find(
+      (item: { taskType?: string; taskUUID?: string }) =>
+        item.taskType === 'imageInference' || item.taskUUID === taskUUID
+    )
+
+    if (!result?.imageURL) {
+      console.error('Runware: No studio background URL in response', JSON.stringify(data))
+      return null
+    }
+
+    return result.imageURL as string
+  } catch (error) {
+    console.error('Runware studio background generation error:', error)
+    return null
+  }
+}
+
+/**
  * Generates a lifestyle scene for a product using Runware's image-to-image.
  * Takes the original product image and a scene prompt, returns a photorealistic
  * lifestyle scene URL with the product naturally placed in context.

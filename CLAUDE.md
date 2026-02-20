@@ -28,6 +28,11 @@ npx convex deploy    # Deploy Convex to production
 
 **CI/CD**: GitHub Actions auto-deploys to Cloudflare Workers on push to `main` (`.github/workflows/deploy.yml`). Requires `CLOUDFLARE_API_TOKEN` secret in GitHub repo settings.
 
+**CRITICAL — Always deploy Convex when deploying Workers**: If you modify ANY file under `convex/` (schema, mutations, queries) you MUST run `npx convex deploy --yes` BEFORE or alongside `npm run deploy`. The Cloudflare Workers deploy does NOT deploy Convex — they are separate deployments. A mismatch between the Workers frontend and the Convex backend causes runtime `Server Error` crashes (e.g. schema expects fields that don't exist, or queries reference changed types). When in doubt, always run both:
+```bash
+npx convex deploy --yes && npm run deploy
+```
+
 **tsconfig**: `ma5zani_mobile` and `ma5zani-mobile-v2` directories are excluded in `tsconfig.json`. If adding new non-Next.js directories, add them to the exclude list to prevent build failures.
 
 ## Architecture

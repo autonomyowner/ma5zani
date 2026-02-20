@@ -156,7 +156,9 @@ Return ONLY valid JSON:
 }
 
 /**
- * Enhanced vision analysis for marketing images — returns palette + scene prompt
+ * Enhanced vision analysis for marketing images — returns palette + background-only scene prompt.
+ * The scenePrompt describes ONLY the studio background environment (no product).
+ * The real product photo will be composited on top via CSS.
  */
 export async function analyzeProductForMarketing(
   imageUrl: string,
@@ -184,9 +186,34 @@ export async function analyzeProductForMarketing(
               },
               {
                 type: 'text',
-                text: `This is a product image for "${productName}". Analyze it for creating a professional marketing image.
+                text: `You are a professional product photographer and art director. Analyze this product image for "${productName}".
 
-Return JSON with:
+TASK 1 — ANALYZE THE PRODUCT:
+Describe the product's colors, materials, and aesthetic style precisely.
+
+TASK 2 — COLOR PALETTE:
+Extract 3 dominant colors from the product and suggest a marketing palette.
+
+TASK 3 — STUDIO BACKGROUND PROMPT:
+Generate a prompt for an AI image generator to create ONLY the studio background — DO NOT include the product itself. The product will be composited on top later.
+
+Describe:
+- **Surface**: The exact material the product would sit on (e.g. "polished white marble slab with grey veining", "warm honey oak wood surface", "matte concrete platform", "brushed rose gold metal surface")
+- **Lighting**: Professional studio lighting setup (e.g. "soft diffused key light from upper-left with gentle fill from right, creating soft natural shadows", "warm golden rim light from behind with cool fill light")
+- **Background**: What's behind the surface (e.g. "soft cream fabric draping out of focus", "clean gradient from light grey to white", "blurred neutral studio backdrop", "subtle warm bokeh circles")
+- **Atmosphere**: Color temperature and mood that complements this specific product's colors
+- **Props**: 0-2 SUBTLE complementary props ONLY if natural (e.g. "a single eucalyptus sprig" for skincare, "a water droplet on the surface" for beverages). NO props is perfectly fine — clean and empty is premium.
+
+The prompt MUST:
+- Describe an EMPTY surface ready for a product to be placed on it
+- Match the product's aesthetic (luxury product = luxury surface, casual = warm natural)
+- End with "professional commercial studio photography, empty product display surface, centered composition, soft natural shadows, shallow depth of field, 8k ultra detailed"
+- NOT mention any product, item, bottle, box, or object
+
+Example for a luxury skincare product:
+"Clean white marble surface with subtle grey veining, soft diffused natural window lighting from upper left creating gentle shadow gradients, blurred cream fabric draping in far background, warm neutral color temperature, a single small eucalyptus leaf resting on the marble surface, professional commercial studio photography, empty product display surface, centered composition, soft natural shadows, shallow depth of field, 8k ultra detailed"
+
+Return ONLY valid JSON:
 {
   "dominantColors": ["#hex1", "#hex2", "#hex3"],
   "productType": "category (e.g. skincare, electronics, clothing, food, accessories)",
@@ -199,14 +226,13 @@ Return JSON with:
     "background": "#hex - light neutral (#f8f8f8 to #ffffff)",
     "text": "#hex - dark readable"
   },
-  "scenePrompt": "A detailed scene description for AI image generation. Describe a professional product photography scene that would suit this product. Include: surface material, lighting type, props, mood. Example: 'premium skincare product elegantly placed on white marble surface, soft diffused natural window lighting, eucalyptus sprigs and water droplets, clean minimalist spa aesthetic, commercial product photography, shallow depth of field, 4k ultra detailed'"
-}
-Return ONLY valid JSON.`,
+  "scenePrompt": "Your BACKGROUND-ONLY studio prompt here (no product in it)"
+}`,
               },
             ],
           },
         ],
-        max_tokens: 800,
+        max_tokens: 1000,
         temperature: 0.4,
       }),
     });
