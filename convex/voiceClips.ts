@@ -1,11 +1,12 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
-import { requireSeller, requireActiveSeller } from "./auth";
+import { requireSeller, requireActiveSeller, getAuthenticatedSeller } from "./auth";
 
 export const listMyClips = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return [];
     return await ctx.db
       .query("voiceClips")
       .withIndex("by_seller_created", (q) => q.eq("sellerId", seller._id))
@@ -17,7 +18,8 @@ export const listMyClips = query({
 export const getTodayClipCount = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return 0;
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
     const clips = await ctx.db
