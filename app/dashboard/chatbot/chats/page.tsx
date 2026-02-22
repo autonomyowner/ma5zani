@@ -7,6 +7,7 @@ import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
 import { useLanguage } from '@/lib/LanguageContext'
+import { localText } from '@/lib/translations'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -131,10 +132,10 @@ export default function LiveChatsPage() {
     const minutes = Math.floor(diff / 60000)
     const hours = Math.floor(diff / 3600000)
 
-    if (minutes < 1) return language === 'ar' ? 'Ø§Ù„Ø¢Ù†' : 'now'
-    if (minutes < 60) return `${minutes}${language === 'ar' ? ' Ø¯' : 'm'}`
-    if (hours < 24) return `${hours}${language === 'ar' ? ' Ø³' : 'h'}`
-    return date.toLocaleDateString(language === 'ar' ? 'ar-DZ' : 'en-US', { month: 'short', day: 'numeric' })
+    if (minutes < 1) return localText(language, { ar: '\u0627\u0644\u0622\u0646', en: 'now', fr: 'maintenant' })
+    if (minutes < 60) return `${minutes}${localText(language, { ar: ' \u062f', en: 'm', fr: 'min' })}`
+    if (hours < 24) return `${hours}${localText(language, { ar: ' \u0633', en: 'h', fr: 'h' })}`
+    return date.toLocaleDateString(language === 'ar' ? 'ar-DZ' : language === 'fr' ? 'fr-FR' : 'en-US', { month: 'short', day: 'numeric' })
   }
 
   const handleSendMessage = async () => {
@@ -180,7 +181,11 @@ export default function LiveChatsPage() {
 
   const handleClose = async () => {
     if (!selectedConversation) return
-    if (!confirm(language === 'ar' ? 'Ù‡Ù„ ØªØ±ÙŠØ¯ Ø¥ØºÙ„Ø§Ù‚ Ù‡Ø°Ù‡ Ø§Ù„Ù…Ø­Ø§Ø¯Ø«Ø©ØŸ' : 'Close this conversation?')) return
+    if (!confirm(localText(language, {
+      ar: '\u0647\u0644 \u062a\u0631\u064a\u062f \u0625\u063a\u0644\u0627\u0642 \u0647\u0630\u0647 \u0627\u0644\u0645\u062d\u0627\u062f\u062b\u0629\u061f',
+      en: 'Close this conversation?',
+      fr: 'Fermer cette conversation ?',
+    }))) return
 
     try {
       await closeConversation({ conversationId: selectedConversation })
@@ -190,15 +195,25 @@ export default function LiveChatsPage() {
     }
   }
 
+  const getStatusLabel = (status: ConversationStatus) => {
+    if (status === 'active') return localText(language, { ar: '\u0646\u0634\u0637', en: 'Active', fr: 'Actif' })
+    if (status === 'handoff') return localText(language, { ar: '\u0628\u0627\u0646\u062a\u0638\u0627\u0631 \u0627\u0644\u0631\u062f', en: 'Waiting', fr: 'En attente' })
+    return localText(language, { ar: '\u0645\u063a\u0644\u0642', en: 'Closed', fr: 'Ferm\u00e9' })
+  }
+
   return (
     <DashboardLayout
       seller={seller}
       title={t.chatbot.liveChats}
-      subtitle={language === 'ar' ? 'Ø¥Ø¯Ø§Ø±Ø© Ù…Ø­Ø§Ø¯Ø«Ø§Øª Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡' : 'Manage customer conversations'}
+      subtitle={localText(language, {
+        ar: '\u0625\u062f\u0627\u0631\u0629 \u0645\u062d\u0627\u062f\u062b\u0627\u062a \u0627\u0644\u0639\u0645\u0644\u0627\u0621',
+        en: 'Manage customer conversations',
+        fr: 'G\u00e9rer les conversations clients',
+      })}
       headerActions={
         <Link href="/dashboard/chatbot">
           <Button variant="ghost" size="sm">
-            {language === 'ar' ? 'Ø±Ø¬ÙˆØ¹' : 'Back'}
+            {localText(language, { ar: '\u0631\u062c\u0648\u0639', en: 'Back', fr: 'Retour' })}
           </Button>
         </Link>
       }
@@ -274,9 +289,7 @@ export default function LiveChatsPage() {
                         conv.status === 'handoff' ? 'bg-orange-100 text-orange-700' :
                         'bg-slate-100 text-slate-600'
                       }`}>
-                        {conv.status === 'active' ? (language === 'ar' ? 'Ù†Ø´Ø·' : 'Active') :
-                         conv.status === 'handoff' ? (language === 'ar' ? 'Ø¨Ø§Ù†ØªØ¸Ø§Ø± Ø§Ù„Ø±Ø¯' : 'Waiting') :
-                         (language === 'ar' ? 'Ù…ØºÙ„Ù‚' : 'Closed')}
+                        {getStatusLabel(conv.status)}
                       </span>
                       {conv.context?.wilaya && (
                         <span className="text-[10px] text-slate-400">
@@ -350,7 +363,7 @@ export default function LiveChatsPage() {
                         <p className={`text-[10px] mt-1 ${
                           msg.sender === 'customer' ? 'text-slate-400' : 'text-white/70'
                         }`}>
-                          {new Date(msg.createdAt).toLocaleTimeString(language === 'ar' ? 'ar-DZ' : 'en-US', {
+                          {new Date(msg.createdAt).toLocaleTimeString(language === 'ar' ? 'ar-DZ' : language === 'fr' ? 'fr-FR' : 'en-US', {
                             hour: '2-digit',
                             minute: '2-digit',
                           })}
@@ -386,7 +399,11 @@ export default function LiveChatsPage() {
                   </div>
                   {selectedChat.status === 'active' && (
                     <p className="text-xs text-slate-500 mt-2 text-center">
-                      {language === 'ar' ? 'Ø§Ù†Ù‚Ø± "Ø§Ù„Ø§Ù†Ø¶Ù…Ø§Ù…" Ù„Ù„Ø±Ø¯ Ø¹Ù„Ù‰ Ù‡Ø°Ù‡ Ø§Ù„Ù…Ø­Ø§Ø¯Ø«Ø©' : 'Click "Join Chat" to reply to this conversation'}
+                      {localText(language, {
+                        ar: '\u0627\u0646\u0642\u0631 "\u0627\u0644\u0627\u0646\u0636\u0645\u0627\u0645" \u0644\u0644\u0631\u062f \u0639\u0644\u0649 \u0647\u0630\u0647 \u0627\u0644\u0645\u062d\u0627\u062f\u062b\u0629',
+                        en: 'Click "Join Chat" to reply to this conversation',
+                        fr: 'Cliquez sur "Rejoindre" pour r\u00e9pondre \u00e0 cette conversation',
+                      })}
                     </p>
                   )}
                 </div>
@@ -394,7 +411,11 @@ export default function LiveChatsPage() {
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-slate-500">
-              {language === 'ar' ? 'Ø§Ø®ØªØ± Ù…Ø­Ø§Ø¯Ø«Ø© Ù„Ù„Ø¹Ø±Ø¶' : 'Select a conversation to view'}
+              {localText(language, {
+                ar: '\u0627\u062e\u062a\u0631 \u0645\u062d\u0627\u062f\u062b\u0629 \u0644\u0644\u0639\u0631\u0636',
+                en: 'Select a conversation to view',
+                fr: 'S\u00e9lectionnez une conversation \u00e0 afficher',
+              })}
             </div>
           )}
         </Card>

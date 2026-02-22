@@ -7,6 +7,7 @@ import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { Id } from '@/convex/_generated/dataModel'
 import { useLanguage } from '@/lib/LanguageContext'
+import { localText } from '@/lib/translations'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -148,7 +149,11 @@ export default function KnowledgePage() {
   }
 
   const handleDelete = async (id: Id<'chatbotKnowledge'>) => {
-    if (!confirm(language === 'ar' ? 'Ù‡Ù„ Ø£Ù†Øª Ù…ØªØ£ÙƒØ¯ Ù…Ù† Ø§Ù„Ø­Ø°ÙØŸ' : 'Are you sure you want to delete this?')) {
+    if (!confirm(localText(language, {
+      ar: '\u0647\u0644 \u0623\u0646\u062a \u0645\u062a\u0623\u0643\u062f \u0645\u0646 \u0627\u0644\u062d\u0630\u0641\u061f',
+      en: 'Are you sure you want to delete this?',
+      fr: '\u00cates-vous s\u00fbr de vouloir supprimer ceci ?',
+    }))) {
       return
     }
 
@@ -163,12 +168,16 @@ export default function KnowledgePage() {
     <DashboardLayout
       seller={seller}
       title={t.chatbot.knowledge}
-      subtitle={language === 'ar' ? 'Ø¥Ø¯Ø§Ø±Ø© Ù‚Ø§Ø¹Ø¯Ø© Ù…Ø¹Ø±ÙØ© Ø§Ù„Ù…Ø³Ø§Ø¹Ø¯' : 'Manage your assistant\'s knowledge'}
+      subtitle={localText(language, {
+        ar: '\u0625\u062f\u0627\u0631\u0629 \u0642\u0627\u0639\u062f\u0629 \u0645\u0639\u0631\u0641\u0629 \u0627\u0644\u0645\u0633\u0627\u0639\u062f',
+        en: "Manage your assistant's knowledge",
+        fr: 'G\u00e9rer les connaissances de votre assistant',
+      })}
       headerActions={
         <div className="flex gap-2">
           <Link href="/dashboard/chatbot">
             <Button variant="ghost" size="sm">
-              {language === 'ar' ? 'Ø±Ø¬ÙˆØ¹' : 'Back'}
+              {localText(language, { ar: '\u0631\u062c\u0648\u0639', en: 'Back', fr: 'Retour' })}
             </Button>
           </Link>
           {!isAdding && !editingId && (
@@ -215,7 +224,11 @@ export default function KnowledgePage() {
                 label={t.chatbot.question}
                 value={formData.question}
                 onChange={(e) => setFormData({ ...formData, question: e.target.value })}
-                placeholder={language === 'ar' ? 'Ù…Ø§ Ù‡ÙŠ Ù…Ø¯Ø© Ø§Ù„ØªÙˆØµÙŠÙ„ØŸ' : 'How long does delivery take?'}
+                placeholder={localText(language, {
+                  ar: '\u0645\u0627 \u0647\u064a \u0645\u062f\u0629 \u0627\u0644\u062a\u0648\u0635\u064a\u0644\u061f',
+                  en: 'How long does delivery take?',
+                  fr: 'Combien de temps prend la livraison ?',
+                })}
               />
 
               <div>
@@ -225,7 +238,11 @@ export default function KnowledgePage() {
                 <textarea
                   value={formData.answer}
                   onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
-                  placeholder={language === 'ar' ? 'Ø§Ù„ØªÙˆØµÙŠÙ„ ÙŠØ³ØªØºØ±Ù‚ 2-5 Ø£ÙŠØ§Ù… Ø­Ø³Ø¨ Ø§Ù„ÙˆÙ„Ø§ÙŠØ©...' : 'Delivery takes 2-5 days depending on the wilaya...'}
+                  placeholder={localText(language, {
+                    ar: '\u0627\u0644\u062a\u0648\u0635\u064a\u0644 \u064a\u0633\u062a\u063a\u0631\u0642 2-5 \u0623\u064a\u0627\u0645 \u062d\u0633\u0628 \u0627\u0644\u0648\u0644\u0627\u064a\u0629...',
+                    en: 'Delivery takes 2-5 days depending on the wilaya...',
+                    fr: 'La livraison prend 2 \u00e0 5 jours selon la wilaya...',
+                  })}
                   className="w-full px-4 py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#0054A6] focus:border-transparent outline-none resize-none text-sm lg:text-base"
                   rows={4}
                 />
@@ -233,10 +250,18 @@ export default function KnowledgePage() {
 
               <Input
                 id="keywords"
-                label={`${t.chatbot.keywords} (${language === 'ar' ? 'Ù…ÙØµÙˆÙ„Ø© Ø¨ÙØ§ØµÙ„Ø©' : 'comma separated'})`}
+                label={`${t.chatbot.keywords} (${localText(language, {
+                  ar: '\u0645\u0641\u0635\u0648\u0644\u0629 \u0628\u0641\u0627\u0635\u0644\u0629',
+                  en: 'comma separated',
+                  fr: 's\u00e9par\u00e9s par des virgules',
+                })})`}
                 value={formData.keywords}
                 onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
-                placeholder={language === 'ar' ? 'ØªÙˆØµÙŠÙ„, Ø´Ø­Ù†, Ù…Ø¯Ø©' : 'delivery, shipping, time'}
+                placeholder={localText(language, {
+                  ar: '\u062a\u0648\u0635\u064a\u0644, \u0634\u062d\u0646, \u0645\u062f\u0629',
+                  en: 'delivery, shipping, time',
+                  fr: 'livraison, exp\u00e9dition, d\u00e9lai',
+                })}
               />
 
               <div className="flex gap-3 pt-2">
