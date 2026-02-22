@@ -74,6 +74,7 @@ interface LandingPageRendererProps {
     boutiqueName: string
     sellerId: Id<'sellers'>
     metaPixelId?: string
+    logoKey?: string
     theme?: { primaryColor: string; accentColor: string }
     colors?: {
       primary: string
@@ -93,18 +94,10 @@ function getTrustBadges(content: LandingPageRendererProps['page']['content'], la
   const hasFlags = content.deliveryTo58 !== undefined || content.freeDelivery !== undefined || content.returnsAccepted !== undefined
 
   if (hasFlags) {
-    if (content.deliveryTo58) {
-      badges.push(localText(language, { ar: 'توصيل لكل 58 ولاية', en: 'Delivery to all 58 wilayas', fr: 'Livraison dans les 58 wilayas' }))
-    }
-    if (content.freeDelivery) {
-      badges.push(localText(language, { ar: 'توصيل مجاني', en: 'Free Delivery', fr: 'Livraison gratuite' }))
-    }
-    if (content.returnsAccepted) {
-      badges.push(localText(language, { ar: 'إرجاع مقبول', en: 'Returns Accepted', fr: 'Retours acceptes' }))
-    }
-    if (badges.length === 1) {
-      badges.push(localText(language, { ar: 'منتج أصلي', en: 'Authentic Product', fr: 'Produit authentique' }))
-    }
+    if (content.deliveryTo58) badges.push(localText(language, { ar: 'توصيل لكل 58 ولاية', en: 'Delivery to all 58 wilayas', fr: 'Livraison dans les 58 wilayas' }))
+    if (content.freeDelivery) badges.push(localText(language, { ar: 'توصيل مجاني', en: 'Free Delivery', fr: 'Livraison gratuite' }))
+    if (content.returnsAccepted) badges.push(localText(language, { ar: 'إرجاع مقبول', en: 'Returns Accepted', fr: 'Retours acceptes' }))
+    if (badges.length === 1) badges.push(localText(language, { ar: 'منتج أصلي', en: 'Authentic Product', fr: 'Produit authentique' }))
   } else {
     badges.push(localText(language, { ar: 'توصيل لكل 58 ولاية', en: 'Delivery to all 58 wilayas', fr: 'Livraison dans les 58 wilayas' }))
     badges.push(localText(language, { ar: 'منتج أصلي', en: 'Authentic Product', fr: 'Produit authentique' }))
@@ -113,27 +106,34 @@ function getTrustBadges(content: LandingPageRendererProps['page']['content'], la
   return badges
 }
 
-// Resolve storefront-aware colors
+// Resolve storefront-aware colors — match StorefrontLayout fallbacks
 function resolveColors(page: LandingPageRendererProps['page'], storefront: LandingPageRendererProps['storefront']) {
-  const bgColor = storefront.colors?.background || page.design.backgroundColor
-  const txtColor = storefront.colors?.text || page.design.textColor
-  const primaryColor = storefront.colors?.primary || page.design.primaryColor
-  const accentColor = storefront.colors?.accent || page.design.accentColor
+  const bgColor = storefront.colors?.background || page.design.backgroundColor || '#0a0a0a'
+  const txtColor = storefront.colors?.text || page.design.textColor || '#f5f5dc'
+  const primaryColor = storefront.colors?.primary || page.design.primaryColor || '#0a0a0a'
+  const accentColor = storefront.colors?.accent || page.design.accentColor || '#c9a962'
+  const headerBg = storefront.colors?.headerBg || primaryColor
+  const footerBg = storefront.colors?.footerBg || primaryColor
   const isLight = isLightColor(bgColor)
+  const isLightHeader = isLightColor(headerBg)
+  const isLightFooter = isLightColor(footerBg)
 
   return {
     bgColor,
     txtColor,
     primaryColor,
     accentColor,
+    headerBg,
+    footerBg,
     isLight,
+    isLightHeader,
+    isLightFooter,
     cardBg: isLight ? '#ffffff' : '#141414',
     borderColor: isLight ? 'rgba(0,0,0,0.10)' : 'rgba(255,255,255,0.10)',
     textMuted: isLight ? 'rgba(0,0,0,0.50)' : 'rgba(255,255,255,0.50)',
     textSubtle: isLight ? 'rgba(0,0,0,0.30)' : 'rgba(255,255,255,0.25)',
     sectionBg: isLight ? `${primaryColor}06` : 'rgba(255,255,255,0.03)',
     sectionBgAlt: isLight ? `${primaryColor}04` : 'rgba(255,255,255,0.02)',
-    inputBg: isLight ? '#ffffff' : 'rgba(255,255,255,0.06)',
   }
 }
 
@@ -146,37 +146,81 @@ export default function LandingPageRenderer({ page, product, storefront }: Landi
     incrementViews({ pageId: page.pageId })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // v3 pages fall through to PremiumTemplate (backward compat)
   const isPremium = (page.templateVersion || 0) >= 2
-
   if (isPremium) {
     return <PremiumTemplate page={page} product={product} storefront={storefront} language={language} isRTL={isRTL} />
   }
-
   return <LegacyTemplate page={page} product={product} storefront={storefront} language={language} isRTL={isRTL} />
 }
 
-// ============ NOISE TEXTURE SVG ============
+// ============ BRANDED HEADER ============
 
-function NoiseTexture() {
+function BrandedHeader({ storefront, c }: { storefront: LandingPageRendererProps['storefront']; c: ReturnType<typeof resolveColors> }) {
+  const logoUrl = storefront.logoKey ? getR2PublicUrl(storefront.logoKey) : null
+  const headerTextColor = c.isLightHeader ? c.primaryColor : '#f5f5dc'
+  const headerTextMuted = c.isLightHeader ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)'
+
   return (
-    <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.03 }}>
-      <filter id="lp-noise">
-        <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-      </filter>
-      <rect width="100%" height="100%" filter="url(#lp-noise)" />
-    </svg>
+    <header
+      className="py-4 border-b"
+      style={{
+        backgroundColor: c.headerBg,
+        borderColor: c.isLightHeader ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)',
+      }}
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 flex items-center justify-center gap-3">
+        {logoUrl ? (
+          <img src={logoUrl} alt={storefront.boutiqueName} className="w-8 h-8 rounded-full object-cover" />
+        ) : (
+          <span
+            className="text-2xl font-light tracking-[0.2em]"
+            style={{ color: headerTextColor }}
+          >
+            {storefront.boutiqueName.charAt(0)}
+          </span>
+        )}
+        <span
+          className="text-xs tracking-[0.3em] uppercase font-medium"
+          style={{ color: headerTextMuted }}
+        >
+          {storefront.boutiqueName}
+        </span>
+      </div>
+    </header>
   )
 }
 
-// ============ DECORATIVE GRADIENT LINE ============
+// ============ BRANDED FOOTER ============
 
-function GradientLine({ accentColor }: { accentColor: string }) {
+function BrandedFooter({ storefront, c, language }: { storefront: LandingPageRendererProps['storefront']; c: ReturnType<typeof resolveColors>; language: Language }) {
+  const footerTextColor = c.isLightFooter ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)'
+  const footerDotColor = c.accentColor
+
   return (
-    <div
-      className="h-px w-full max-w-xs mx-auto"
-      style={{ background: `linear-gradient(to right, transparent, ${accentColor}, transparent)` }}
-    />
+    <footer
+      className="border-t"
+      style={{
+        backgroundColor: c.footerBg,
+        borderColor: c.isLightFooter ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)',
+      }}
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-8">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-[10px] tracking-[0.2em] uppercase" style={{ color: footerTextColor }}>
+            &copy; {new Date().getFullYear()} {storefront.boutiqueName}
+          </p>
+          <div className="flex items-center gap-4">
+            <span className="text-[10px] tracking-[0.2em] uppercase" style={{ color: footerTextColor }}>
+              {localText(language, { ar: 'التوصيل لجميع الولايات', en: 'Delivery to all wilayas', fr: 'Livraison dans toutes les wilayas' })}
+            </span>
+            <span className="w-1 h-1 rounded-full" style={{ backgroundColor: footerDotColor }} />
+            <span className="text-[10px] tracking-[0.2em] uppercase" style={{ color: footerTextColor }}>
+              {localText(language, { ar: 'الجزائر', en: 'Algeria', fr: 'Algerie' })}
+            </span>
+          </div>
+        </div>
+      </div>
+    </footer>
   )
 }
 
@@ -213,24 +257,24 @@ function PremiumTemplate({
   const galleryReveal = useScrollReveal()
 
   return (
-    <div
-      className="min-h-screen relative"
-      dir={isRTL ? 'rtl' : 'ltr'}
-      style={{ backgroundColor: c.bgColor, color: c.txtColor }}
-    >
-      <NoiseTexture />
+    <div className="min-h-screen" dir={isRTL ? 'rtl' : 'ltr'} style={{ backgroundColor: c.bgColor, color: c.txtColor }}>
+      {/* === BRANDED HEADER === */}
+      <BrandedHeader storefront={storefront} c={c} />
 
       {/* === HERO SECTION === */}
       <section className="relative overflow-hidden">
-        {/* Radial glow behind hero */}
+        {/* Radial glow */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `radial-gradient(ellipse at 50% 30%, ${c.accentColor}12 0%, transparent 70%)`,
-          }}
+          style={{ background: `radial-gradient(ellipse at 50% 40%, ${c.accentColor}15 0%, transparent 70%)` }}
         />
+        {/* Noise texture */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.025 }}>
+          <filter id="lp-noise"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" /></filter>
+          <rect width="100%" height="100%" filter="url(#lp-noise)" />
+        </svg>
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-8 py-12 sm:py-24">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-8 py-12 sm:py-20">
           <div
             ref={heroReveal.ref}
             className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center transition-all duration-700 ${
@@ -241,42 +285,34 @@ function PremiumTemplate({
             <div className={`${isRTL ? 'lg:order-2' : 'lg:order-1'} order-1`}>
               {hasEnhancedImage && mainEnhancedUrl ? (
                 <div
-                  className="relative aspect-square flex items-center justify-center rounded-3xl p-8"
+                  className="relative aspect-square flex items-center justify-center rounded-2xl p-8"
                   style={{
                     background: c.isLight
-                      ? `linear-gradient(160deg, ${c.primaryColor}10 0%, ${c.accentColor}08 100%)`
-                      : `linear-gradient(160deg, rgba(255,255,255,0.04) 0%, ${c.accentColor}10 100%)`,
+                      ? `linear-gradient(160deg, ${c.primaryColor}08 0%, ${c.accentColor}06 100%)`
+                      : `linear-gradient(160deg, rgba(255,255,255,0.03) 0%, ${c.accentColor}08 100%)`,
+                    border: `1px solid ${c.borderColor}`,
                   }}
                 >
                   <img
                     src={mainEnhancedUrl}
                     alt={product.name}
                     className="max-w-full max-h-full object-contain"
-                    style={{
-                      filter: `drop-shadow(0 20px 40px ${c.isLight ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.5)'})`,
-                    }}
+                    style={{ filter: `drop-shadow(0 25px 50px ${c.isLight ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.6)'})` }}
                   />
                   {hasDiscount && (
-                    <div
-                      className="absolute top-6 right-6 px-4 py-2 rounded-full text-white font-bold text-sm"
-                      style={{ backgroundColor: c.accentColor }}
-                    >
+                    <div className="absolute top-6 right-6 px-4 py-2 rounded-full text-white font-bold text-sm" style={{ backgroundColor: c.accentColor }}>
                       -{discountPercent}%
                     </div>
                   )}
                 </div>
               ) : mainOriginalUrl ? (
-                <div className="relative aspect-square rounded-2xl overflow-hidden" style={{ boxShadow: `0 25px 60px ${c.isLight ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.5)'}` }}>
-                  <img
-                    src={mainOriginalUrl}
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
+                <div
+                  className="relative aspect-square rounded-2xl overflow-hidden"
+                  style={{ boxShadow: `0 25px 60px ${c.isLight ? 'rgba(0,0,0,0.12)' : 'rgba(0,0,0,0.5)'}`, border: `1px solid ${c.borderColor}` }}
+                >
+                  <img src={mainOriginalUrl} alt={product.name} className="w-full h-full object-cover" />
                   {hasDiscount && (
-                    <div
-                      className="absolute top-4 right-4 px-3 py-1.5 rounded-full text-white font-bold text-sm"
-                      style={{ backgroundColor: c.accentColor }}
-                    >
+                    <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full text-white font-bold text-sm" style={{ backgroundColor: c.accentColor }}>
                       -{discountPercent}%
                     </div>
                   )}
@@ -286,48 +322,47 @@ function PremiumTemplate({
 
             {/* Text content */}
             <div className={`${isRTL ? 'lg:order-1' : 'lg:order-2'} order-2`}>
-              {/* Urgency badge */}
               {content.urgencyText && (
                 <div
-                  className="inline-block px-4 py-1.5 rounded-full text-sm font-bold mb-5 tracking-wide uppercase"
-                  style={{
-                    backgroundColor: c.accentColor + '15',
-                    color: c.accentColor,
-                  }}
+                  className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold mb-5 tracking-[0.15em] uppercase"
+                  style={{ backgroundColor: c.accentColor + '18', color: c.accentColor }}
                 >
                   {content.urgencyText}
                 </div>
               )}
 
               <h1
-                className="font-bold mb-5 leading-tight tracking-tight"
+                className="font-bold mb-4 leading-[1.1]"
                 style={{
                   color: c.isLight ? c.primaryColor : c.txtColor,
-                  fontFamily: 'var(--font-outfit)',
-                  fontSize: 'clamp(1.75rem, 5vw, 3.5rem)',
+                  fontSize: 'clamp(1.75rem, 5vw, 3rem)',
+                  letterSpacing: '-0.02em',
                 }}
               >
                 {content.headline}
               </h1>
 
-              <p className="text-lg sm:text-xl mb-8 leading-relaxed" style={{ color: c.textMuted }}>
+              {/* Decorative accent line under headline */}
+              <div className="h-[2px] w-16 mb-6" style={{ background: `linear-gradient(to right, ${c.accentColor}, transparent)` }} />
+
+              <p className="text-base sm:text-lg mb-8 leading-relaxed" style={{ color: c.textMuted }}>
                 {content.subheadline}
               </p>
 
               {/* Price block */}
-              <div className="flex items-center gap-3 mb-8 flex-wrap">
+              <div
+                className="rounded-xl p-4 mb-8 inline-flex items-center gap-3 flex-wrap"
+                style={{ backgroundColor: c.isLight ? `${c.accentColor}08` : 'rgba(255,255,255,0.04)', border: `1px solid ${c.isLight ? `${c.accentColor}15` : 'rgba(255,255,255,0.06)'}` }}
+              >
                 {hasDiscount ? (
                   <>
-                    <span className="text-3xl sm:text-4xl font-bold" style={{ color: c.accentColor }}>
+                    <span className="text-2xl sm:text-3xl font-bold" style={{ color: c.accentColor }}>
                       {product.salePrice!.toLocaleString()} DZD
                     </span>
-                    <span className="text-xl line-through" style={{ color: c.textSubtle }}>
+                    <span className="text-lg line-through" style={{ color: c.textSubtle }}>
                       {product.price.toLocaleString()} DZD
                     </span>
-                    <span
-                      className="px-3 py-1 rounded-lg text-sm font-bold"
-                      style={{ backgroundColor: c.accentColor + '15', color: c.accentColor }}
-                    >
+                    <span className="px-3 py-1 rounded-lg text-xs font-bold" style={{ backgroundColor: c.accentColor + '20', color: c.accentColor }}>
                       {localText(language, {
                         ar: `وفّر ${savingsAmount.toLocaleString()} دج`,
                         en: `Save ${savingsAmount.toLocaleString()} DZD`,
@@ -336,23 +371,22 @@ function PremiumTemplate({
                     </span>
                   </>
                 ) : (
-                  <span className="text-3xl sm:text-4xl font-bold" style={{ color: c.accentColor }}>
+                  <span className="text-2xl sm:text-3xl font-bold" style={{ color: c.accentColor }}>
                     {product.price.toLocaleString()} DZD
                   </span>
                 )}
               </div>
 
-              {/* CTA button with glow */}
-              <button
-                onClick={scrollToOrder}
-                className="w-full sm:w-auto px-10 py-4 rounded-xl text-white font-bold text-lg tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  backgroundColor: c.accentColor,
-                  boxShadow: `0 8px 30px ${c.accentColor}40`,
-                }}
-              >
-                {content.ctaText}
-              </button>
+              {/* CTA */}
+              <div>
+                <button
+                  onClick={scrollToOrder}
+                  className="w-full sm:w-auto px-10 py-4 rounded-xl text-white font-bold text-lg tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{ backgroundColor: c.accentColor, boxShadow: `0 8px 30px ${c.accentColor}40` }}
+                >
+                  {content.ctaText}
+                </button>
+              </div>
 
               {content.socialProof && (
                 <p className="mt-5 text-sm" style={{ color: c.textSubtle }}>{content.socialProof}</p>
@@ -362,26 +396,25 @@ function PremiumTemplate({
         </div>
       </section>
 
-      {/* === DECORATIVE LINE === */}
-      <GradientLine accentColor={c.accentColor} />
-
-      {/* === TRUST BAR === */}
+      {/* === TRUST BAR — accent colored === */}
       <section
         ref={trustReveal.ref}
-        className={`py-6 relative transition-all duration-600 ${
-          trustReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-        }`}
-        style={{ backgroundColor: c.sectionBg }}
+        className={`py-5 transition-all duration-600 ${trustReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+        style={{
+          backgroundColor: c.isLight ? c.primaryColor : `${c.accentColor}12`,
+        }}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-8">
-          <div className="flex flex-wrap justify-center gap-8 sm:gap-12">
+          <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
             {trustBadges.map((text, i) => (
-              <div key={i} className="flex items-center gap-2.5">
+              <div key={i} className="flex items-center gap-2">
+                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" style={{ color: c.isLight ? '#ffffff' : c.accentColor }}>
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
                 <span
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: c.accentColor }}
-                />
-                <span className="text-sm font-medium tracking-wide" style={{ color: c.txtColor }}>
+                  className="text-sm font-medium tracking-wide"
+                  style={{ color: c.isLight ? '#ffffff' : c.txtColor }}
+                >
                   {text}
                 </span>
               </div>
@@ -393,19 +426,12 @@ function PremiumTemplate({
       {/* === BENEFITS SECTION === */}
       {content.featureBullets.length > 0 && (
         <section className="py-16 sm:py-24 relative">
-          {/* Subtle radial accent glow */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: `radial-gradient(ellipse at center, ${c.accentColor}08 0%, transparent 70%)`,
-            }}
-          />
           <div ref={benefitsReveal.ref} className="relative max-w-6xl mx-auto px-4 sm:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {content.featureBullets.map((bullet, i) => (
                 <div
                   key={i}
-                  className={`rounded-2xl p-7 transition-all duration-500 hover:shadow-lg ${
+                  className={`rounded-2xl p-6 transition-all duration-500 ${
                     benefitsReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
                   }`}
                   style={{
@@ -414,13 +440,10 @@ function PremiumTemplate({
                     transitionDelay: benefitsReveal.isVisible ? `${i * 100}ms` : '0ms',
                   }}
                 >
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm mb-4"
-                    style={{ backgroundColor: c.accentColor }}
-                  >
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm mb-4" style={{ backgroundColor: c.accentColor }}>
                     {i + 1}
                   </div>
-                  <h3 className="font-bold text-lg mb-2" style={{ color: c.isLight ? c.primaryColor : c.txtColor }}>
+                  <h3 className="font-semibold text-base mb-2" style={{ color: c.isLight ? c.primaryColor : c.txtColor }}>
                     {bullet.title}
                   </h3>
                   <p className="text-sm leading-relaxed" style={{ color: c.textMuted }}>{bullet.description}</p>
@@ -431,49 +454,39 @@ function PremiumTemplate({
         </section>
       )}
 
-      {/* === DECORATIVE LINE === */}
-      <GradientLine accentColor={c.accentColor} />
-
       {/* === GALLERY + DESCRIPTION === */}
-      <section className="py-16 sm:py-24 relative" style={{ backgroundColor: c.sectionBgAlt }}>
+      <section
+        className="py-16 sm:py-24 relative border-y"
+        style={{ backgroundColor: c.sectionBgAlt, borderColor: c.borderColor }}
+      >
         <div ref={galleryReveal.ref} className="max-w-6xl mx-auto px-4 sm:px-8">
           <div
             className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 transition-all duration-700 ${
               galleryReveal.isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
             }`}
           >
-            {/* Gallery */}
             {product.imageKeys.length > 0 && (
               <div>
-                <ImageGallery
-                  images={product.imageKeys}
-                  enhancedImages={page.enhancedImageKeys}
-                  productName={product.name}
-                  accentColor={c.accentColor}
-                />
+                <ImageGallery images={product.imageKeys} enhancedImages={page.enhancedImageKeys} productName={product.name} accentColor={c.accentColor} />
               </div>
             )}
 
-            {/* Description */}
             <div className={product.imageKeys.length === 0 ? 'lg:col-span-2 max-w-2xl mx-auto' : ''}>
               <h2
-                className="text-2xl sm:text-3xl font-bold mb-5 tracking-tight"
-                style={{ color: c.isLight ? c.primaryColor : c.txtColor, fontFamily: 'var(--font-outfit)' }}
+                className="text-2xl sm:text-3xl font-bold mb-5"
+                style={{ color: c.isLight ? c.primaryColor : c.txtColor, letterSpacing: '-0.02em' }}
               >
                 {product.name}
               </h2>
+              <div className="h-[2px] w-12 mb-6" style={{ background: `linear-gradient(to right, ${c.accentColor}, transparent)` }} />
               <p className="text-base sm:text-lg leading-relaxed whitespace-pre-line" style={{ color: c.textMuted }}>
                 {content.productDescription}
               </p>
 
-              {/* Second CTA */}
               <button
                 onClick={scrollToOrder}
                 className="mt-8 px-10 py-4 rounded-xl text-white font-bold text-lg tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-                style={{
-                  backgroundColor: c.accentColor,
-                  boxShadow: `0 8px 30px ${c.accentColor}40`,
-                }}
+                style={{ backgroundColor: c.accentColor, boxShadow: `0 8px 30px ${c.accentColor}40` }}
               >
                 {content.ctaText}
               </button>
@@ -484,44 +497,26 @@ function PremiumTemplate({
 
       {/* === ORDER FORM === */}
       <section className="py-16 sm:py-24 relative">
-        {/* Radial glow behind form */}
         <div
           className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `radial-gradient(ellipse at 50% 50%, ${c.accentColor}08 0%, transparent 60%)`,
-          }}
+          style={{ background: `radial-gradient(ellipse at 50% 50%, ${c.accentColor}08 0%, transparent 60%)` }}
         />
         <div className="relative max-w-lg mx-auto px-4 sm:px-8">
           <LandingPageOrderForm
             product={product}
             storefront={storefront}
             pageId={page.pageId}
-            design={{
-              ...page.design,
-              backgroundColor: c.bgColor,
-              textColor: c.txtColor,
-              primaryColor: c.primaryColor,
-              accentColor: c.accentColor,
-            }}
+            design={{ ...page.design, backgroundColor: c.bgColor, textColor: c.txtColor, primaryColor: c.primaryColor, accentColor: c.accentColor }}
             ctaText={content.ctaText}
           />
         </div>
       </section>
 
-      {/* === FOOTER === */}
-      <GradientLine accentColor={c.accentColor} />
-      <footer className="py-8 text-center text-sm" style={{ color: c.textSubtle }}>
-        <p>{storefront.boutiqueName}</p>
-      </footer>
+      {/* === BRANDED FOOTER === */}
+      <BrandedFooter storefront={storefront} c={c} language={language} />
 
       {/* === STICKY MOBILE CTA === */}
-      <StickyOrderBar
-        price={product.price}
-        salePrice={product.salePrice}
-        ctaText={content.ctaText}
-        accentColor={c.accentColor}
-        onOrderClick={scrollToOrder}
-      />
+      <StickyOrderBar price={product.price} salePrice={product.salePrice} ctaText={content.ctaText} accentColor={c.accentColor} onOrderClick={scrollToOrder} />
     </div>
   )
 }
@@ -544,7 +539,6 @@ function LegacyTemplate({
 
   const mainImage = product.imageKeys[0] ? getR2PublicUrl(product.imageKeys[0]) : null
   const galleryImages = product.imageKeys.map((k) => getR2PublicUrl(k))
-
   const trustBadges = getTrustBadges(content, language)
 
   const scrollToOrder = () => {
@@ -552,35 +546,23 @@ function LegacyTemplate({
   }
 
   return (
-    <div
-      className="min-h-screen relative"
-      dir={isRTL ? 'rtl' : 'ltr'}
-      style={{ backgroundColor: c.bgColor, color: c.txtColor }}
-    >
-      <NoiseTexture />
+    <div className="min-h-screen" dir={isRTL ? 'rtl' : 'ltr'} style={{ backgroundColor: c.bgColor, color: c.txtColor }}>
+      <BrandedHeader storefront={storefront} c={c} />
 
       {/* === HERO SECTION === */}
       <section className="relative overflow-hidden">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `radial-gradient(ellipse at 50% 30%, ${c.accentColor}10 0%, transparent 70%)`,
-          }}
-        />
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ opacity: 0.025 }}>
+          <filter id="lp-noise-legacy"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" /></filter>
+          <rect width="100%" height="100%" filter="url(#lp-noise-legacy)" />
+        </svg>
         <div className="relative max-w-6xl mx-auto px-4 sm:px-8 py-10 sm:py-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <div className={`${isRTL ? 'lg:order-2' : 'lg:order-1'} order-1`}>
               {mainImage && (
-                <div
-                  className="relative aspect-square rounded-2xl overflow-hidden"
-                  style={{ boxShadow: `0 25px 60px ${c.isLight ? 'rgba(0,0,0,0.15)' : 'rgba(0,0,0,0.5)'}` }}
-                >
+                <div className="relative aspect-square rounded-2xl overflow-hidden" style={{ boxShadow: `0 25px 60px ${c.isLight ? 'rgba(0,0,0,0.12)' : 'rgba(0,0,0,0.5)'}`, border: `1px solid ${c.borderColor}` }}>
                   <img src={mainImage} alt={product.name} className="w-full h-full object-cover" />
                   {hasDiscount && (
-                    <div
-                      className="absolute top-4 right-4 px-3 py-1.5 rounded-full text-white font-bold text-sm"
-                      style={{ backgroundColor: c.accentColor }}
-                    >
+                    <div className="absolute top-4 right-4 px-3 py-1.5 rounded-full text-white font-bold text-sm" style={{ backgroundColor: c.accentColor }}>
                       -{discountPercent}%
                     </div>
                   )}
@@ -590,20 +572,16 @@ function LegacyTemplate({
 
             <div className={`${isRTL ? 'lg:order-1' : 'lg:order-2'} order-2`}>
               {content.urgencyText && (
-                <div
-                  className="inline-block px-4 py-1.5 rounded-full text-sm font-bold mb-4 tracking-wide uppercase"
-                  style={{ backgroundColor: c.accentColor + '15', color: c.accentColor }}
-                >
+                <div className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold mb-4 tracking-[0.15em] uppercase" style={{ backgroundColor: c.accentColor + '18', color: c.accentColor }}>
                   {content.urgencyText}
                 </div>
               )}
 
-              <h1
-                className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-tight tracking-tight"
-                style={{ color: c.isLight ? c.primaryColor : c.txtColor, fontFamily: 'var(--font-outfit)' }}
-              >
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-tight" style={{ color: c.isLight ? c.primaryColor : c.txtColor, letterSpacing: '-0.02em' }}>
                 {content.headline}
               </h1>
+
+              <div className="h-[2px] w-16 mb-5" style={{ background: `linear-gradient(to right, ${c.accentColor}, transparent)` }} />
 
               <p className="text-lg sm:text-xl mb-6" style={{ color: c.textMuted }}>
                 {content.subheadline}
@@ -612,71 +590,48 @@ function LegacyTemplate({
               <div className="flex items-center gap-3 mb-6">
                 {hasDiscount ? (
                   <>
-                    <span className="text-3xl font-bold" style={{ color: c.accentColor }}>
-                      {product.salePrice!.toLocaleString()} DZD
-                    </span>
-                    <span className="text-xl line-through" style={{ color: c.textSubtle }}>
-                      {product.price.toLocaleString()} DZD
-                    </span>
+                    <span className="text-3xl font-bold" style={{ color: c.accentColor }}>{product.salePrice!.toLocaleString()} DZD</span>
+                    <span className="text-xl line-through" style={{ color: c.textSubtle }}>{product.price.toLocaleString()} DZD</span>
                   </>
                 ) : (
-                  <span className="text-3xl font-bold" style={{ color: c.accentColor }}>
-                    {product.price.toLocaleString()} DZD
-                  </span>
+                  <span className="text-3xl font-bold" style={{ color: c.accentColor }}>{product.price.toLocaleString()} DZD</span>
                 )}
               </div>
 
-              <button
-                onClick={scrollToOrder}
-                className="w-full sm:w-auto px-8 py-4 rounded-xl text-white font-bold text-lg tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-                style={{ backgroundColor: c.accentColor, boxShadow: `0 8px 30px ${c.accentColor}40` }}
-              >
+              <button onClick={scrollToOrder} className="w-full sm:w-auto px-8 py-4 rounded-xl text-white font-bold text-lg tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" style={{ backgroundColor: c.accentColor, boxShadow: `0 8px 30px ${c.accentColor}40` }}>
                 {content.ctaText}
               </button>
 
-              {content.socialProof && (
-                <p className="mt-4 text-sm" style={{ color: c.textSubtle }}>{content.socialProof}</p>
-              )}
+              {content.socialProof && <p className="mt-4 text-sm" style={{ color: c.textSubtle }}>{content.socialProof}</p>}
             </div>
           </div>
         </div>
       </section>
 
-      {/* === TRUST BADGES === */}
-      <GradientLine accentColor={c.accentColor} />
-      <section className="py-6" style={{ backgroundColor: c.sectionBg }}>
+      {/* === TRUST BAR === */}
+      <section className="py-5" style={{ backgroundColor: c.isLight ? c.primaryColor : `${c.accentColor}12` }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-8">
           <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
             {trustBadges.map((text, i) => (
               <div key={i} className="flex items-center gap-2">
-                <span style={{ color: c.accentColor }}>&#10004;</span>
-                <span className="text-sm font-medium tracking-wide" style={{ color: c.txtColor }}>{text}</span>
+                <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor" style={{ color: c.isLight ? '#ffffff' : c.accentColor }}>
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm font-medium tracking-wide" style={{ color: c.isLight ? '#ffffff' : c.txtColor }}>{text}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
-      <GradientLine accentColor={c.accentColor} />
 
-      {/* === BENEFITS SECTION === */}
+      {/* === BENEFITS === */}
       {content.featureBullets.length > 0 && (
         <section className="py-14 sm:py-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {content.featureBullets.map((bullet, i) => (
-                <div
-                  key={i}
-                  className="rounded-xl p-6 transition-shadow hover:shadow-md"
-                  style={{
-                    backgroundColor: c.cardBg,
-                    border: `1px solid ${c.borderColor}`,
-                    borderLeft: isRTL ? `1px solid ${c.borderColor}` : `4px solid ${c.accentColor}`,
-                    borderRight: isRTL ? `4px solid ${c.accentColor}` : `1px solid ${c.borderColor}`,
-                  }}
-                >
-                  <h3 className="font-bold text-lg mb-2" style={{ color: c.isLight ? c.primaryColor : c.txtColor }}>
-                    {bullet.title}
-                  </h3>
+                <div key={i} className="rounded-xl p-6" style={{ backgroundColor: c.cardBg, border: `1px solid ${c.borderColor}`, borderLeft: isRTL ? `1px solid ${c.borderColor}` : `3px solid ${c.accentColor}`, borderRight: isRTL ? `3px solid ${c.accentColor}` : `1px solid ${c.borderColor}` }}>
+                  <h3 className="font-semibold text-base mb-2" style={{ color: c.isLight ? c.primaryColor : c.txtColor }}>{bullet.title}</h3>
                   <p className="text-sm" style={{ color: c.textMuted }}>{bullet.description}</p>
                 </div>
               ))}
@@ -685,36 +640,24 @@ function LegacyTemplate({
         </section>
       )}
 
-      {/* === PRODUCT DETAILS + IMAGE GALLERY === */}
-      <section className="py-14 sm:py-20" style={{ backgroundColor: c.sectionBgAlt }}>
+      {/* === GALLERY + DESCRIPTION === */}
+      <section className="py-14 sm:py-20 border-y" style={{ backgroundColor: c.sectionBgAlt, borderColor: c.borderColor }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {galleryImages.length > 1 && (
               <div className="grid grid-cols-2 gap-3">
                 {galleryImages.slice(0, 4).map((img, i) => (
-                  <div key={i} className="aspect-square rounded-xl overflow-hidden">
+                  <div key={i} className="aspect-square rounded-xl overflow-hidden" style={{ border: `1px solid ${c.borderColor}` }}>
                     <img src={img} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
             )}
-
             <div className={galleryImages.length <= 1 ? 'lg:col-span-2 max-w-2xl mx-auto' : ''}>
-              <h2
-                className="text-2xl font-bold mb-4 tracking-tight"
-                style={{ color: c.isLight ? c.primaryColor : c.txtColor, fontFamily: 'var(--font-outfit)' }}
-              >
-                {product.name}
-              </h2>
-              <p className="text-base leading-relaxed whitespace-pre-line" style={{ color: c.textMuted }}>
-                {content.productDescription}
-              </p>
-
-              <button
-                onClick={scrollToOrder}
-                className="mt-6 px-8 py-4 rounded-xl text-white font-bold text-lg tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-                style={{ backgroundColor: c.accentColor, boxShadow: `0 8px 30px ${c.accentColor}40` }}
-              >
+              <h2 className="text-2xl font-bold mb-4" style={{ color: c.isLight ? c.primaryColor : c.txtColor, letterSpacing: '-0.02em' }}>{product.name}</h2>
+              <div className="h-[2px] w-12 mb-5" style={{ background: `linear-gradient(to right, ${c.accentColor}, transparent)` }} />
+              <p className="text-base leading-relaxed whitespace-pre-line" style={{ color: c.textMuted }}>{content.productDescription}</p>
+              <button onClick={scrollToOrder} className="mt-6 px-8 py-4 rounded-xl text-white font-bold text-lg tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]" style={{ backgroundColor: c.accentColor, boxShadow: `0 8px 30px ${c.accentColor}40` }}>
                 {content.ctaText}
               </button>
             </div>
@@ -724,34 +667,13 @@ function LegacyTemplate({
 
       {/* === ORDER FORM === */}
       <section className="py-14 sm:py-20 relative">
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: `radial-gradient(ellipse at 50% 50%, ${c.accentColor}08 0%, transparent 60%)`,
-          }}
-        />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 50%, ${c.accentColor}08 0%, transparent 60%)` }} />
         <div className="relative max-w-lg mx-auto px-4 sm:px-8">
-          <LandingPageOrderForm
-            product={product}
-            storefront={storefront}
-            pageId={page.pageId}
-            design={{
-              ...page.design,
-              backgroundColor: c.bgColor,
-              textColor: c.txtColor,
-              primaryColor: c.primaryColor,
-              accentColor: c.accentColor,
-            }}
-            ctaText={content.ctaText}
-          />
+          <LandingPageOrderForm product={product} storefront={storefront} pageId={page.pageId} design={{ ...page.design, backgroundColor: c.bgColor, textColor: c.txtColor, primaryColor: c.primaryColor, accentColor: c.accentColor }} ctaText={content.ctaText} />
         </div>
       </section>
 
-      {/* === FOOTER === */}
-      <GradientLine accentColor={c.accentColor} />
-      <footer className="py-6 text-center text-sm" style={{ color: c.textSubtle }}>
-        <p>{storefront.boutiqueName}</p>
-      </footer>
+      <BrandedFooter storefront={storefront} c={c} language={language} />
     </div>
   )
 }

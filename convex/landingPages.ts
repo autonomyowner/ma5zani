@@ -292,6 +292,7 @@ export const getPublicLandingPage = query({
         boutiqueName: storefront.boutiqueName,
         sellerId: storefront.sellerId,
         metaPixelId: storefront.metaPixelId,
+        logoKey: storefront.logoKey,
         theme: storefront.theme,
         colors: storefront.colors,
       },
