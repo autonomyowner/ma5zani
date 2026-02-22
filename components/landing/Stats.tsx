@@ -13,15 +13,15 @@ export default function Stats() {
   ]
 
   return (
-    <section className="py-8 bg-white border-y border-slate-100">
-      <div className="max-w-5xl mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-center gap-10 md:gap-16 flex-wrap">
+    <section className="py-4 md:py-8 bg-white border-y border-slate-100">
+      <div className="max-w-5xl mx-auto px-4 lg:px-8">
+        <div className="grid grid-cols-4 md:flex md:items-center md:justify-center gap-x-6 gap-y-3 md:gap-16">
           {logos.map((logo) => (
             <img
               key={logo.alt}
               src={logo.src}
               alt={logo.alt}
-              className="h-8 md:h-10 object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+              className="h-6 md:h-10 mx-auto object-contain grayscale opacity-50 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
               style={{ mixBlendMode: 'multiply' }}
             />
           ))}
