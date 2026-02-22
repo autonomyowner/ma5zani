@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { useLanguage } from '@/lib/LanguageContext'
+import { localText } from '@/lib/translations'
 import DashboardLayout from '@/components/dashboard/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -80,8 +81,8 @@ export default function ChatbotPage() {
     setIsSaving(true)
     try {
       await upsertChatbot({
-        name: formData.name || (language === 'ar' ? 'Ù…Ø³Ø§Ø¹Ø¯ Ø§Ù„ØªØ³ÙˆÙ‚' : 'Shopping Assistant'),
-        greeting: formData.greeting || (language === 'ar' ? 'Ù…Ø±Ø­Ø¨Ø§Ù‹! ÙƒÙŠÙ ÙŠÙ…ÙƒÙ†Ù†ÙŠ Ù…Ø³Ø§Ø¹Ø¯ØªÙƒ Ø§Ù„ÙŠÙˆÙ…ØŸ' : 'Hello! How can I help you today?'),
+        name: formData.name || localText(language, { ar: 'مساعد التسوق', en: 'Shopping Assistant', fr: 'Assistant d\'achat' }),
+        greeting: formData.greeting || localText(language, { ar: 'مرحباً! كيف يمكنني مساعدتك اليوم؟', en: 'Hello! How can I help you today?', fr: 'Bonjour ! Comment puis-je vous aider ?' }),
         personality: formData.personality,
         isEnabled: formData.isEnabled || true,
       })
@@ -151,8 +152,8 @@ export default function ChatbotPage() {
               <p className="font-medium text-slate-900 text-sm lg:text-base">{t.chatbot.enableChatbot}</p>
               <p className="text-xs lg:text-sm text-slate-500">
                 {chatbot?.isEnabled
-                  ? (language === 'ar' ? 'Ø§Ù„Ù…Ø³Ø§Ø¹Ø¯ ÙŠØ¸Ù‡Ø± ÙÙŠ Ù…ØªØ¬Ø±Ùƒ' : 'Assistant is visible on your storefront')
-                  : (language === 'ar' ? 'Ø§Ù„Ù…Ø³Ø§Ø¹Ø¯ Ù…Ø®ÙÙŠ Ø¹Ù† Ø§Ù„Ø¹Ù…Ù„Ø§Ø¡' : 'Assistant is hidden from customers')
+                  ? localText(language, { ar: 'المساعد يظهر في متجرك', en: 'Assistant is visible on your storefront', fr: 'L\'assistant est visible sur votre boutique' })
+                  : localText(language, { ar: 'المساعد مخفي عن العملاء', en: 'Assistant is hidden from customers', fr: 'L\'assistant est masqué pour les clients' })
                 }
               </p>
             </div>
@@ -265,7 +266,7 @@ export default function ChatbotPage() {
                 {t.chatbot.knowledge}
               </h3>
               <p className="text-xs lg:text-sm text-slate-500">
-                {knowledgeCount} {language === 'ar' ? 'Ù…Ø¹Ù„ÙˆÙ…Ø©' : 'entries'}
+                {knowledgeCount} {localText(language, { ar: 'معلومة', en: 'entries', fr: 'entrées' })}
               </p>
             </Card>
           </Link>
@@ -275,7 +276,7 @@ export default function ChatbotPage() {
                 {t.chatbot.liveChats}
               </h3>
               <p className="text-xs lg:text-sm text-slate-500">
-                {activeChats + handoffChats} {language === 'ar' ? 'Ù…Ø­Ø§Ø¯Ø«Ø© Ù†Ø´Ø·Ø©' : 'active'}
+                {activeChats + handoffChats} {localText(language, { ar: 'محادثة نشطة', en: 'active', fr: 'actives' })}
               </p>
               {handoffChats > 0 && (
                 <span className="absolute top-3 lg:top-4 right-3 lg:right-4 w-2 h-2 lg:w-3 lg:h-3 bg-[#F7941D] rounded-full animate-pulse" />
