@@ -393,6 +393,9 @@ export default defineSchema({
         payment: v.string(),
         returns: v.string(),
       })),
+      deliveryTo58: v.optional(v.boolean()),
+      freeDelivery: v.optional(v.boolean()),
+      returnsAccepted: v.optional(v.boolean()),
     }),
     design: v.object({
       primaryColor: v.string(),

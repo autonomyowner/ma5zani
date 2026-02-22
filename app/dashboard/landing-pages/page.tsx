@@ -33,9 +33,8 @@ export default function LandingPagesPage() {
   const deleteLP = useMutation(api.landingPages.deleteLandingPage)
 
   const [showPicker, setShowPicker] = useState(false)
-  const [generating, setGenerating] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
-  const [genError, setGenError] = useState('')
+  const [error, setError] = useState('')
 
   // Activation gate
   if (seller && !sellerHasAccess(seller)) {
@@ -46,45 +45,32 @@ export default function LandingPagesPage() {
     )
   }
 
-  const handleProductSelect = async (product: Doc<'products'>, prompt: string) => {
+  const handleProductSelect = async (
+    product: Doc<'products'>,
+    description: string,
+    deliveryOptions: { deliveryTo58: boolean; freeDelivery: boolean; returnsAccepted: boolean },
+    ctaText: string
+  ) => {
     if (!seller || !storefront) return
 
     setShowPicker(false)
-    setGenerating(true)
-    setGenError('')
+    setError('')
 
     try {
       const pageId = generatePageId()
-
-      // Create LP record
-      const lpId = await createLP({
+      await createLP({
         storefrontId: storefront._id,
         productId: product._id,
         pageId,
+        description,
+        ctaText,
+        deliveryTo58: deliveryOptions.deliveryTo58,
+        freeDelivery: deliveryOptions.freeDelivery,
+        returnsAccepted: deliveryOptions.returnsAccepted,
       })
-
-      // Trigger AI generation
-      const res = await fetch('/api/landing-pages/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sellerId: seller._id,
-          productId: product._id,
-          storefrontId: storefront._id,
-          landingPageId: lpId,
-          prompt,
-        }),
-      })
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        setGenError(data.error || 'Generation failed. Please try again.')
-      }
-    } catch (error) {
-      console.error('Failed to generate landing page:', error)
-      setGenError('Network error. Please try again.')
-    } finally {
-      setGenerating(false)
+    } catch (err) {
+      console.error('Failed to create landing page:', err)
+      setError('Failed to create page. Please try again.')
     }
   }
 
@@ -127,29 +113,21 @@ export default function LandingPagesPage() {
     <DashboardLayout
       seller={seller}
       title={lp?.title || 'Landing Pages'}
-      subtitle={lp?.subtitle || 'Create AI-powered sales pages'}
+      subtitle={lp?.subtitle || 'Create sales pages for your products'}
       headerActions={
         <button
           onClick={() => setShowPicker(true)}
-          disabled={generating || !storefront}
+          disabled={!storefront}
           className="px-3 sm:px-5 py-2 sm:py-2.5 bg-[#0054A6] text-white rounded-xl text-sm sm:text-base font-medium hover:bg-[#004590] transition-colors disabled:opacity-50"
         >
-          {generating ? (lp?.generating || 'Generating...') : (lp?.generate || 'Generate New Page')}
+          {lp?.generate || 'New Page'}
         </button>
       }
     >
-      {/* Generating state */}
-      {generating && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-blue-700 font-medium">{lp?.generatingDesc || 'AI is writing your page content...'}</p>
-        </div>
-      )}
-
       {/* Error state */}
-      {genError && (
+      {error && (
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-          <p className="text-red-700 font-medium">{genError}</p>
+          <p className="text-red-700 font-medium">{error}</p>
         </div>
       )}
 
@@ -160,7 +138,7 @@ export default function LandingPagesPage() {
             <div key={i} className="h-24 bg-slate-100 rounded-xl animate-pulse" />
           ))}
         </div>
-      ) : landingPages.length === 0 && !generating ? (
+      ) : landingPages.length === 0 ? (
         <div className="text-center py-16">
           <h3 className="text-lg font-bold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-outfit)' }}>
             {lp?.noPages || 'No landing pages yet'}
@@ -171,7 +149,7 @@ export default function LandingPagesPage() {
             disabled={!storefront}
             className="px-6 py-3 bg-[#0054A6] text-white rounded-xl font-medium hover:bg-[#004590] transition-colors disabled:opacity-50"
           >
-            {lp?.generate || 'Generate New Page'}
+            {lp?.generate || 'New Page'}
           </button>
         </div>
       ) : (
@@ -205,24 +183,6 @@ export default function LandingPagesPage() {
                   <p className="text-xs sm:text-sm text-slate-500 truncate">{page.productName}</p>
                   <div className="flex items-center gap-2 sm:gap-3 mt-1 flex-wrap">
                     {statusBadge(page.status)}
-                    {(page as any).templateType && (
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        (page as any).templateType === 'lifestyle-hero' ? 'bg-emerald-100 text-emerald-700' :
-                        (page as any).templateType === 'editorial' ? 'bg-violet-100 text-violet-700' :
-                        (page as any).templateType === 'product-spotlight' ? 'bg-slate-800 text-slate-200' :
-                        'bg-purple-100 text-purple-700'
-                      }`}>
-                        {(page as any).templateType === 'lifestyle-hero' ? 'Lifestyle' :
-                         (page as any).templateType === 'editorial' ? 'Editorial' :
-                         (page as any).templateType === 'product-spotlight' ? 'Spotlight' :
-                         (page as any).templateType}
-                      </span>
-                    )}
-                    {(page as any).enhancedImageKeys?.length > 0 && !(page as any).templateType && (
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                        {lp?.enhanced || 'Enhanced'}
-                      </span>
-                    )}
                     <span className="text-xs text-slate-400">
                       {lp?.views || 'Views'}: {page.viewCount || 0}
                     </span>
@@ -238,7 +198,7 @@ export default function LandingPagesPage() {
                 </div>
               </div>
 
-              {/* Actions — below content on mobile, inline on desktop */}
+              {/* Actions */}
               {page.status !== 'generating' && (
                 <div className="flex items-center gap-1 sm:gap-2 mt-3 pt-3 border-t border-slate-100 sm:mt-0 sm:pt-0 sm:border-t-0 sm:justify-end">
                   <button

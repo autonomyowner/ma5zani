@@ -11,9 +11,6 @@ import LandingPageOrderForm from './LandingPageOrderForm'
 import { useScrollReveal } from './useScrollReveal'
 import ImageGallery from './ImageGallery'
 import StickyOrderBar from './StickyOrderBar'
-import LifestyleHeroTemplate from './templates/LifestyleHeroTemplate'
-import EditorialTemplate from './templates/EditorialTemplate'
-import ProductSpotlightTemplate from './templates/ProductSpotlightTemplate'
 
 interface LandingPageRendererProps {
   page: {
@@ -30,6 +27,9 @@ interface LandingPageRendererProps {
       secondaryCta?: string
       scarcityText?: string
       microCopy?: { delivery: string; payment: string; returns: string }
+      deliveryTo58?: boolean
+      freeDelivery?: boolean
+      returnsAccepted?: boolean
     }
     design: {
       primaryColor: string
@@ -66,6 +66,38 @@ interface LandingPageRendererProps {
   }
 }
 
+function getTrustBadges(content: LandingPageRendererProps['page']['content'], language: Language) {
+  const badges: string[] = []
+
+  // Always show cash on delivery
+  badges.push(localText(language, { ar: 'الدفع عند الاستلام', en: 'Cash on Delivery', fr: 'Paiement a la livraison' }))
+
+  // Delivery flags (new pages have explicit flags)
+  const hasFlags = content.deliveryTo58 !== undefined || content.freeDelivery !== undefined || content.returnsAccepted !== undefined
+
+  if (hasFlags) {
+    if (content.deliveryTo58) {
+      badges.push(localText(language, { ar: 'توصيل لكل 58 ولاية', en: 'Delivery to all 58 wilayas', fr: 'Livraison dans les 58 wilayas' }))
+    }
+    if (content.freeDelivery) {
+      badges.push(localText(language, { ar: 'توصيل مجاني', en: 'Free Delivery', fr: 'Livraison gratuite' }))
+    }
+    if (content.returnsAccepted) {
+      badges.push(localText(language, { ar: 'إرجاع مقبول', en: 'Returns Accepted', fr: 'Retours acceptes' }))
+    }
+    // Fallback if no delivery flags selected
+    if (badges.length === 1) {
+      badges.push(localText(language, { ar: 'منتج أصلي', en: 'Authentic Product', fr: 'Produit authentique' }))
+    }
+  } else {
+    // Old pages without flags — show the original hardcoded badges
+    badges.push(localText(language, { ar: 'توصيل لكل 58 ولاية', en: 'Delivery to all 58 wilayas', fr: 'Livraison dans les 58 wilayas' }))
+    badges.push(localText(language, { ar: 'منتج أصلي', en: 'Authentic Product', fr: 'Produit authentique' }))
+  }
+
+  return badges
+}
+
 export default function LandingPageRenderer({ page, product, storefront }: LandingPageRendererProps) {
   const { language } = useLanguage()
   const incrementViews = useMutation(api.landingPages.incrementViewCount)
@@ -76,21 +108,7 @@ export default function LandingPageRenderer({ page, product, storefront }: Landi
     incrementViews({ pageId: page.pageId })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // v3 templates: dispatch by templateType
-  const isV3 = (page.templateVersion || 0) >= 3 && page.templateType
-  if (isV3) {
-    const v3Props = { page, product, storefront, language, isRTL }
-    switch (page.templateType) {
-      case 'editorial':
-        return <EditorialTemplate {...v3Props} />
-      case 'product-spotlight':
-        return <ProductSpotlightTemplate {...v3Props} />
-      case 'lifestyle-hero':
-      default:
-        return <LifestyleHeroTemplate {...v3Props} />
-    }
-  }
-
+  // v3 pages now fall through to PremiumTemplate (backward compat)
   const isPremium = (page.templateVersion || 0) >= 2
 
   if (isPremium) {
@@ -143,6 +161,8 @@ function PremiumTemplate({
   const scrollToOrder = () => {
     document.getElementById('order-form')?.scrollIntoView({ behavior: 'smooth' })
   }
+
+  const trustBadges = getTrustBadges(content, language)
 
   // Scroll reveal hooks for each section
   const heroReveal = useScrollReveal()
@@ -317,11 +337,7 @@ function PremiumTemplate({
       >
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-8 sm:gap-12">
-            {[
-              localText(language, { ar: 'الدفع عند الاستلام', en: 'Cash on Delivery', fr: 'Paiement a la livraison' }),
-              localText(language, { ar: 'توصيل لكل 58 ولاية', en: 'Delivery to all 58 wilayas', fr: 'Livraison dans les 58 wilayas' }),
-              localText(language, { ar: 'منتج أصلي', en: 'Authentic Product', fr: 'Produit authentique' }),
-            ].map((text, i) => (
+            {trustBadges.map((text, i) => (
               <div key={i} className="flex items-center gap-2.5">
                 <span
                   className="w-2 h-2 rounded-full flex-shrink-0"
@@ -464,6 +480,8 @@ function LegacyTemplate({
   const mainImage = product.imageKeys[0] ? getR2PublicUrl(product.imageKeys[0]) : null
   const galleryImages = product.imageKeys.map((k) => getR2PublicUrl(k))
 
+  const trustBadges = getTrustBadges(content, language)
+
   const scrollToOrder = () => {
     document.getElementById('order-form')?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -567,24 +585,12 @@ function LegacyTemplate({
       <section className="py-6 border-y" style={{ borderColor: design.textColor + '15' }}>
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-wrap justify-center gap-6 sm:gap-10">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">&#10004;</span>
-              <span className="text-sm font-medium">
-                {localText(language, { ar: 'الدفع عند الاستلام', en: 'Cash on Delivery', fr: 'Paiement a la livraison' })}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl">&#10004;</span>
-              <span className="text-sm font-medium">
-                {localText(language, { ar: 'توصيل لكل 58 ولاية', en: 'Delivery to all 58 wilayas', fr: 'Livraison dans les 58 wilayas' })}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl">&#10004;</span>
-              <span className="text-sm font-medium">
-                {localText(language, { ar: 'منتج أصلي', en: 'Authentic Product', fr: 'Produit authentique' })}
-              </span>
-            </div>
+            {trustBadges.map((text, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <span className="text-xl">&#10004;</span>
+                <span className="text-sm font-medium">{text}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
