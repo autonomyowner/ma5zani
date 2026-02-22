@@ -501,7 +501,9 @@ export default function StorefrontPage() {
 
           {storefrontProducts.length === 0 && !storefront.isPublished && (
             <p className="mt-4 text-sm text-amber-600 bg-amber-50 p-3 rounded-lg">
-              {localText(language, { ar: 'أضف منتج واحد على الأقل لمتجرك قبل النشر', en: 'Add at least one product to your store before publishing', fr: 'Ajoutez au moins un produit à votre boutique avant de publier' })}
+              {(products?.length ?? 0) === 0
+                ? localText(language, { ar: 'أضف منتج واحد على الأقل لمتجرك قبل النشر', en: 'Add at least one product to your store before publishing', fr: 'Ajoutez au moins un produit à votre boutique avant de publier' })
+                : localText(language, { ar: 'فعّل منتج واحد على الأقل ليظهر في متجرك قبل النشر', en: 'Activate at least one product to show in your store before publishing', fr: 'Activez au moins un produit à afficher dans votre boutique avant de publier' })}
             </p>
           )}
         </div>
