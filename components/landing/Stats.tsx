@@ -6,6 +6,10 @@ export default function Stats() {
     { src: '/logos/algerie-poste.svg', alt: 'Algérie Poste' },
     { src: '/logos/satim.png', alt: 'SATIM CIB' },
     { src: '/logos/algerie-telecom.png', alt: 'Algérie Télécom' },
+    { src: '/logos/telegram.svg', alt: 'Telegram' },
+    { src: '/logos/meta.svg', alt: 'Meta' },
+    { src: '/logos/cloudflare.svg', alt: 'Cloudflare' },
+    { src: '/logos/anthropic.svg', alt: 'Anthropic AI' },
   ]
 
   return (
