@@ -23,6 +23,26 @@ export default function PublicLandingPage() {
     )
   }
 
+  // Storefront not published
+  if (data && 'reason' in data && data.reason === 'storefront_not_published') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white px-4">
+        <div className="text-center max-w-md">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2" style={{ fontFamily: 'var(--font-outfit)' }}>
+            المتجر غير منشور بعد
+          </h1>
+          <p className="text-slate-500 mb-1">يجب نشر المتجر أولاً حتى تظهر صفحة المنتج</p>
+          <p className="text-slate-400 text-sm">The storefront must be published first for this page to be visible</p>
+        </div>
+      </div>
+    )
+  }
+
   // Not found
   if (data === null) {
     return (

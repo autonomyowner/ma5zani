@@ -258,7 +258,8 @@ export const getPublicLandingPage = query({
     if (!product) return null;
 
     const storefront = await ctx.db.get(page.storefrontId);
-    if (!storefront || !storefront.isPublished) return null;
+    if (!storefront) return null;
+    if (!storefront.isPublished) return { reason: "storefront_not_published" as const };
 
     return {
       page,
