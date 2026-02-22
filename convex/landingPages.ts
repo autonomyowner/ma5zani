@@ -111,10 +111,10 @@ export const createLandingPage = mutation({
         returnsAccepted: args.returnsAccepted,
       },
       design: {
-        primaryColor: storefront.theme.primaryColor,
-        accentColor: storefront.theme.accentColor,
-        backgroundColor: "#ffffff",
-        textColor: "#1a1a1a",
+        primaryColor: storefront.colors?.primary || storefront.theme.primaryColor,
+        accentColor: storefront.colors?.accent || storefront.theme.accentColor,
+        backgroundColor: storefront.colors?.background || "#ffffff",
+        textColor: storefront.colors?.text || "#1a1a1a",
       },
       templateVersion: 2,
       isPublished: false,
@@ -292,6 +292,8 @@ export const getPublicLandingPage = query({
         boutiqueName: storefront.boutiqueName,
         sellerId: storefront.sellerId,
         metaPixelId: storefront.metaPixelId,
+        theme: storefront.theme,
+        colors: storefront.colors,
       },
     };
   },

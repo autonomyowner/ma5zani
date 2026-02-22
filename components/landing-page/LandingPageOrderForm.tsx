@@ -9,6 +9,15 @@ import { localText } from '@/lib/translations'
 import WilayaSelect from '@/components/storefront/WilayaSelect'
 import CommuneSelect from '@/components/storefront/CommuneSelect'
 
+function isLightColor(color: string): boolean {
+  const hex = color.replace('#', '')
+  if (hex.length !== 6) return false
+  const r = parseInt(hex.substr(0, 2), 16)
+  const g = parseInt(hex.substr(2, 2), 16)
+  const b = parseInt(hex.substr(4, 2), 16)
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.5
+}
+
 interface LandingPageOrderFormProps {
   product: {
     _id: Id<'products'>
@@ -57,50 +66,40 @@ export default function LandingPageOrderForm({
   const [deliveryFee, setDeliveryFee] = useState<number | null>(null)
   const [loadingFee, setLoadingFee] = useState(false)
 
+  // Theme-aware colors
+  const isLight = isLightColor(design.backgroundColor)
+  const cardBg = isLight ? '#ffffff' : '#141414'
+  const borderClr = isLight ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)'
+  const labelColor = isLight ? '#475569' : 'rgba(255,255,255,0.7)'
+  const inputBg = isLight ? '#ffffff' : 'rgba(255,255,255,0.06)'
+  const inputText = isLight ? '#1e293b' : '#f5f5dc'
+  const inputBorder = isLight ? '#e2e8f0' : 'rgba(255,255,255,0.12)'
+  const summaryBg = isLight ? '#f8fafc' : 'rgba(255,255,255,0.04)'
+  const mutedText = isLight ? '#64748b' : 'rgba(255,255,255,0.5)'
+  const unselectedBg = isLight ? 'transparent' : 'transparent'
+  const unselectedBorder = isLight ? '#e2e8f0' : 'rgba(255,255,255,0.15)'
+  const unselectedText = isLight ? '#475569' : 'rgba(255,255,255,0.7)'
+
   // Fetch delivery fee when wilaya/type changes
   useEffect(() => {
-    if (!wilaya) {
-      setDeliveryFee(null)
-      return
-    }
-
+    if (!wilaya) { setDeliveryFee(null); return; }
     setLoadingFee(true)
-    fetch(`/api/delivery/fees?wilaya=${encodeURIComponent(wilaya)}&deliveryType=${deliveryType}&sellerId=${storefront.sellerId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setDeliveryFee(data.fee ?? null)
-      })
-      .catch(() => setDeliveryFee(null))
-      .finally(() => setLoadingFee(false))
-  }, [wilaya, deliveryType, storefront.sellerId])
+    fetch(`/api/delivery/fees?wilaya=${encodeURIComponent(wilaya)}&type=${deliveryType}`)
+      .then(r => r.json())
+      .then(d => { setDeliveryFee(d.fee ?? null); setLoadingFee(false) })
+      .catch(() => { setDeliveryFee(null); setLoadingFee(false) })
+  }, [wilaya, deliveryType])
 
-  const unitPrice = product.salePrice ?? product.price
-  const subtotal = unitPrice * quantity
+  const displayPrice = product.salePrice ?? product.price
+  const subtotal = displayPrice * quantity
   const total = subtotal + (deliveryFee || 0)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (submitting) return
+    setSubmitting(true)
     setError('')
 
-    if (!customerName.trim() || !customerPhone.trim() || !wilaya || !deliveryAddress.trim()) {
-      setError(localText(language, {
-        ar: 'يرجى ملء جميع الحقول المطلوبة',
-        en: 'Please fill all required fields',
-        fr: 'Veuillez remplir tous les champs requis',
-      }))
-      return
-    }
-
-    if (!/^0[567]\d{8}$/.test(customerPhone)) {
-      setError(localText(language, {
-        ar: 'رقم الهاتف غير صحيح (مثال: 0551234567)',
-        en: 'Invalid phone number (e.g. 0551234567)',
-        fr: 'Numero de telephone invalide (ex: 0551234567)',
-      }))
-      return
-    }
-
-    setSubmitting(true)
     try {
       const result = await createOrder({
         storefrontSlug: storefront.slug,
@@ -120,12 +119,10 @@ export default function LandingPageOrderForm({
         source: "landing_page" as const,
       })
 
-      // Increment LP order count
       await incrementOrders({ pageId })
 
-      // Redirect to success
-      const orderId = result.orderIds[0]
-      window.location.href = `/${storefront.slug}/lp/${pageId}/success?orderId=${orderId}`
+      const orderId = (result as any).orderIds?.[0]
+      window.location.href = `/${storefront.slug}/lp/${pageId}/success${orderId ? `?orderId=${orderId}` : ''}`
     } catch (err: any) {
       setError(err.message || 'Failed to submit order')
       setSubmitting(false)
@@ -154,14 +151,25 @@ export default function LandingPageOrderForm({
   }
 
   const inputStyle = {
-    backgroundColor: '#ffffff',
-    borderColor: '#e2e8f0',
-    color: '#1a1a1a',
+    backgroundColor: inputBg,
+    borderColor: inputBorder,
+    color: inputText,
   }
 
   return (
-    <div id="order-form" className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg border border-slate-200">
-      <h3 className="text-xl font-bold mb-6" style={{ color: design.primaryColor, fontFamily: 'var(--font-outfit)' }}>
+    <div
+      id="order-form"
+      className="rounded-2xl p-6 sm:p-8"
+      style={{
+        backgroundColor: cardBg,
+        border: `1px solid ${borderClr}`,
+        boxShadow: isLight ? '0 10px 40px rgba(0,0,0,0.08)' : '0 10px 40px rgba(0,0,0,0.3)',
+      }}
+    >
+      <h3
+        className="text-xl font-bold mb-6"
+        style={{ color: isLight ? design.primaryColor : design.textColor, fontFamily: 'var(--font-outfit)' }}
+      >
         {t.title}
       </h3>
 
@@ -169,19 +177,18 @@ export default function LandingPageOrderForm({
         {/* Size selector */}
         {product.sizes.length > 0 && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t.size}</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>{t.size}</label>
             <div className="flex flex-wrap gap-2">
               {product.sizes.map((size) => (
                 <button
                   key={size}
                   type="button"
                   onClick={() => setSelectedSize(size)}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                    selectedSize === size
-                      ? 'border-2 text-white'
-                      : 'border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}
-                  style={selectedSize === size ? { backgroundColor: design.accentColor, borderColor: design.accentColor } : {}}
+                  className="px-4 py-2 rounded-lg border text-sm font-medium transition-colors"
+                  style={selectedSize === size
+                    ? { backgroundColor: design.accentColor, borderColor: design.accentColor, color: '#ffffff' }
+                    : { borderColor: unselectedBorder, color: unselectedText, backgroundColor: unselectedBg }
+                  }
                 >
                   {size}
                 </button>
@@ -193,19 +200,18 @@ export default function LandingPageOrderForm({
         {/* Color selector */}
         {product.colors.length > 0 && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t.color}</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>{t.color}</label>
             <div className="flex flex-wrap gap-2">
               {product.colors.map((color) => (
                 <button
                   key={color}
                   type="button"
                   onClick={() => setSelectedColor(color)}
-                  className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
-                    selectedColor === color
-                      ? 'border-2 text-white'
-                      : 'border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}
-                  style={selectedColor === color ? { backgroundColor: design.accentColor, borderColor: design.accentColor } : {}}
+                  className="px-4 py-2 rounded-lg border text-sm font-medium transition-colors"
+                  style={selectedColor === color
+                    ? { backgroundColor: design.accentColor, borderColor: design.accentColor, color: '#ffffff' }
+                    : { borderColor: unselectedBorder, color: unselectedText, backgroundColor: unselectedBg }
+                  }
                 >
                   {color}
                 </button>
@@ -216,20 +222,22 @@ export default function LandingPageOrderForm({
 
         {/* Quantity */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">{t.qty}</label>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>{t.qty}</label>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-10 h-10 rounded-lg border border-slate-200 flex items-center justify-center text-lg font-bold text-slate-600 hover:bg-slate-50"
+              className="w-10 h-10 rounded-lg border flex items-center justify-center text-lg font-bold transition-colors"
+              style={{ borderColor: unselectedBorder, color: unselectedText }}
             >
               -
             </button>
-            <span className="text-lg font-bold text-slate-900 w-8 text-center">{quantity}</span>
+            <span className="text-lg font-bold w-8 text-center" style={{ color: design.textColor }}>{quantity}</span>
             <button
               type="button"
               onClick={() => setQuantity(quantity + 1)}
-              className="w-10 h-10 rounded-lg border border-slate-200 flex items-center justify-center text-lg font-bold text-slate-600 hover:bg-slate-50"
+              className="w-10 h-10 rounded-lg border flex items-center justify-center text-lg font-bold transition-colors"
+              style={{ borderColor: unselectedBorder, color: unselectedText }}
             >
               +
             </button>
@@ -238,7 +246,7 @@ export default function LandingPageOrderForm({
 
         {/* Name */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">{t.name}</label>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>{t.name}</label>
           <input
             type="text"
             value={customerName}
@@ -251,7 +259,7 @@ export default function LandingPageOrderForm({
 
         {/* Phone */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">{t.phone}</label>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>{t.phone}</label>
           <input
             type="tel"
             value={customerPhone}
@@ -265,7 +273,7 @@ export default function LandingPageOrderForm({
 
         {/* Wilaya */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">{t.wilaya}</label>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>{t.wilaya}</label>
           <WilayaSelect
             value={wilaya}
             onChange={(val) => { setWilaya(val); setCommune(''); }}
@@ -274,17 +282,18 @@ export default function LandingPageOrderForm({
 
         {/* Delivery type */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">{t.deliveryType}</label>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>{t.deliveryType}</label>
           <div className="flex gap-3">
             {(['office', 'home'] as const).map((type) => (
               <button
                 key={type}
                 type="button"
                 onClick={() => setDeliveryType(type)}
-                className={`flex-1 py-3 rounded-xl border text-sm font-medium transition-colors ${
-                  deliveryType === type ? 'text-white' : 'border-slate-200 text-slate-600'
-                }`}
-                style={deliveryType === type ? { backgroundColor: design.accentColor, borderColor: design.accentColor } : {}}
+                className="flex-1 py-3 rounded-xl border text-sm font-medium transition-colors"
+                style={deliveryType === type
+                  ? { backgroundColor: design.accentColor, borderColor: design.accentColor, color: '#ffffff' }
+                  : { borderColor: unselectedBorder, color: unselectedText }
+                }
               >
                 {type === 'office' ? t.office : t.home}
               </button>
@@ -295,7 +304,7 @@ export default function LandingPageOrderForm({
         {/* Commune */}
         {wilaya && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">{t.commune}</label>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>{t.commune}</label>
             <CommuneSelect
               wilayaName={wilaya}
               value={commune}
@@ -306,7 +315,7 @@ export default function LandingPageOrderForm({
 
         {/* Address */}
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">{t.address}</label>
+          <label className="block text-sm font-medium mb-1.5" style={{ color: labelColor }}>{t.address}</label>
           <input
             type="text"
             value={deliveryAddress}
@@ -318,25 +327,28 @@ export default function LandingPageOrderForm({
         </div>
 
         {/* Price summary */}
-        <div className="bg-slate-50 rounded-xl p-4 space-y-2">
-          <div className="flex justify-between text-sm text-slate-600">
+        <div className="rounded-xl p-4 space-y-2" style={{ backgroundColor: summaryBg }}>
+          <div className="flex justify-between text-sm" style={{ color: mutedText }}>
             <span>{t.subtotal}</span>
             <span>{subtotal.toLocaleString()} DZD</span>
           </div>
           {deliveryFee !== null && (
-            <div className="flex justify-between text-sm text-slate-600">
+            <div className="flex justify-between text-sm" style={{ color: mutedText }}>
               <span>{t.delivery}</span>
               <span>{loadingFee ? '...' : `${deliveryFee.toLocaleString()} DZD`}</span>
             </div>
           )}
-          <div className="flex justify-between font-bold text-lg pt-2 border-t border-slate-200" style={{ color: design.primaryColor }}>
+          <div
+            className="flex justify-between font-bold text-lg pt-2"
+            style={{ color: isLight ? design.primaryColor : design.textColor, borderTop: `1px solid ${borderClr}` }}
+          >
             <span>{t.total}</span>
             <span>{total.toLocaleString()} DZD</span>
           </div>
         </div>
 
         {/* COD badge */}
-        <div className="text-center text-sm text-slate-500 font-medium">
+        <div className="text-center text-sm font-medium" style={{ color: mutedText }}>
           {t.cod}
         </div>
 
@@ -349,8 +361,8 @@ export default function LandingPageOrderForm({
         <button
           type="submit"
           disabled={submitting}
-          className="w-full py-4 rounded-xl text-white font-bold text-lg transition-opacity disabled:opacity-60"
-          style={{ backgroundColor: design.accentColor }}
+          className="w-full py-4 rounded-xl text-white font-bold text-lg tracking-wide transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+          style={{ backgroundColor: design.accentColor, boxShadow: `0 8px 30px ${design.accentColor}40` }}
         >
           {submitting ? t.submitting : (ctaText || t.submit)}
         </button>
