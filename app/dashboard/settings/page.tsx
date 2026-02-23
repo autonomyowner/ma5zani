@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useMutation } from 'convex/react'
+import { useMutation, useQuery } from 'convex/react'
 import { api } from '@/convex/_generated/api'
 import { useLanguage } from '@/lib/LanguageContext'
 import { useCurrentSeller } from '@/hooks/useCurrentSeller'
@@ -20,6 +20,8 @@ export default function SettingsPage() {
   const { seller, session, isLoading, isAuthenticated } = useCurrentSeller()
   const updateProfile = useMutation(api.sellers.updateSellerProfile)
   const toggleEmailNotifications = useMutation(api.sellers.toggleEmailNotifications)
+  const referralStats = useQuery(api.referrals.getMyReferralStats)
+  const [referralCopied, setReferralCopied] = useState(false)
 
   const [isEditing, setIsEditing] = useState(false)
   const [isTogglingEmail, setIsTogglingEmail] = useState(false)
@@ -335,6 +337,113 @@ export default function SettingsPage() {
             </button>
           </div>
         </Card>
+
+        {/* Referral Program */}
+        {referralStats && (
+          <Card className="p-4 lg:p-6">
+            <h2 className="text-base lg:text-lg font-bold text-[#0054A6] mb-4 lg:mb-6" style={{ fontFamily: 'var(--font-outfit)' }}>
+              {t.dashboard.referralTitle}
+            </h2>
+
+            {/* Referral Code + Copy */}
+            <div className="bg-[#0054A6]/5 border-2 border-[#0054A6]/20 rounded-xl p-4 mb-4">
+              <p className="text-sm text-slate-500 mb-2">{t.dashboard.yourReferralCode}</p>
+              <div className="flex items-center gap-3">
+                <span
+                  className="text-2xl font-bold text-[#0054A6] tracking-[0.3em] font-mono"
+                  style={{ fontFamily: 'var(--font-outfit), monospace' }}
+                  dir="ltr"
+                >
+                  {referralStats.referralCode}
+                </span>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(referralStats.referralCode)
+                    setReferralCopied(true)
+                    setTimeout(() => setReferralCopied(false), 2000)
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    referralCopied
+                      ? 'bg-[#22B14C] text-white'
+                      : 'bg-[#0054A6] text-white hover:bg-[#003d7a]'
+                  }`}
+                >
+                  {referralCopied ? t.dashboard.referralCopied : t.dashboard.yourReferralCode.split(' ')[0]}
+                </button>
+              </div>
+            </div>
+
+            {/* Share Link */}
+            <div className="bg-slate-50 rounded-xl p-4 mb-4">
+              <p className="text-sm text-slate-500 mb-2">{t.dashboard.referralShareLink}</p>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-xs bg-white px-3 py-2 rounded-lg border border-slate-200 text-slate-700 break-all" dir="ltr">
+                  ma5zani.com/offer?ref={referralStats.referralCode}
+                </code>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(`https://www.ma5zani.com/offer?ref=${referralStats.referralCode}`)
+                    setReferralCopied(true)
+                    setTimeout(() => setReferralCopied(false), 2000)
+                  }}
+                  className="px-3 py-2 bg-[#F7941D] text-white rounded-lg text-xs font-semibold hover:bg-[#D35400] transition-colors whitespace-nowrap"
+                >
+                  {referralCopied ? t.dashboard.referralCopied : t.dashboard.referralShareLink.split(' ')[0]}
+                </button>
+              </div>
+              <p className="text-xs text-slate-400 mt-2">{t.dashboard.referralShareText}</p>
+            </div>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="bg-slate-50 rounded-xl p-3 text-center">
+                <p className="text-2xl font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
+                  {referralStats.totalCount}
+                </p>
+                <p className="text-xs text-slate-500">{t.dashboard.referralCount}</p>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-3 text-center">
+                <p className="text-2xl font-bold text-[#22B14C]" style={{ fontFamily: 'var(--font-outfit)' }}>
+                  {referralStats.totalEarnings}
+                </p>
+                <p className="text-xs text-slate-500">{t.dashboard.referralEarnings}</p>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-3 text-center">
+                <p className="text-2xl font-bold text-[#F7941D]" style={{ fontFamily: 'var(--font-outfit)' }}>
+                  {referralStats.pendingCount}
+                </p>
+                <p className="text-xs text-slate-500">{t.dashboard.referralPending}</p>
+              </div>
+            </div>
+
+            {/* Referral List */}
+            {referralStats.referrals.length > 0 ? (
+              <div className="space-y-2">
+                {referralStats.referrals.map((r: { _id: string; referredName: string; status: string; referrerReward: number; createdAt: number }) => (
+                  <div key={r._id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div>
+                      <p className="font-medium text-slate-900 text-sm">{r.referredName}</p>
+                      <p className="text-xs text-slate-400">
+                        {new Date(r.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                      r.status === 'paid' ? 'bg-[#22B14C]/10 text-[#22B14C]' :
+                      r.status === 'activated' ? 'bg-[#F7941D]/10 text-[#F7941D]' :
+                      'bg-slate-200 text-slate-500'
+                    }`}>
+                      {r.status === 'paid' ? t.dashboard.referralEarnings :
+                       r.status === 'activated' ? t.dashboard.referralPending :
+                       t.dashboard.referralStatus}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400 text-center py-4">{t.dashboard.referralNone}</p>
+            )}
+          </Card>
+        )}
 
         {/* Delivery Settings - Only for activated sellers */}
         {seller && sellerHasAccess(seller) && <DeliverySettingsSection />}

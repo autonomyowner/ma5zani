@@ -27,10 +27,15 @@ export default defineSchema({
       isEnabled: v.boolean(),
       defaultWeight: v.optional(v.number()),
     })),
+    referralCode: v.optional(v.string()),
+    referredBy: v.optional(v.id("sellers")),
+    referralEarnings: v.optional(v.number()),
+    referralCount: v.optional(v.number()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
-    .index("by_email", ["email"]),
+    .index("by_email", ["email"])
+    .index("by_referralCode", ["referralCode"]),
 
   products: defineTable({
     sellerId: v.id("sellers"),
@@ -458,6 +463,21 @@ export default defineSchema({
   })
     .index("by_seller", ["sellerId"])
     .index("by_product", ["productId"]),
+
+  // ============ REFERRAL PROGRAM ============
+
+  referrals: defineTable({
+    referrerId: v.id("sellers"),
+    referredSellerId: v.id("sellers"),
+    status: v.union(v.literal("pending"), v.literal("activated"), v.literal("paid")),
+    referrerReward: v.number(),
+    referredDiscount: v.number(),
+    createdAt: v.number(),
+    activatedAt: v.optional(v.number()),
+    paidAt: v.optional(v.number()),
+  })
+    .index("by_referrer", ["referrerId"])
+    .index("by_referred", ["referredSellerId"]),
 
   // Messages in chatbot conversations
   chatbotMessages: defineTable({

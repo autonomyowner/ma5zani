@@ -23,6 +23,7 @@ import type * as notifications from "../notifications.js";
 import type * as orders from "../orders.js";
 import type * as products from "../products.js";
 import type * as publicOrders from "../publicOrders.js";
+import type * as referrals from "../referrals.js";
 import type * as sellers from "../sellers.js";
 import type * as stats from "../stats.js";
 import type * as storefronts from "../storefronts.js";
@@ -51,6 +52,7 @@ declare const fullApi: ApiFromModules<{
   orders: typeof orders;
   products: typeof products;
   publicOrders: typeof publicOrders;
+  referrals: typeof referrals;
   sellers: typeof sellers;
   stats: typeof stats;
   storefronts: typeof storefronts;

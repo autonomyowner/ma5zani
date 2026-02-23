@@ -106,10 +106,10 @@ export default function Pricing() {
             style={{ fontFamily: 'var(--font-outfit), var(--font-cairo), sans-serif' }}
           >
             {language === 'ar'
-              ? 'عرض المؤسسين: 4,000 دج/السنة — لأول 50 بائع'
+              ? 'عرض المؤسسين: 4,000 دج مدى الحياة — لأول 50 بائع'
               : language === 'fr'
-                ? 'Offre Fondateur : 4 000 DA/an — pour les 50 premiers'
-                : 'Founder Offer: 4,000 DA/year — first 50 sellers'}
+                ? 'Offre Fondateur : 4 000 DA a vie — pour les 50 premiers'
+                : 'Founder Offer: 4,000 DA Lifetime — first 50 sellers'}
           </p>
           <p className="text-slate-600">
             {language === 'ar'

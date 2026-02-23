@@ -146,6 +146,11 @@ export default function AdminSellersPage() {
                 Support Chats
               </Link>
             </li>
+            <li>
+              <Link href="/admin/referrals" className="block px-4 py-3 rounded-xl text-slate-300 hover:bg-slate-700 font-medium">
+                Referrals
+              </Link>
+            </li>
           </ul>
         </nav>
 

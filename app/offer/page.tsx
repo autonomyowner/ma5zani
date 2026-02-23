@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { trackEvent } from '@/lib/meta-pixel'
 import Image from 'next/image'
 
@@ -45,11 +46,11 @@ const t = {
     founderDesc: 'بعد التجربة المجانية، اشترك بعرض خاص للبائعين الأوائل',
     founderPrice: '4,000',
     founderCurrency: 'دج',
-    founderPeriod: '/ السنة',
-    founderNote: 'بدل الأسعار العادية (12,000 - 94,800 دج/السنة)',
+    founderPeriod: '/ مدى الحياة',
+    founderNote: '',
     founderFeatures: [
       'كل المميزات مفتوحة',
-      'سنة كاملة',
+      'مدى الحياة',
       'بدون رسوم إضافية',
       'أول 50 بائع فقط',
     ],
@@ -62,7 +63,14 @@ const t = {
     finalCtaDesc: '14 يوم مجاناً — سجّل الآن وابدأ البيع',
     finalCtaButton: 'ابدأ مجاناً الآن',
     footerTag: 'ma5zani.com — منصة التجارة الإلكترونية للبائعين الجزائريين',
-    whatsappMessage: 'السلام عليكم، أريد تفعيل متجري في ma5zani. لقد قمت بالدفع 4000 دج. إليكم إثبات الدفع:',
+    whatsappMessage: 'السلام عليكم، أريد تفعيل متجري في ma5zani (عرض مدى الحياة). لقد قمت بالدفع 4000 دج. إليكم إثبات الدفع:',
+    referralLabel: 'عندك كود إحالة؟',
+    referralPlaceholder: 'أدخل الكود',
+    referralValid: 'كود صحيح! خصم 500 دج',
+    referralInvalid: 'كود غير صحيح',
+    referralChecking: 'جاري التحقق...',
+    referralDiscount: 'بعد الخصم',
+    referralFrom: 'من طرف',
   },
   fr: {
     topBanner: 'Essayez gratuitement — sans engagement',
@@ -102,12 +110,12 @@ const t = {
     founderDesc: 'Après l\'essai gratuit, abonnez-vous avec une offre spéciale pour les premiers vendeurs',
     founderPrice: '4 000',
     founderCurrency: 'DA',
-    founderPeriod: '/ an',
-    founderNote: 'Au lieu des prix normaux (12 000 - 94 800 DA/an)',
+    founderPeriod: '/ a vie',
+    founderNote: '',
     founderFeatures: [
-      'Toutes les fonctionnalités incluses',
-      'Une année complète',
-      'Sans frais supplémentaires',
+      'Toutes les fonctionnalites incluses',
+      'Acces a vie',
+      'Sans frais supplementaires',
       'Les 50 premiers vendeurs seulement',
     ],
     founderCta: 'Essayez gratuitement d\'abord puis abonnez-vous',
@@ -119,7 +127,14 @@ const t = {
     finalCtaDesc: '14 jours gratuits — inscrivez-vous et commencez à vendre',
     finalCtaButton: 'Commencer gratuitement',
     footerTag: 'ma5zani.com — Plateforme e-commerce pour les vendeurs algériens',
-    whatsappMessage: 'Bonjour, je souhaite activer ma boutique sur ma5zani. J\'ai effectué le paiement de 4000 DA. Voici la preuve de paiement :',
+    whatsappMessage: 'Bonjour, je souhaite activer ma boutique sur ma5zani (offre a vie). J\'ai effectue le paiement de 4000 DA. Voici la preuve de paiement :',
+    referralLabel: 'Vous avez un code de parrainage ?',
+    referralPlaceholder: 'Entrez le code',
+    referralValid: 'Code valide ! Reduction de 500 DA',
+    referralInvalid: 'Code invalide',
+    referralChecking: 'Verification...',
+    referralDiscount: 'Apres reduction',
+    referralFrom: 'De la part de',
   },
 }
 
@@ -127,10 +142,44 @@ export default function OfferPage() {
   const [copied, setCopied] = useState<string | null>(null)
   const [lang, setLang] = useState<Lang>('ar')
   const [mounted, setMounted] = useState(false)
+  const [referralCode, setReferralCode] = useState('')
+  const [referralStatus, setReferralStatus] = useState<'idle' | 'checking' | 'valid' | 'invalid'>('idle')
+  const [referrerName, setReferrerName] = useState('')
+  const searchParams = useSearchParams()
   const s = t[lang]
   const isRTL = lang === 'ar'
+  const hasDiscount = referralStatus === 'valid'
+  const displayPrice = hasDiscount ? '3,500' : '4,000'
+  const displayPriceFr = hasDiscount ? '3 500' : '4 000'
 
-  useEffect(() => { setMounted(true) }, [])
+  const validateCode = useCallback(async (code: string) => {
+    if (code.length !== 6) {
+      setReferralStatus('idle')
+      return
+    }
+    setReferralStatus('checking')
+    try {
+      const res = await fetch(`/api/referral/validate?code=${encodeURIComponent(code)}`)
+      const data = await res.json()
+      if (data.valid) {
+        setReferralStatus('valid')
+        setReferrerName(data.referrerName)
+      } else {
+        setReferralStatus('invalid')
+      }
+    } catch {
+      setReferralStatus('invalid')
+    }
+  }, [])
+
+  useEffect(() => {
+    setMounted(true)
+    const ref = searchParams.get('ref')
+    if (ref && ref.length === 6) {
+      setReferralCode(ref.toUpperCase())
+      validateCode(ref.toUpperCase())
+    }
+  }, [searchParams, validateCode])
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text)
@@ -138,7 +187,8 @@ export default function OfferPage() {
     setTimeout(() => setCopied(null), 2000)
   }
 
-  const whatsappMessage = encodeURIComponent(s.whatsappMessage)
+  const referralSuffix = hasDiscount ? ` (${lang === 'ar' ? 'كود إحالة' : 'Code parrainage'}: ${referralCode})` : ''
+  const whatsappMessage = encodeURIComponent(s.whatsappMessage + referralSuffix)
   const whatsappLink = `https://wa.me/213697339450?text=${whatsappMessage}`
 
   const handleTrialClick = () => {
@@ -338,16 +388,62 @@ export default function OfferPage() {
             <p className="text-[#00AEEF] text-sm font-bold tracking-wide uppercase mb-2">{s.founderTitle}</p>
             <p className="text-white/80 text-sm mb-4">{s.founderDesc}</p>
             <div className="flex items-baseline justify-center gap-1">
+              {hasDiscount && (
+                <span
+                  className="text-2xl font-bold text-white/40 line-through"
+                  style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
+                >
+                  {s.founderPrice}
+                </span>
+              )}
               <span
                 className="text-5xl font-bold text-white"
                 style={{ fontFamily: 'var(--font-outfit), sans-serif' }}
               >
-                {s.founderPrice}
+                {lang === 'fr' ? displayPriceFr : displayPrice}
               </span>
               <span className="text-xl font-bold text-white/80">{s.founderCurrency}</span>
               <span className="text-white/60 text-sm">{s.founderPeriod}</span>
             </div>
-            <p className="text-white/50 text-xs mt-2 line-through">{s.founderNote}</p>
+            {hasDiscount && (
+              <p className="text-[#22B14C] text-xs mt-2 font-semibold">
+                {s.referralDiscount} — {s.referralFrom} {referrerName}
+              </p>
+            )}
+            {s.founderNote && <p className="text-white/50 text-xs mt-2 line-through">{s.founderNote}</p>}
+          </div>
+
+          {/* Referral Code Input */}
+          <div className="mb-5 bg-white/10 rounded-xl p-4">
+            <label className="text-white/80 text-xs font-semibold mb-2 block">{s.referralLabel}</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                maxLength={6}
+                value={referralCode}
+                onChange={(e) => {
+                  const val = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '')
+                  setReferralCode(val)
+                  if (val.length === 6) {
+                    validateCode(val)
+                  } else {
+                    setReferralStatus('idle')
+                  }
+                }}
+                placeholder={s.referralPlaceholder}
+                className="flex-1 bg-white/20 text-white placeholder-white/40 rounded-lg px-3 py-2.5 text-sm font-mono tracking-widest text-center uppercase outline-none focus:bg-white/30 transition-colors"
+                dir="ltr"
+              />
+            </div>
+            {referralStatus === 'checking' && (
+              <p className="text-white/60 text-xs mt-2">{s.referralChecking}</p>
+            )}
+            {referralStatus === 'valid' && (
+              <p className="text-[#22B14C] text-xs mt-2 font-semibold">{s.referralValid}</p>
+            )}
+            {referralStatus === 'invalid' && (
+              <p className="text-red-300 text-xs mt-2">{s.referralInvalid}</p>
+            )}
           </div>
 
           <ul className="space-y-2 mb-5">

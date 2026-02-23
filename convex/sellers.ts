@@ -42,6 +42,22 @@ export const upsertSeller = mutation({
       return existingSeller._id;
     }
 
+    // Generate unique 6-char referral code
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let referralCode = "";
+    let isUnique = false;
+    while (!isUnique) {
+      referralCode = "";
+      for (let i = 0; i < 6; i++) {
+        referralCode += chars[Math.floor(Math.random() * chars.length)];
+      }
+      const existing = await ctx.db
+        .query("sellers")
+        .withIndex("by_referralCode", (q) => q.eq("referralCode", referralCode))
+        .first();
+      if (!existing) isUnique = true;
+    }
+
     const sellerId = await ctx.db.insert("sellers", {
       email,
       name: args.name,
@@ -50,6 +66,9 @@ export const upsertSeller = mutation({
       isActivated: false,
       emailNotifications: true,
       trialEndsAt: now + 14 * 24 * 60 * 60 * 1000,
+      referralCode,
+      referralEarnings: 0,
+      referralCount: 0,
       createdAt: now,
       updatedAt: now,
     });

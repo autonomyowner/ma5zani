@@ -1,7 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-const ADMIN_PASSWORD = "csgo2026";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "csgo2026";
 
 // Verify admin password
 export const verifyAdmin = query({
@@ -11,36 +11,36 @@ export const verifyAdmin = query({
   },
 });
 
-// Get all sellers
+// Get all sellers (paginated)
 export const getAllSellers = query({
   args: { password: v.string() },
   handler: async (ctx, args) => {
     if (args.password !== ADMIN_PASSWORD) {
       throw new Error("Unauthorized");
     }
-    return await ctx.db.query("sellers").collect();
+    return await ctx.db.query("sellers").order("desc").take(500);
   },
 });
 
-// Get all orders (across all sellers)
+// Get all orders (paginated, most recent first)
 export const getAllOrders = query({
   args: { password: v.string() },
   handler: async (ctx, args) => {
     if (args.password !== ADMIN_PASSWORD) {
       throw new Error("Unauthorized");
     }
-    return await ctx.db.query("orders").collect();
+    return await ctx.db.query("orders").order("desc").take(500);
   },
 });
 
-// Get all products (across all sellers)
+// Get all products (paginated)
 export const getAllProducts = query({
   args: { password: v.string() },
   handler: async (ctx, args) => {
     if (args.password !== ADMIN_PASSWORD) {
       throw new Error("Unauthorized");
     }
-    return await ctx.db.query("products").collect();
+    return await ctx.db.query("products").order("desc").take(500);
   },
 });
 
@@ -63,6 +63,31 @@ export const activateSeller = mutation({
       updates.activatedAt = Date.now();
     }
     await ctx.db.patch(args.sellerId, updates);
+
+    // If activating, check for pending referral and credit the referrer
+    if (args.isActivated) {
+      const referral = await ctx.db
+        .query("referrals")
+        .withIndex("by_referred", (q) => q.eq("referredSellerId", args.sellerId))
+        .first();
+
+      if (referral && referral.status === "pending") {
+        await ctx.db.patch(referral._id, {
+          status: "activated",
+          activatedAt: Date.now(),
+        });
+
+        const referrer = await ctx.db.get(referral.referrerId);
+        if (referrer) {
+          await ctx.db.patch(referrer._id, {
+            referralEarnings: (referrer.referralEarnings || 0) + referral.referrerReward,
+            referralCount: (referrer.referralCount || 0) + 1,
+            updatedAt: Date.now(),
+          });
+        }
+      }
+    }
+
     return args.sellerId;
   },
 });
@@ -97,23 +122,87 @@ export const deleteSeller = mutation({
       throw new Error("Unauthorized");
     }
 
+    // Helper to delete all docs from an indexed query
+    const deleteAll = async (table: string, index: string, field: string, value: unknown) => {
+      const docs = await (ctx.db.query(table as any) as any)
+        .withIndex(index, (q: any) => q.eq(field, value))
+        .collect();
+      for (const doc of docs) {
+        await ctx.db.delete(doc._id);
+      }
+    };
+
     // Delete all products for this seller
-    const products = await ctx.db
-      .query("products")
-      .withIndex("by_seller", (q) => q.eq("sellerId", args.sellerId))
-      .collect();
-    for (const product of products) {
-      await ctx.db.delete(product._id);
-    }
+    await deleteAll("products", "by_seller", "sellerId", args.sellerId);
 
     // Delete all orders for this seller
-    const orders = await ctx.db
-      .query("orders")
+    await deleteAll("orders", "by_seller", "sellerId", args.sellerId);
+
+    // Delete categories
+    await deleteAll("categories", "by_seller", "sellerId", args.sellerId);
+
+    // Delete storefronts and related data
+    const storefronts = await ctx.db
+      .query("storefronts")
       .withIndex("by_seller", (q) => q.eq("sellerId", args.sellerId))
       .collect();
-    for (const order of orders) {
-      await ctx.db.delete(order._id);
+
+    for (const storefront of storefronts) {
+      // Delete custom domains for this storefront
+      const domains = await ctx.db
+        .query("customDomains")
+        .withIndex("by_storefront", (q) => q.eq("storefrontId", storefront._id))
+        .collect();
+      for (const domain of domains) await ctx.db.delete(domain._id);
+
+      // Delete chatbots and their data
+      const chatbots = await ctx.db
+        .query("chatbots")
+        .withIndex("by_storefront", (q) => q.eq("storefrontId", storefront._id))
+        .collect();
+      for (const chatbot of chatbots) {
+        // Delete knowledge base
+        const knowledge = await ctx.db
+          .query("chatbotKnowledge")
+          .withIndex("by_chatbot", (q) => q.eq("chatbotId", chatbot._id))
+          .collect();
+        for (const k of knowledge) await ctx.db.delete(k._id);
+
+        // Delete conversations and messages
+        const convos = await ctx.db
+          .query("chatbotConversations")
+          .withIndex("by_chatbot", (q) => q.eq("chatbotId", chatbot._id))
+          .collect();
+        for (const convo of convos) {
+          const msgs = await ctx.db
+            .query("chatbotMessages")
+            .withIndex("by_conversation", (q) => q.eq("conversationId", convo._id))
+            .collect();
+          for (const msg of msgs) await ctx.db.delete(msg._id);
+          await ctx.db.delete(convo._id);
+        }
+
+        await ctx.db.delete(chatbot._id);
+      }
+
+      // Delete landing pages
+      const landingPages = await ctx.db
+        .query("landingPages")
+        .withIndex("by_seller", (q) => q.eq("sellerId", args.sellerId))
+        .collect();
+      for (const lp of landingPages) await ctx.db.delete(lp._id);
+
+      await ctx.db.delete(storefront._id);
     }
+
+    // Delete voice clips
+    await deleteAll("voiceClips", "by_seller", "sellerId", args.sellerId);
+
+    // Delete marketing images
+    await deleteAll("marketingImages", "by_seller", "sellerId", args.sellerId);
+
+    // Delete telegram links
+    await deleteAll("telegramLinks", "by_seller", "sellerId", args.sellerId);
 
     // Delete the seller
     await ctx.db.delete(args.sellerId);
@@ -274,7 +363,7 @@ export const getAllStorefronts = query({
       throw new Error("Unauthorized");
     }
 
-    const storefronts = await ctx.db.query("storefronts").collect();
+    const storefronts = await ctx.db.query("storefronts").order("desc").take(500);
 
     // Get seller info for each storefront
     const storefrontsWithSeller = await Promise.all(
@@ -289,5 +378,101 @@ export const getAllStorefronts = query({
     );
 
     return storefrontsWithSeller;
+  },
+});
+
+// Get all referrals with seller names
+export const getAllReferrals = query({
+  args: { password: v.string() },
+  handler: async (ctx, args) => {
+    if (args.password !== ADMIN_PASSWORD) {
+      throw new Error("Unauthorized");
+    }
+
+    const referrals = await ctx.db.query("referrals").order("desc").collect();
+
+    const referralsWithNames = await Promise.all(
+      referrals.map(async (r) => {
+        const referrer = await ctx.db.get(r.referrerId);
+        const referred = await ctx.db.get(r.referredSellerId);
+        return {
+          ...r,
+          referrerName: referrer?.name || "Unknown",
+          referrerEmail: referrer?.email || "Unknown",
+          referredName: referred?.name || "Unknown",
+          referredEmail: referred?.email || "Unknown",
+        };
+      })
+    );
+
+    return referralsWithNames;
+  },
+});
+
+// Mark a referral as paid
+export const markReferralPaid = mutation({
+  args: {
+    password: v.string(),
+    referralId: v.id("referrals"),
+  },
+  handler: async (ctx, args) => {
+    if (args.password !== ADMIN_PASSWORD) {
+      throw new Error("Unauthorized");
+    }
+
+    const referral = await ctx.db.get(args.referralId);
+    if (!referral) throw new Error("Referral not found");
+    if (referral.status !== "activated") {
+      throw new Error("Can only mark activated referrals as paid");
+    }
+
+    await ctx.db.patch(args.referralId, {
+      status: "paid",
+      paidAt: Date.now(),
+    });
+
+    return args.referralId;
+  },
+});
+
+// Backfill referral codes for existing sellers
+export const backfillReferralCodes = mutation({
+  args: { password: v.string() },
+  handler: async (ctx, args) => {
+    if (args.password !== ADMIN_PASSWORD) {
+      throw new Error("Unauthorized");
+    }
+
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const sellers = await ctx.db.query("sellers").collect();
+    let count = 0;
+
+    for (const seller of sellers) {
+      if (!seller.referralCode) {
+        let referralCode = "";
+        let isUnique = false;
+        while (!isUnique) {
+          referralCode = "";
+          for (let i = 0; i < 6; i++) {
+            referralCode += chars[Math.floor(Math.random() * chars.length)];
+          }
+          const existing = await ctx.db
+            .query("sellers")
+            .withIndex("by_referralCode", (q) => q.eq("referralCode", referralCode))
+            .first();
+          if (!existing) isUnique = true;
+        }
+
+        await ctx.db.patch(seller._id, {
+          referralCode,
+          referralEarnings: seller.referralEarnings ?? 0,
+          referralCount: seller.referralCount ?? 0,
+          updatedAt: Date.now(),
+        });
+        count++;
+      }
+    }
+
+    return { updated: count };
   },
 });

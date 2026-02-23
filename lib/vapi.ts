@@ -52,7 +52,7 @@ Ma5zani is an e-commerce store builder for Algerian sellers — the Algerian alt
 - **Business (بزنس)**: 7,900 DZD/month - Everything in Pro + custom domain + advanced analytics + dedicated account manager
 
 ## Founder Offer (عرض المؤسسين)
-- 4,000 DZD/year — all features unlocked
+- 4,000 DZD lifetime deal — all features unlocked forever
 - Limited to the first 50 sellers only
 - Payment via CCP/BaridiMob
 
