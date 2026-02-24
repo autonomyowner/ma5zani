@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { requireSeller } from "./auth";
+import { requireSeller, getAuthenticatedSeller } from "./auth";
 
 // Public: validate a referral code (no auth needed)
 export const validateReferralCode = query({
@@ -74,7 +74,8 @@ export const applyReferralCode = mutation({
 export const getMyReferralStats = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return null;
 
     const referrals = await ctx.db
       .query("referrals")
@@ -111,7 +112,8 @@ export const getMyReferralStats = query({
 export const getMyReferralCode = query({
   args: {},
   handler: async (ctx) => {
-    const seller = await requireSeller(ctx);
+    const seller = await getAuthenticatedSeller(ctx);
+    if (!seller) return null;
     return seller.referralCode || null;
   },
 });
