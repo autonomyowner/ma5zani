@@ -117,6 +117,17 @@ export const createPublicOrder = mutation({
     source: v.optional(v.union(v.literal("storefront"), v.literal("landing_page"))),
   },
   handler: async (ctx, args) => {
+    // Validate inputs
+    if (!args.customerName.trim()) throw new Error("Customer name is required");
+    if (!args.customerPhone.trim()) throw new Error("Customer phone is required");
+    if (!args.wilaya.trim()) throw new Error("Wilaya is required");
+    if (!args.deliveryAddress.trim()) throw new Error("Delivery address is required");
+    if (args.items.length === 0) throw new Error("Order must have at least one item");
+    for (const item of args.items) {
+      if (item.quantity < 1) throw new Error("Quantity must be at least 1");
+    }
+    if (args.deliveryFee !== undefined && args.deliveryFee < 0) throw new Error("Delivery fee cannot be negative");
+
     const storefront = await ctx.db
       .query("storefronts")
       .withIndex("by_slug", (q) => q.eq("slug", args.storefrontSlug.toLowerCase()))

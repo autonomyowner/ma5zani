@@ -59,6 +59,10 @@ export const createOrder = mutation({
   handler: async (ctx, args) => {
     const seller = await requireSeller(ctx);
 
+    if (args.quantity < 1) throw new Error("Quantity must be at least 1");
+    if (!args.customerName.trim()) throw new Error("Customer name is required");
+    if (!args.wilaya.trim()) throw new Error("Wilaya is required");
+
     const product = await ctx.db.get(args.productId);
     if (!product || product.sellerId !== seller._id) {
       throw new Error("Product not found");
@@ -69,7 +73,7 @@ export const createOrder = mutation({
     }
 
     const now = Date.now();
-    const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}`;
+    const orderNumber = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
 
     const orderId = await ctx.db.insert("orders", {
       sellerId: seller._id,

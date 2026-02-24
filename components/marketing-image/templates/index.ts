@@ -1,18 +1,23 @@
-import { LifestyleHero } from './LifestyleHero';
-import { SplitScene } from './SplitScene';
-import { Spotlight } from './Spotlight';
-import { PromoCard } from './PromoCard';
-import { MinimalLuxe } from './MinimalLuxe';
+import { PosterLight } from './PosterLight';
+import { PosterDark } from './PosterDark';
 
-export interface MarketingTemplateProps {
+export interface PosterCopy {
+  hookHeadline: string;
+  subheadline: string;
+  problem: string;
+  solution: string;
+  features: string[];
+  trustBadges: string[];
+  ctaText: string;
+}
+
+export interface PosterTemplateProps {
   productImageUrl: string;
   sceneImageUrl?: string;
   productName: string;
   price: number;
   salePrice?: number;
-  headline: string;
-  subheadline: string;
-  ctaText?: string;
+  copy: PosterCopy;
   palette: {
     primaryColor: string;
     accentColor: string;
@@ -21,46 +26,27 @@ export interface MarketingTemplateProps {
     gradientFrom: string;
     gradientTo: string;
   };
-  format: 'square' | 'story' | 'facebook';
   storeName: string;
+  isDarkTheme?: boolean;
 }
 
-export const FORMAT_DIMENSIONS: Record<string, { width: number; height: number }> = {
-  square: { width: 1080, height: 1080 },
-  story: { width: 1080, height: 1920 },
-  facebook: { width: 1200, height: 628 },
-};
+export const POSTER_DIMENSIONS = { width: 1080, height: 1920 };
 
-export interface TemplateDefinition {
+export interface PosterTemplateDefinition {
   id: string;
   name: { ar: string; en: string; fr: string };
-  component: React.ComponentType<MarketingTemplateProps>;
+  component: React.ComponentType<PosterTemplateProps>;
 }
 
-export const MARKETING_TEMPLATES: TemplateDefinition[] = [
+export const POSTER_TEMPLATES: PosterTemplateDefinition[] = [
   {
-    id: 'lifestyle-hero',
-    name: { ar: 'صورة حية', en: 'Lifestyle Hero', fr: 'Hero Lifestyle' },
-    component: LifestyleHero,
+    id: 'poster-light',
+    name: { ar: 'ملصق فاتح', en: 'Light Poster', fr: 'Affiche Claire' },
+    component: PosterLight,
   },
   {
-    id: 'split-scene',
-    name: { ar: 'مشهد مقسوم', en: 'Split Scene', fr: 'Scene Divisee' },
-    component: SplitScene,
-  },
-  {
-    id: 'spotlight',
-    name: { ar: 'تسليط الضوء', en: 'Spotlight', fr: 'Projecteur' },
-    component: Spotlight,
-  },
-  {
-    id: 'promo-card',
-    name: { ar: 'بطاقة ترويج', en: 'Promo Card', fr: 'Carte Promo' },
-    component: PromoCard,
-  },
-  {
-    id: 'minimal-luxe',
-    name: { ar: 'فخامة بسيطة', en: 'Minimal Luxe', fr: 'Luxe Minimal' },
-    component: MinimalLuxe,
+    id: 'poster-dark',
+    name: { ar: 'ملصق داكن', en: 'Dark Poster', fr: 'Affiche Sombre' },
+    component: PosterDark,
   },
 ];

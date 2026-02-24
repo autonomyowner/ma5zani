@@ -2,21 +2,18 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 import { toPng } from 'html-to-image';
-import { MARKETING_TEMPLATES, FORMAT_DIMENSIONS, type MarketingTemplateProps } from './templates';
+import { POSTER_TEMPLATES, POSTER_DIMENSIONS, type PosterTemplateProps } from './templates';
 import Button from '@/components/ui/Button';
 import { useLanguage } from '@/lib/LanguageContext';
 
 interface ImagePreviewProps {
   templateId: string;
-  format: 'square' | 'story' | 'facebook';
-  templateProps: Omit<MarketingTemplateProps, 'format'>;
+  templateProps: PosterTemplateProps;
   onSave: (blob: Blob) => Promise<void>;
 }
 
 /**
  * Convert an external image URL to a base64 data URL via same-origin proxy.
- * Direct cross-origin fetch fails in the browser due to CORS — the proxy
- * endpoint (/api/image-proxy) fetches server-side and returns the bytes.
  */
 async function imageToBase64(url: string): Promise<string> {
   if (!url || url.startsWith('data:')) return url;
@@ -33,11 +30,11 @@ async function imageToBase64(url: string): Promise<string> {
     });
   } catch (e) {
     console.error('imageToBase64 failed:', e);
-    return url; // Fallback to original URL (capture may fail)
+    return url;
   }
 }
 
-export default function ImagePreview({ templateId, format, templateProps, onSave }: ImagePreviewProps) {
+export default function ImagePreview({ templateId, templateProps, onSave }: ImagePreviewProps) {
   const { t } = useLanguage();
   const mi = (t as unknown as Record<string, Record<string, string>>).marketingImages;
   const captureRef = useRef<HTMLDivElement>(null);
@@ -47,7 +44,7 @@ export default function ImagePreview({ templateId, format, templateProps, onSave
   const [base64SceneImage, setBase64SceneImage] = useState<string>('');
   const [imageReady, setImageReady] = useState(false);
 
-  // Pre-convert both product and scene images to base64 via proxy
+  // Pre-convert images to base64 via proxy
   useEffect(() => {
     setImageReady(false);
     const conversions: Promise<void>[] = [];
@@ -70,23 +67,21 @@ export default function ImagePreview({ templateId, format, templateProps, onSave
     }
   }, [templateProps.productImageUrl, templateProps.sceneImageUrl]);
 
-  const template = MARKETING_TEMPLATES.find((tmpl) => tmpl.id === templateId);
+  const template = POSTER_TEMPLATES.find((tmpl) => tmpl.id === templateId);
   if (!template) return null;
 
-  const dim = FORMAT_DIMENSIONS[format];
+  const dim = POSTER_DIMENSIONS;
   const TemplateComponent = template.component;
 
-  // Both preview and capture use base64 to ensure consistency
-  const props: MarketingTemplateProps = {
+  const props: PosterTemplateProps = {
     ...templateProps,
-    format,
     productImageUrl: base64ProductImage || templateProps.productImageUrl,
     sceneImageUrl: base64SceneImage || templateProps.sceneImageUrl,
   };
 
-  // Scale down the preview to fit the viewport
-  const maxPreviewWidth = 480;
-  const maxPreviewHeight = 560;
+  // Scale down preview — vertical poster fits in 360x640
+  const maxPreviewWidth = 360;
+  const maxPreviewHeight = 640;
   const scaleX = maxPreviewWidth / dim.width;
   const scaleY = maxPreviewHeight / dim.height;
   const scale = Math.min(scaleX, scaleY, 1);
@@ -117,7 +112,7 @@ export default function ImagePreview({ templateId, format, templateProps, onSave
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${templateProps.productName}-${format}-${templateId}.png`;
+      a.download = `${templateProps.productName}-poster-${templateId}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -125,7 +120,7 @@ export default function ImagePreview({ templateId, format, templateProps, onSave
     } finally {
       setDownloading(false);
     }
-  }, [captureImage, templateProps.productName, format, templateId]);
+  }, [captureImage, templateProps.productName, templateId]);
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -160,7 +155,7 @@ export default function ImagePreview({ templateId, format, templateProps, onSave
         </div>
       </div>
 
-      {/* Offscreen full-res capture container — must be rendered (not opacity:0) for html-to-image */}
+      {/* Offscreen full-res capture container */}
       <div
         style={{
           position: 'fixed',

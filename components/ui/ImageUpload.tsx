@@ -9,6 +9,7 @@ interface ImageUploadProps {
   onChange: (keys: string[]) => void;
   maxImages?: number;
   folder?: string;
+  id?: string;
 }
 
 export default function ImageUpload({
@@ -16,7 +17,9 @@ export default function ImageUpload({
   onChange,
   maxImages = 5,
   folder = 'products',
+  id: instanceId,
 }: ImageUploadProps) {
+  const inputId = instanceId || 'image-upload';
   const { language } = useLanguage();
   const [uploading, setUploading] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -145,11 +148,11 @@ export default function ImageUpload({
             multiple
             onChange={(e) => handleFiles(e.target.files)}
             className="hidden"
-            id="image-upload"
+            id={inputId}
             disabled={uploading}
           />
           <label
-            htmlFor="image-upload"
+            htmlFor={inputId}
             className="cursor-pointer block"
           >
             {uploading ? (

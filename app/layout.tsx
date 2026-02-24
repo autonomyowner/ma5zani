@@ -24,6 +24,7 @@ const cairo = Cairo({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://www.ma5zani.com'),
   title: 'مخزني - ma5zani | حلول التوصيل للتجارة الإلكترونية في الجزائر',
   description: 'الحل الذكي للتخزين والتوصيل لبائعي التجارة الإلكترونية الجزائريين. خزّن، وصّل، ووسّع بسهولة.',
   icons: {
@@ -35,6 +36,19 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   manifest: '/site.webmanifest',
+  openGraph: {
+    title: 'ma5zani - E-commerce Platform for Algeria',
+    description: 'Create your online store in minutes. The Shopify alternative for Algerian sellers.',
+    url: 'https://www.ma5zani.com',
+    siteName: 'ma5zani',
+    type: 'website',
+    locale: 'ar_DZ',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'ma5zani - E-commerce Platform for Algeria',
+    description: 'Create your online store in minutes. The Shopify alternative for Algerian sellers.',
+  },
 }
 
 export default function RootLayout({

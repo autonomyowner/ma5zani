@@ -8,6 +8,17 @@ ma5zani is an e-commerce store builder for Algerian sellers — positioned as th
 
 **Production URL**: https://www.ma5zani.com
 
+## Deployment Rule (MANDATORY)
+
+**When the user asks to push, deploy, commit, or ship changes, Claude Code MUST follow this exact sequence:**
+
+1. Check if ANY file under `convex/` was modified (schema, mutations, queries, actions, http, auth)
+2. **If yes** → run `npx convex deploy --yes` FIRST, wait for it to succeed, THEN commit & push to `main`
+3. **If no** → commit & push to `main` directly
+4. GitHub Actions will auto-deploy the frontend to Cloudflare Workers after the push
+
+**Never skip step 1.** A mismatch between the Convex backend and the Cloudflare Workers frontend causes runtime crashes on the live site. When in doubt, always run `npx convex deploy --yes` before pushing — it's safe to run even if nothing changed.
+
 ## Hosting & Deployment
 
 Hosted on **Cloudflare Workers** via `@opennextjs/cloudflare`. Previously hosted on Vercel (migrated Feb 2025).
@@ -32,6 +43,22 @@ npx convex deploy    # Deploy Convex to production
 ```bash
 npx convex deploy --yes && npm run deploy
 ```
+
+**CRITICAL — `.env.local` overrides `.env.production` in Next.js builds**: `NEXT_PUBLIC_*` vars are baked in at build time. The `.env.local` file has the **dev** Convex URL (`effervescent-dachshund-947`), while `.env.production` has the **production** URL (`colorless-cricket-513`). Since `.env.local` takes priority, running `npm run deploy` locally will bake the dev URL into production — causing the site to query an empty dev database.
+
+**To deploy locally, always rename `.env.local` first:**
+```bash
+mv .env.local .env.local.bak
+set NODE_OPTIONS=--max-old-space-size=4096 && npm run deploy
+mv .env.local.bak .env.local
+```
+
+**Preferred: deploy via `git push` to `main`** — CI/CD (`.github/workflows/deploy.yml`) has the correct production env vars hardcoded and is not affected by `.env.local`.
+
+**Two Convex deployments:**
+- **Dev**: `effervescent-dachshund-947` — used by `npx convex dev` and local `npm run dev`
+- **Production**: `colorless-cricket-513` — used by `npx convex deploy` and the live site
+- `npx convex deploy` always targets production regardless of `.env.local`
 
 **tsconfig**: `ma5zani_mobile` and `ma5zani-mobile-v2` directories are excluded in `tsconfig.json`. If adding new non-Next.js directories, add them to the exclude list to prevent build failures.
 
@@ -370,14 +397,38 @@ Sellers generate professional marketing images from the dashboard (`/dashboard/m
 
 **Formats**: square (1080x1080), story (1080x1920), facebook (1200x628). Scene images stored in R2 under `images/scenes/{sellerId}/`, enhanced under `images/enhanced/{sellerId}/`.
 
-### Founder Offer / Activation Gate
+### Founder Offer / Activation Gate & Trial System
 
-Storefront and AI chatbot features are locked behind `seller.isActivated`. Flow:
-1. New sellers get `isActivated: false` on signup
-2. Seller pays 4,000 DA/year, sends proof via WhatsApp
-3. Admin activates seller via `/admin/sellers` (toggles `isActivated` + sets `activatedAt`)
-4. Gated pages: `/dashboard/storefront/*`, `/dashboard/chatbot/*`, `/dashboard/voice-studio` — show `FounderOfferGate` component if not activated
-5. Dashboard shows orange unlock banner for non-activated sellers
+Access to premium features uses a **two-tier system**: trial OR activation.
+
+**`requireActiveSeller()`** in `convex/auth.ts` checks:
+```
+hasAccess = seller.isActivated || (seller.trialEndsAt !== undefined && seller.trialEndsAt > Date.now())
+```
+
+**Trial flow (new sellers):**
+1. New seller signs up → `upsertSeller` creates record with `isActivated: false`, `trialEndsAt: now + 14 days`
+2. During trial, seller has full access to gated features
+3. After trial expires, seller sees `FounderOfferGate` on premium pages
+4. Returning sellers (existing record): `upsertSeller` only updates name/phone/plan — does NOT reset `trialEndsAt` or `isActivated`
+
+**Activation flow (paid sellers):**
+1. Seller pays, sends proof via WhatsApp
+2. Admin activates via `/admin/sellers` → sets `isActivated: true` + `activatedAt`
+3. Activated sellers have permanent access regardless of `trialEndsAt`
+
+**What uses `requireActiveSeller` (gated behind trial/activation):**
+- Storefront editing mutations (`updateStorefront`, `publishStorefront`, etc.)
+- Chatbot, landing pages, marketing images, voice studio, custom domains
+
+**What uses `requireSeller` (no trial check — always accessible):**
+- `createStorefront` — so onboarding step 2 is never blocked
+- Basic product/order CRUD
+
+**Key files:** `convex/auth.ts` (requireSeller, requireActiveSeller), `convex/sellers.ts` (upsertSeller with trialEndsAt)
+
+**Dashboard gating:** Gated pages (`/dashboard/storefront/*`, `/dashboard/chatbot/*`, `/dashboard/voice-studio`) show `FounderOfferGate` component if not activated AND trial expired. Dashboard shows orange unlock banner for non-activated sellers.
+
 6. Pricing is hardcoded in: `lib/translations.ts` (founderOffer section), `app/onboarding/page.tsx`, `components/landing/Pricing.tsx`
 
 ### Pricing Tiers (Current)

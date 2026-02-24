@@ -35,6 +35,17 @@ export const getStorefrontBySeller = query({
   },
 });
 
+// Public: list all published storefront slugs (for sitemap)
+export const listPublishedSlugs = query({
+  args: {},
+  handler: async (ctx) => {
+    const storefronts = await ctx.db.query("storefronts").collect();
+    return storefronts
+      .filter((sf) => sf.isPublished)
+      .map((sf) => ({ slug: sf.slug, updatedAt: sf.updatedAt }));
+  },
+});
+
 export const getStorefrontBySlug = query({
   args: { slug: v.string() },
   handler: async (ctx, args) => {
@@ -57,7 +68,11 @@ export const checkSlugAvailability = query({
     const slug = args.slug.toLowerCase().trim();
 
     // Reserved slugs
-    const reserved = ["dashboard", "login", "signup", "admin", "api", "onboarding", "settings"];
+    const reserved = [
+      "dashboard", "login", "signup", "admin", "api", "onboarding", "settings",
+      "www", "cdn", "static", "mail", "smtp", "ftp", "dev", "staging", "app",
+      "offer", "pricing", "about", "contact", "help", "support", "blog",
+    ];
     if (reserved.includes(slug)) {
       return { available: false, reason: "reserved" };
     }
@@ -107,7 +122,7 @@ export const createStorefront = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const seller = await requireActiveSeller(ctx);
+    const seller = await requireSeller(ctx);
 
     // Check if seller already has a storefront
     const existing = await ctx.db

@@ -22,6 +22,8 @@ export interface VisionAnalysis {
   scenePrompt?: string;
   scenePrompts?: string[];
   templateType?: string;
+  lifestyleScenePrompt?: string;
+  suggestedFeatures?: string[];
 }
 
 export async function analyzeProductImage(
@@ -156,9 +158,8 @@ Return ONLY valid JSON:
 }
 
 /**
- * Enhanced vision analysis for marketing images — returns palette + background-only scene prompt.
- * The scenePrompt describes ONLY the studio background environment (no product).
- * The real product photo will be composited on top via CSS.
+ * Enhanced vision analysis for marketing poster images.
+ * Returns palette, lifestyle scene prompt (product IN context), and suggested features.
  */
 export async function analyzeProductForMarketing(
   imageUrl: string,
@@ -189,29 +190,27 @@ export async function analyzeProductForMarketing(
                 text: `You are a professional product photographer and art director. Analyze this product image for "${productName}".
 
 TASK 1 — ANALYZE THE PRODUCT:
-Describe the product's colors, materials, and aesthetic style precisely.
+Describe the product's colors, materials, aesthetic style, and any visible details precisely.
 
 TASK 2 — COLOR PALETTE:
 Extract 3 dominant colors from the product and suggest a marketing palette.
 
-TASK 3 — STUDIO BACKGROUND PROMPT:
-Generate a prompt for an AI image generator to create ONLY the studio background — DO NOT include the product itself. The product will be composited on top later.
+TASK 3 — LIFESTYLE SCENE PROMPT:
+Generate a prompt for an AI image generator to place THIS SPECIFIC PRODUCT in a professional lifestyle/commercial photography scene.
 
-Describe:
-- **Surface**: The exact material the product would sit on (e.g. "polished white marble slab with grey veining", "warm honey oak wood surface", "matte concrete platform", "brushed rose gold metal surface")
-- **Lighting**: Professional studio lighting setup (e.g. "soft diffused key light from upper-left with gentle fill from right, creating soft natural shadows", "warm golden rim light from behind with cool fill light")
-- **Background**: What's behind the surface (e.g. "soft cream fabric draping out of focus", "clean gradient from light grey to white", "blurred neutral studio backdrop", "subtle warm bokeh circles")
-- **Atmosphere**: Color temperature and mood that complements this specific product's colors
-- **Props**: 0-2 SUBTLE complementary props ONLY if natural (e.g. "a single eucalyptus sprig" for skincare, "a water droplet on the surface" for beverages). NO props is perfectly fine — clean and empty is premium.
+CRITICAL: Describe the product's exact appearance (colors, material, shape) so the AI keeps the product recognizable. Then describe the scene environment around it.
 
 The prompt MUST:
-- Describe an EMPTY surface ready for a product to be placed on it
-- Match the product's aesthetic (luxury product = luxury surface, casual = warm natural)
-- End with "professional commercial studio photography, empty product display surface, centered composition, soft natural shadows, shallow depth of field, 8k ultra detailed"
-- NOT mention any product, item, bottle, box, or object
+- Include the product naturally IN the scene (not removed or separate)
+- Match the product's aesthetic (luxury product = elegant environment, casual = warm lifestyle)
+- Describe lighting, surface, background, and mood
+- End with "professional commercial product photography, sharp focus, 4k, ultra detailed"
 
-Example for a luxury skincare product:
-"Clean white marble surface with subtle grey veining, soft diffused natural window lighting from upper left creating gentle shadow gradients, blurred cream fabric draping in far background, warm neutral color temperature, a single small eucalyptus leaf resting on the marble surface, professional commercial studio photography, empty product display surface, centered composition, soft natural shadows, shallow depth of field, 8k ultra detailed"
+Example for wireless headphones:
+"Sleek matte black over-ear headphones with silver accents resting on a dark walnut desk beside a minimalist laptop, warm afternoon window light casting soft golden highlights, blurred modern office with indoor plants in background, professional commercial product photography, sharp focus, 4k, ultra detailed"
+
+TASK 4 — SUGGESTED FEATURES:
+Based on what you can see in the image, suggest 4 product benefit/feature phrases. Focus on BENEFITS the customer would care about (comfort, quality, durability, style, convenience). Keep each phrase 3-6 words.
 
 Return ONLY valid JSON:
 {
@@ -226,13 +225,14 @@ Return ONLY valid JSON:
     "background": "#hex - light neutral (#f8f8f8 to #ffffff)",
     "text": "#hex - dark readable"
   },
-  "scenePrompt": "Your BACKGROUND-ONLY studio prompt here (no product in it)"
+  "lifestyleScenePrompt": "Full lifestyle scene prompt with product IN the scene...",
+  "suggestedFeatures": ["benefit 1", "benefit 2", "benefit 3", "benefit 4"]
 }`,
               },
             ],
           },
         ],
-        max_tokens: 1000,
+        max_tokens: 1200,
         temperature: 0.4,
       }),
     });
@@ -247,6 +247,17 @@ Return ONLY valid JSON:
     if (!content) return null;
 
     const parsed = JSON.parse(extractJSON(content)) as VisionAnalysis;
+
+    // Ensure suggestedFeatures has 4 items
+    if (!parsed.suggestedFeatures || parsed.suggestedFeatures.length < 4) {
+      parsed.suggestedFeatures = [
+        ...(parsed.suggestedFeatures || []),
+        'Premium quality materials',
+        'Comfortable everyday use',
+        'Modern elegant design',
+        'Built to last',
+      ].slice(0, 4);
+    }
 
     // Post-process: validate contrast
     const adjusted = adjustForContrast({

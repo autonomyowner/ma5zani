@@ -61,6 +61,14 @@ export const createProduct = mutation({
   },
   handler: async (ctx, args) => {
     const seller = await requireSeller(ctx);
+
+    // Validate numeric inputs
+    if (args.stock < 0) throw new Error("Stock cannot be negative");
+    if (args.price < 0) throw new Error("Price cannot be negative");
+    if (args.salePrice !== undefined && args.salePrice < 0) throw new Error("Sale price cannot be negative");
+    if (!args.name.trim()) throw new Error("Product name is required");
+    if (!args.sku.trim()) throw new Error("SKU is required");
+
     const now = Date.now();
 
     // Determine status based on stock
@@ -128,6 +136,13 @@ export const updateProduct = mutation({
       throw new Error("Product not found");
     }
 
+    // Validate numeric inputs
+    if (args.stock !== undefined && args.stock < 0) throw new Error("Stock cannot be negative");
+    if (args.price !== undefined && args.price < 0) throw new Error("Price cannot be negative");
+    if (args.salePrice !== undefined && args.salePrice < 0) throw new Error("Sale price cannot be negative");
+    if (args.name !== undefined && !args.name.trim()) throw new Error("Product name is required");
+    if (args.sku !== undefined && !args.sku.trim()) throw new Error("SKU is required");
+
     const updates: Record<string, unknown> = { updatedAt: Date.now() };
     if (args.name !== undefined) updates.name = args.name;
     if (args.sku !== undefined) updates.sku = args.sku;
@@ -165,6 +180,8 @@ export const updateStock = mutation({
   },
   handler: async (ctx, args) => {
     const seller = await requireSeller(ctx);
+
+    if (args.stock < 0) throw new Error("Stock cannot be negative");
 
     const product = await ctx.db.get(args.productId);
     if (!product || product.sellerId !== seller._id) {

@@ -1,41 +1,62 @@
-// Marketing Image AI — Short copy generator for marketing images
-// Generates punchy Darija headline + subheadline via Claude on OpenRouter
+// Marketing Poster AI — Full 7-section Darija copy generator for promo posters
+// Generates PosterCopy via Claude on OpenRouter, using vision data for context
+
+import type { PosterCopy } from '@/components/marketing-image/templates';
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = 'anthropic/claude-3.5-sonnet';
+const MODEL = 'anthropic/claude-sonnet-4-5';
 
-export interface MarketingCopy {
-  headline: string;
-  subheadline: string;
-  ctaText: string;
+interface PosterCopyInput {
+  productName: string;
+  price: number;
+  salePrice?: number;
+  description?: string;
+  visionData?: {
+    productDescription?: string;
+    visualAttributes?: string[];
+    productCategory?: string;
+    suggestedFeatures?: string[];
+  };
 }
 
-export async function generateMarketingCopy(
-  productName: string,
-  price: number,
-  salePrice?: number,
-  description?: string,
-): Promise<MarketingCopy | null> {
+export async function generatePosterCopy(input: PosterCopyInput): Promise<PosterCopy | null> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) return null;
 
+  const { productName, price, salePrice, description, visionData } = input;
   const hasDiscount = salePrice && salePrice < price;
   const discountPercent = hasDiscount
     ? Math.round(((price - salePrice!) / price) * 100)
     : 0;
 
-  const systemPrompt = `You write SHORT marketing text in Algerian Darija for product ads.
+  const systemPrompt = `You write FULL promotional poster copy in Algerian Darija for product ads.
 
 RULES:
-- headline: 3-6 words max, punchy, uses Darija
+- hookHeadline: 3-6 words max, punchy attention-grabbing hook in Darija
 - subheadline: 8-15 words, value proposition in Darija
-- ctaText: 2-4 words, call to action in Darija (e.g. "اطلب دروك", "شري هنا", "احجز تاعك")
-- Use Darija words: "بزاف", "واش", "كاين", "هاذ", "صح"
-- Mix French loanwords naturally: "qualité", "livraison", "promotion"
-- NO emoji, NO icons, NO hashtags
-- Focus on BENEFITS not features
+- problem: A pain point question the customer relates to (e.g. "واش تعبت تدور على qualité صح؟" or "ملقيت حتى منتج يدوم معاك؟")
+- solution: A positive answer statement (e.g. "مع هاذ المنتج، حياتك تتبدّل" or "الحل هنا — qualité عالية بسعر معقول")
+- features: Array of exactly 4 benefit strings in Darija (3-8 words each). Rewrite the suggested features in Darija style.
+- trustBadges: Array of exactly 3 trust signals in Darija (e.g. "توصيل لكل 58 ولاية", "الدفع عند الاستلام", "ضمان الجودة", "إرجاع مجاني")
+- ctaText: 2-4 words CTA in Darija (e.g. "اطلب دروك", "شري هنا", "احجز تاعك")
 
-Return ONLY valid JSON: {"headline": "...", "subheadline": "...", "ctaText": "..."}`;
+STYLE:
+- Use Darija words naturally: "بزاف", "واش", "كاين", "هاذ", "صح", "دروك", "تاع"
+- Mix French loanwords where natural: "qualité", "livraison", "promotion", "gratuit"
+- NO emoji, NO icons, NO hashtags
+- Focus on BENEFITS not technical specs
+- Be direct, confident, aspirational
+
+Return ONLY valid JSON:
+{
+  "hookHeadline": "...",
+  "subheadline": "...",
+  "problem": "...",
+  "solution": "...",
+  "features": ["...", "...", "...", "..."],
+  "trustBadges": ["...", "...", "..."],
+  "ctaText": "..."
+}`;
 
   const userLines = [
     `Product: ${productName}`,
@@ -47,7 +68,19 @@ Return ONLY valid JSON: {"headline": "...", "subheadline": "...", "ctaText": "..
   if (description) {
     userLines.push(`Description: ${description}`);
   }
-  userLines.push('', 'Write a headline + subheadline for a marketing image ad.');
+  if (visionData?.productDescription) {
+    userLines.push(`Visual analysis: ${visionData.productDescription}`);
+  }
+  if (visionData?.visualAttributes?.length) {
+    userLines.push(`Visual attributes: ${visionData.visualAttributes.join(', ')}`);
+  }
+  if (visionData?.productCategory) {
+    userLines.push(`Category: ${visionData.productCategory}`);
+  }
+  if (visionData?.suggestedFeatures?.length) {
+    userLines.push(`Suggested features to rewrite in Darija: ${visionData.suggestedFeatures.join(' | ')}`);
+  }
+  userLines.push('', 'Write the full poster copy for a 1080x1920 promotional poster.');
 
   try {
     const response = await fetch(OPENROUTER_API_URL, {
@@ -56,7 +89,7 @@ Return ONLY valid JSON: {"headline": "...", "subheadline": "...", "ctaText": "..
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`,
         'HTTP-Referer': 'https://ma5zani.com',
-        'X-Title': 'ma5zani Marketing Image AI',
+        'X-Title': 'ma5zani Marketing Poster AI',
       },
       body: JSON.stringify({
         model: MODEL,
@@ -64,13 +97,13 @@ Return ONLY valid JSON: {"headline": "...", "subheadline": "...", "ctaText": "..
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userLines.join('\n') },
         ],
-        max_tokens: 300,
+        max_tokens: 600,
         temperature: 0.7,
       }),
     });
 
     if (!response.ok) {
-      console.error('Marketing copy API error:', await response.text());
+      console.error('Poster copy API error:', await response.text());
       return null;
     }
 
@@ -79,9 +112,30 @@ Return ONLY valid JSON: {"headline": "...", "subheadline": "...", "ctaText": "..
     if (!content) return null;
 
     const jsonStr = extractJSON(content);
-    return JSON.parse(jsonStr) as MarketingCopy;
+    const parsed = JSON.parse(jsonStr) as PosterCopy;
+
+    // Ensure arrays have correct lengths
+    if (!parsed.features || parsed.features.length < 4) {
+      parsed.features = [
+        ...(parsed.features || []),
+        'جودة عالية مضمونة',
+        'تصميم عصري وأنيق',
+        'راحة كل يوم',
+        'يدوم معاك بزاف',
+      ].slice(0, 4);
+    }
+    if (!parsed.trustBadges || parsed.trustBadges.length < 3) {
+      parsed.trustBadges = [
+        ...(parsed.trustBadges || []),
+        'توصيل لكل 58 ولاية',
+        'الدفع عند الاستلام',
+        'ضمان الجودة',
+      ].slice(0, 3);
+    }
+
+    return parsed;
   } catch (error) {
-    console.error('Marketing copy error:', error);
+    console.error('Poster copy error:', error);
     return null;
   }
 }
