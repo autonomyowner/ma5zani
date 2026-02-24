@@ -21,19 +21,25 @@ export default function AdminLoginPage() {
     }
   }, [router])
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsChecking(true)
-    setError('')
+  const verifyAdmin = useQuery(api.admin.verifyAdmin,
+    password.length > 0 && isChecking ? { password } : "skip"
+  )
 
-    // Simple password check
-    if (password === 'csgo2026') {
+  useEffect(() => {
+    if (verifyAdmin === undefined || !isChecking) return
+    if (verifyAdmin) {
       sessionStorage.setItem('adminPassword', password)
       router.push('/admin/dashboard')
     } else {
       setError('Invalid password')
     }
     setIsChecking(false)
+  }, [verifyAdmin, isChecking, password, router])
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError('')
+    setIsChecking(true)
   }
 
   return (

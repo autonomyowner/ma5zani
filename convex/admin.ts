@@ -1,7 +1,10 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "csgo2026";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if (!ADMIN_PASSWORD) {
+  console.error("ADMIN_PASSWORD environment variable is not set");
+}
 
 // Verify admin password
 export const verifyAdmin = query({
@@ -474,5 +477,36 @@ export const backfillReferralCodes = mutation({
     }
 
     return { updated: count };
+  },
+});
+
+// Revert migration: undo accidental activation, give 14-day trial instead
+// Only reverts sellers activated in the last 2 hours (by the migration), not manually activated ones
+export const migrateRevertToTrial = mutation({
+  args: { password: v.string() },
+  handler: async (ctx, args) => {
+    if (args.password !== ADMIN_PASSWORD) {
+      throw new Error("Unauthorized");
+    }
+
+    const sellers = await ctx.db.query("sellers").collect();
+    const twoHoursAgo = Date.now() - 2 * 60 * 60 * 1000;
+    const trialDuration = 14 * 24 * 60 * 60 * 1000;
+    let count = 0;
+
+    for (const seller of sellers) {
+      // Only revert sellers activated recently (by migration), not manually activated ones
+      if (seller.isActivated && seller.activatedAt && seller.activatedAt > twoHoursAgo) {
+        await ctx.db.patch(seller._id, {
+          isActivated: false,
+          activatedAt: undefined,
+          trialEndsAt: Date.now() + trialDuration,
+          updatedAt: Date.now(),
+        });
+        count++;
+      }
+    }
+
+    return { reverted: count, total: sellers.length };
   },
 });
