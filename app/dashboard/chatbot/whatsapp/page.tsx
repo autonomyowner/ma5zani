@@ -27,8 +27,9 @@ export default function WhatsAppPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [pollingStatus, setPollingStatus] = useState<string | null>(null)
+  const upsertSession = useMutation(api.whatsappSessions.upsertSession)
 
-  // Poll for connection status while QR is showing
+  // Poll for connection status while QR is showing or session is qr_pending
   const pollStatus = useCallback(async () => {
     if (!seller || !GATEWAY_URL) return
     try {
@@ -45,18 +46,31 @@ export default function WhatsAppPage() {
         setPollingStatus(data.status)
         if (data.status === 'connected') {
           setQrDataUrl(null)
+          // Update Convex directly from frontend as backup
+          try {
+            await upsertSession({
+              sellerId: seller._id,
+              status: 'connected',
+              phoneNumber: data.phoneNumber || undefined,
+            })
+          } catch {
+            // Ignore - bridge may have already updated
+          }
         }
       }
     } catch {
       // Ignore polling errors
     }
-  }, [seller])
+  }, [seller, upsertSession])
 
+  // Poll when QR is showing OR when Convex session is qr_pending
+  const shouldPoll = !!qrDataUrl || (session?.status === 'qr_pending')
   useEffect(() => {
-    if (!qrDataUrl) return
+    if (!shouldPoll) return
+    pollStatus() // Poll immediately
     const interval = setInterval(pollStatus, 3000)
     return () => clearInterval(interval)
-  }, [qrDataUrl, pollStatus])
+  }, [shouldPoll, pollStatus])
 
   if (seller === undefined) {
     return (
