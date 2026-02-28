@@ -15,6 +15,7 @@ import { sellerHasAccess } from '@/lib/sellerAccess'
 import FounderOfferGate from '@/components/dashboard/FounderOfferGate'
 
 type Personality = 'friendly' | 'professional' | 'casual'
+type SalesIntensity = 'gentle' | 'balanced' | 'aggressive'
 
 export default function ChatbotPage() {
   const router = useRouter()
@@ -23,16 +24,23 @@ export default function ChatbotPage() {
   const chatbot = useQuery(api.chatbot.getChatbot)
   const conversations = useQuery(api.chatbot.getConversations, {})
   const knowledge = useQuery(api.chatbot.getKnowledge, {})
+  const learningStats = useQuery(api.chatbotLearning.getLearningStats)
   const upsertChatbot = useMutation(api.chatbot.upsertChatbot)
   const toggleChatbot = useMutation(api.chatbot.toggleChatbot)
 
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isSavingSales, setIsSavingSales] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     greeting: '',
     personality: 'friendly' as Personality,
     isEnabled: false,
+  })
+  const [salesData, setSalesData] = useState({
+    intensity: 'balanced' as SalesIntensity,
+    autoFollowUp: false,
+    maxDiscountPercent: 0,
   })
 
   // Initialize form data when chatbot loads
@@ -44,6 +52,13 @@ export default function ChatbotPage() {
         personality: chatbot.personality,
         isEnabled: chatbot.isEnabled,
       })
+      if (chatbot.salesSettings) {
+        setSalesData({
+          intensity: chatbot.salesSettings.intensity || 'balanced',
+          autoFollowUp: chatbot.salesSettings.autoFollowUp || false,
+          maxDiscountPercent: chatbot.salesSettings.maxDiscountPercent || 0,
+        })
+      }
     }
   }, [chatbot])
 
@@ -91,6 +106,27 @@ export default function ChatbotPage() {
       console.error('Failed to save chatbot:', error)
     }
     setIsSaving(false)
+  }
+
+  const handleSaveSales = async () => {
+    if (!chatbot) return
+    setIsSavingSales(true)
+    try {
+      await upsertChatbot({
+        name: chatbot.name,
+        greeting: chatbot.greeting,
+        personality: chatbot.personality,
+        isEnabled: chatbot.isEnabled,
+        salesSettings: {
+          intensity: salesData.intensity,
+          autoFollowUp: salesData.autoFollowUp,
+          maxDiscountPercent: salesData.maxDiscountPercent > 0 ? salesData.maxDiscountPercent : undefined,
+        },
+      })
+    } catch (error) {
+      console.error('Failed to save sales settings:', error)
+    }
+    setIsSavingSales(false)
   }
 
   // Calculate stats
@@ -248,8 +284,108 @@ export default function ChatbotPage() {
           )}
         </Card>
 
+        {/* Sales Settings Card */}
+        {chatbot && (
+          <Card className="p-4 lg:p-6">
+            <div className="flex items-center justify-between mb-4 lg:mb-6">
+              <h2 className="text-base lg:text-lg font-bold text-[#0054A6]" style={{ fontFamily: 'var(--font-outfit)' }}>
+                {localText(language, { ar: 'إعدادات البيع', en: 'Sales Settings', fr: 'Param\u00e8tres de vente' })}
+              </h2>
+            </div>
+
+            {/* Sales Intensity */}
+            <div className="mb-4 lg:mb-6">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                {localText(language, { ar: 'شدة البيع', en: 'Sales Intensity', fr: 'Intensit\u00e9 de vente' })}
+              </label>
+              <p className="text-xs text-slate-500 mb-3">
+                {localText(language, {
+                  ar: 'تحكم في مدى إلحاح المساعد في اقتراح المنتجات',
+                  en: 'Controls how aggressively the assistant suggests products',
+                  fr: 'Contr\u00f4le l\'agressivit\u00e9 des suggestions de produits',
+                })}
+              </p>
+              <div className="grid grid-cols-3 gap-2 lg:gap-3">
+                {([
+                  { value: 'gentle' as SalesIntensity, label: localText(language, { ar: 'لطيف', en: 'Gentle', fr: 'Doux' }) },
+                  { value: 'balanced' as SalesIntensity, label: localText(language, { ar: 'متوازن', en: 'Balanced', fr: '\u00c9quilibr\u00e9' }) },
+                  { value: 'aggressive' as SalesIntensity, label: localText(language, { ar: 'قوي', en: 'Aggressive', fr: 'Agressif' }) },
+                ]).map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setSalesData({ ...salesData, intensity: option.value })}
+                    className={`p-2 lg:p-3 rounded-xl border-2 text-sm lg:text-base transition-all ${
+                      salesData.intensity === option.value
+                        ? 'border-[#0054A6] bg-[#0054A6]/5 text-[#0054A6]'
+                        : 'border-slate-200 hover:border-slate-300 text-slate-600'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Auto Follow-up Toggle */}
+            <div className="flex items-center justify-between p-3 lg:p-4 bg-slate-50 rounded-xl mb-4 lg:mb-6">
+              <div>
+                <p className="font-medium text-slate-900 text-sm lg:text-base">
+                  {localText(language, { ar: 'متابعة تلقائية', en: 'Auto Follow-up', fr: 'Suivi automatique' })}
+                </p>
+                <p className="text-xs lg:text-sm text-slate-500">
+                  {localText(language, {
+                    ar: 'تذكير العميل بالسلة المتروكة',
+                    en: 'Remind customers about abandoned carts',
+                    fr: 'Rappeler les clients pour les paniers abandonn\u00e9s',
+                  })}
+                </p>
+              </div>
+              <button
+                onClick={() => setSalesData({ ...salesData, autoFollowUp: !salesData.autoFollowUp })}
+                className={`relative w-12 lg:w-14 h-6 lg:h-7 rounded-full transition-colors`}
+                style={{ backgroundColor: salesData.autoFollowUp ? '#22B14C' : '#cbd5e1' }}
+              >
+                <div
+                  className={`absolute top-0.5 lg:top-1 w-5 lg:w-5 h-5 lg:h-5 rounded-full bg-white shadow transition-transform ${
+                    salesData.autoFollowUp
+                      ? (language === 'ar' ? 'translate-x-1' : 'translate-x-7 lg:translate-x-8')
+                      : (language === 'ar' ? 'translate-x-6 lg:translate-x-8' : 'translate-x-1')
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Max Discount */}
+            <div className="mb-4 lg:mb-6">
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                {localText(language, { ar: 'أقصى خصم يمكن عرضه', en: 'Maximum discount bot can offer', fr: 'Remise maximale offerte par le bot' })}
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  min={0}
+                  max={50}
+                  value={salesData.maxDiscountPercent}
+                  onChange={(e) => setSalesData({ ...salesData, maxDiscountPercent: Math.min(50, Math.max(0, parseInt(e.target.value) || 0)) })}
+                  className="w-24 px-3 lg:px-4 py-2 lg:py-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#0054A6] focus:border-transparent outline-none text-sm lg:text-base"
+                />
+                <span className="text-sm text-slate-500">%</span>
+                <span className="text-xs text-slate-400">
+                  {localText(language, { ar: '(0 = بدون خصم)', en: '(0 = no discount)', fr: '(0 = pas de remise)' })}
+                </span>
+              </div>
+            </div>
+
+            {/* Save Button */}
+            <Button variant="primary" onClick={handleSaveSales} disabled={isSavingSales}>
+              {isSavingSales ? t.dashboard.saving : t.dashboard.save}
+            </Button>
+          </Card>
+        )}
+
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 lg:gap-4">
           <Link href="/dashboard/chatbot/training">
             <Card className="p-4 lg:p-6 hover:shadow-md transition-shadow cursor-pointer group">
               <h3 className="font-bold text-slate-900 mb-1 group-hover:text-[#0054A6] transition-colors text-sm lg:text-base">
@@ -280,6 +416,29 @@ export default function ChatbotPage() {
               </p>
               {handoffChats > 0 && (
                 <span className="absolute top-3 lg:top-4 right-3 lg:right-4 w-2 h-2 lg:w-3 lg:h-3 bg-[#F7941D] rounded-full animate-pulse" />
+              )}
+            </Card>
+          </Link>
+          <Link href="/dashboard/chatbot/whatsapp">
+            <Card className="p-4 lg:p-6 hover:shadow-md transition-shadow cursor-pointer group relative">
+              <h3 className="font-bold text-slate-900 mb-1 group-hover:text-[#22B14C] transition-colors text-sm lg:text-base">
+                WhatsApp
+              </h3>
+              <p className="text-xs lg:text-sm text-slate-500">
+                {localText(language, { ar: 'ربط واتساب', en: 'Connect', fr: 'Connecter' })}
+              </p>
+            </Card>
+          </Link>
+          <Link href="/dashboard/chatbot/learning">
+            <Card className="p-4 lg:p-6 hover:shadow-md transition-shadow cursor-pointer group relative">
+              <h3 className="font-bold text-slate-900 mb-1 group-hover:text-[#0054A6] transition-colors text-sm lg:text-base">
+                {localText(language, { ar: 'التعلم', en: 'Learning', fr: 'Apprentissage' })}
+              </h3>
+              <p className="text-xs lg:text-sm text-slate-500">
+                {learningStats?.pending || 0} {localText(language, { ar: 'بانتظار المراجعة', en: 'pending', fr: 'en attente' })}
+              </p>
+              {(learningStats?.pending || 0) > 0 && (
+                <span className="absolute top-3 lg:top-4 right-3 lg:right-4 w-2 h-2 lg:w-3 lg:h-3 bg-[#22B14C] rounded-full animate-pulse" />
               )}
             </Card>
           </Link>

@@ -63,6 +63,18 @@ interface AIContext {
     commune?: string;
     deliveryFee?: number;
   };
+  salesSettings?: {
+    intensity: 'gentle' | 'balanced' | 'aggressive';
+    autoFollowUp: boolean;
+    maxDiscountPercent?: number;
+  };
+  recentOrderCount?: number;
+  customerProfile?: {
+    name?: string;
+    wilaya?: string;
+    orderHistory: Array<{ productName: string; date: number }>;
+    interests: string[];
+  };
 }
 
 interface Message {
@@ -115,6 +127,185 @@ function buildOrderStatePrompt(context: AIContext, language: 'ar' | 'en'): strin
   return prompt;
 }
 
+function buildSalesContext(context: AIContext, language: 'ar' | 'en'): string {
+  const settings = context.salesSettings;
+  if (!settings) return '';
+
+  const intensity = settings.intensity || 'balanced';
+  const lowStockProducts = context.products.filter(p => p.stock > 0 && p.stock < 10);
+  const saleProducts = context.products.filter(p => p.salePrice && p.salePrice < p.price);
+
+  if (language === 'ar') {
+    let prompt = '\n## قواعد البيع والإغلاق\n';
+
+    // Intensity-specific rules
+    if (intensity === 'gentle') {
+      prompt += `- اقترح المنتجات بلطف دون إلحاح\n`;
+      prompt += `- اذكر المخزون المحدود بشكل طبيعي فقط عند السؤال\n`;
+      prompt += `- لا تستخدم لغة استعجال\n`;
+      prompt += `- دع العميل يقرر بنفسه\n`;
+    } else if (intensity === 'balanced') {
+      prompt += `- اقترح الشراء بعد 2-3 رسائل من المحادثة\n`;
+      prompt += `- اذكر مستويات المخزون عند الحاجة\n`;
+      prompt += `- استخدم لغة استعجال خفيفة\n`;
+      prompt += `- اقترح منتجات مكملة عند الإمكان\n`;
+    } else if (intensity === 'aggressive') {
+      prompt += `- ادفع نحو الشراء في كل تبادل\n`;
+      prompt += `- استخدم لغة استعجال قوية\n`;
+      prompt += `- اقترح عروض حزم ومنتجات إضافية\n`;
+      prompt += `- ذكّر بالمخزون المحدود والعروض الحالية\n`;
+    }
+
+    prompt += `\n### التعامل مع الاعتراضات\n`;
+    prompt += `- إذا قال العميل "غالي": قسّم السعر على أيام الاستخدام، اقترح بدائل أرخص\n`;
+    prompt += `- إذا قال "مش متأكد": اذكر عدد العملاء الراضين وسياسة الاسترجاع\n`;
+    prompt += `- إذا قال "لازم نفكر": احفظ السلة واعرض المتابعة لاحقاً\n`;
+
+    prompt += `\n### الإلحاح الصادق (بيانات حقيقية فقط)\n`;
+    if (lowStockProducts.length > 0) {
+      lowStockProducts.forEach(p => {
+        prompt += `- ${p.name}: باقي ${p.stock} قطع فقط\n`;
+      });
+    }
+    if (context.recentOrderCount && context.recentOrderCount > 0) {
+      prompt += `- تم بيع ${context.recentOrderCount} طلب مؤخراً\n`;
+    }
+    prompt += `- لا تكذب أبداً بشأن المخزون أو المراجعات\n`;
+
+    if (saleProducts.length > 0) {
+      prompt += `\n### العروض الحالية\n`;
+      saleProducts.forEach(p => {
+        const discount = Math.round(((p.price - (p.salePrice || p.price)) / p.price) * 100);
+        prompt += `- ${p.name}: ${p.salePrice} دج بدلاً من ${p.price} دج (خصم ${discount}%)\n`;
+      });
+    }
+
+    prompt += `\n### البيع المتقاطع\n`;
+    prompt += `- بعد إضافة منتج: اقترح منتجات مكملة من نفس الفئة\n`;
+    prompt += `- اعرض التوصيل المجاني إذا أضاف منتج آخر (إن وجد)\n`;
+
+    prompt += `\n### دفع الشراء\n`;
+    if (intensity !== 'gentle') {
+      prompt += `- بعد 2-3 رسائل بدون نية شراء: "تحب نبدالك الطلب؟"\n`;
+    }
+    if (context.customerProfile?.orderHistory?.length) {
+      prompt += `- للعميل العائد: "نفس الطلبية السابقة؟"\n`;
+    }
+
+    if (settings.maxDiscountPercent && settings.maxDiscountPercent > 0) {
+      prompt += `\n### الخصومات\n`;
+      prompt += `- يمكنك عرض خصم حتى ${settings.maxDiscountPercent}% إذا تردد العميل\n`;
+      prompt += `- لا تعرض الخصم مباشرة، انتظر حتى يعترض العميل على السعر\n`;
+    }
+
+    // Customer profile context
+    if (context.customerProfile) {
+      prompt += `\n### معلومات العميل\n`;
+      if (context.customerProfile.name) {
+        prompt += `- الاسم: ${context.customerProfile.name}\n`;
+      }
+      if (context.customerProfile.wilaya) {
+        prompt += `- الولاية: ${context.customerProfile.wilaya}\n`;
+      }
+      if (context.customerProfile.orderHistory.length > 0) {
+        prompt += `- عميل عائد! طلبات سابقة:\n`;
+        context.customerProfile.orderHistory.slice(-3).forEach(o => {
+          prompt += `  * ${o.productName}\n`;
+        });
+      }
+      if (context.customerProfile.interests.length > 0) {
+        prompt += `- اهتمامات: ${context.customerProfile.interests.join(', ')}\n`;
+      }
+    }
+
+    return prompt;
+  }
+
+  // English version
+  let prompt = '\n## Sales Closing Rules\n';
+
+  if (intensity === 'gentle') {
+    prompt += `- Suggest products gently without pushing\n`;
+    prompt += `- Only mention limited stock naturally when asked\n`;
+    prompt += `- No urgency language\n`;
+    prompt += `- Let the customer decide on their own\n`;
+  } else if (intensity === 'balanced') {
+    prompt += `- Suggest purchases after 2-3 message exchanges\n`;
+    prompt += `- Mention stock levels when relevant\n`;
+    prompt += `- Use light urgency language\n`;
+    prompt += `- Suggest complementary products when possible\n`;
+  } else if (intensity === 'aggressive') {
+    prompt += `- Push toward purchase in every exchange\n`;
+    prompt += `- Use strong urgency language\n`;
+    prompt += `- Suggest bundle deals and additional products\n`;
+    prompt += `- Remind about limited stock and current offers\n`;
+  }
+
+  prompt += `\n### Handling Objections\n`;
+  prompt += `- If customer says "too expensive": Break down price per day of use, suggest cheaper alternatives\n`;
+  prompt += `- If customer says "not sure": Mention satisfied customers and return policy\n`;
+  prompt += `- If customer says "need to think": Save cart and offer to follow up later\n`;
+
+  prompt += `\n### Honest Urgency (real data only)\n`;
+  if (lowStockProducts.length > 0) {
+    lowStockProducts.forEach(p => {
+      prompt += `- ${p.name}: Only ${p.stock} units left\n`;
+    });
+  }
+  if (context.recentOrderCount && context.recentOrderCount > 0) {
+    prompt += `- ${context.recentOrderCount} orders placed recently\n`;
+  }
+  prompt += `- Never lie about stock or reviews\n`;
+
+  if (saleProducts.length > 0) {
+    prompt += `\n### Current Offers\n`;
+    saleProducts.forEach(p => {
+      const discount = Math.round(((p.price - (p.salePrice || p.price)) / p.price) * 100);
+      prompt += `- ${p.name}: ${p.salePrice} DZD instead of ${p.price} DZD (${discount}% off)\n`;
+    });
+  }
+
+  prompt += `\n### Cross-selling\n`;
+  prompt += `- After adding a product: Suggest complementary products from the same category\n`;
+  prompt += `- Offer free delivery if they add another product (if applicable)\n`;
+
+  prompt += `\n### Purchase Nudge\n`;
+  if (intensity !== 'gentle') {
+    prompt += `- After 2-3 messages without purchase intent: "Would you like me to start your order?"\n`;
+  }
+  if (context.customerProfile?.orderHistory?.length) {
+    prompt += `- For returning customer: "Same as your last order?"\n`;
+  }
+
+  if (settings.maxDiscountPercent && settings.maxDiscountPercent > 0) {
+    prompt += `\n### Discounts\n`;
+    prompt += `- You can offer up to ${settings.maxDiscountPercent}% discount if the customer hesitates\n`;
+    prompt += `- Don't offer the discount right away, wait until they object to the price\n`;
+  }
+
+  // Customer profile context
+  if (context.customerProfile) {
+    prompt += `\n### Customer Info\n`;
+    if (context.customerProfile.name) {
+      prompt += `- Name: ${context.customerProfile.name}\n`;
+    }
+    if (context.customerProfile.wilaya) {
+      prompt += `- Wilaya: ${context.customerProfile.wilaya}\n`;
+    }
+    if (context.customerProfile.orderHistory.length > 0) {
+      prompt += `- Returning customer! Previous orders:\n`;
+      context.customerProfile.orderHistory.slice(-3).forEach(o => {
+        prompt += `  * ${o.productName}\n`;
+      });
+    }
+    if (context.customerProfile.interests.length > 0) {
+      prompt += `- Interests: ${context.customerProfile.interests.join(', ')}\n`;
+    }
+  }
+
+  return prompt;
+}
+
 function buildSystemPrompt(context: AIContext, language: 'ar' | 'en'): string {
   const { chatbot, storefront, seller, knowledge, products, currentProduct } = context;
 
@@ -131,6 +322,7 @@ function buildSystemPrompt(context: AIContext, language: 'ar' | 'en'): string {
   };
 
   const orderStatePrompt = buildOrderStatePrompt(context, language);
+  const salesContextPrompt = buildSalesContext(context, language);
 
   const productListAr = products.slice(0, 15).map(p => {
     let line = `- [${p.id}] ${p.name}: ${p.salePrice || p.price} دج`;
@@ -233,7 +425,7 @@ ${orderSystemAr}
 4. إذا لم تعرف الإجابة، اعتذر واقترح التحدث مع فريق الدعم
 5. استخدم اللغة العربية فقط
 6. أضف دائماً كتلة JSON في نهاية كل رد
-
+${salesContextPrompt}
 تذكر: أنت تمثل المتجر، كن مفيداً ومهنياً.
 ` : `
 You are ${chatbot.name}, a smart shopping assistant for "${storefront.name}".
@@ -272,7 +464,7 @@ ${orderSystemEn}
 4. If unsure, apologize and suggest talking to support team
 5. Use the same language as the customer
 6. Always add a JSON block at the end of every response
-
+${salesContextPrompt}
 Remember: You represent the store, be helpful and professional.
 `;
 

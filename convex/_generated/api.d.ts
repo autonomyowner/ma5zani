@@ -13,6 +13,7 @@ import type * as auth from "../auth.js";
 import type * as categories from "../categories.js";
 import type * as chat from "../chat.js";
 import type * as chatbot from "../chatbot.js";
+import type * as chatbotLearning from "../chatbotLearning.js";
 import type * as crons from "../crons.js";
 import type * as customDomains from "../customDomains.js";
 import type * as delivery from "../delivery.js";
@@ -29,6 +30,7 @@ import type * as stats from "../stats.js";
 import type * as storefronts from "../storefronts.js";
 import type * as telegram from "../telegram.js";
 import type * as voiceClips from "../voiceClips.js";
+import type * as whatsappSessions from "../whatsappSessions.js";
 
 import type {
   ApiFromModules,
@@ -42,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   categories: typeof categories;
   chat: typeof chat;
   chatbot: typeof chatbot;
+  chatbotLearning: typeof chatbotLearning;
   crons: typeof crons;
   customDomains: typeof customDomains;
   delivery: typeof delivery;
@@ -58,6 +61,7 @@ declare const fullApi: ApiFromModules<{
   storefronts: typeof storefronts;
   telegram: typeof telegram;
   voiceClips: typeof voiceClips;
+  whatsappSessions: typeof whatsappSessions;
 }>;
 
 /**

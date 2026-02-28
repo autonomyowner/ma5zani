@@ -262,6 +262,15 @@ export default defineSchema({
       v.literal("casual")
     ),
     isEnabled: v.boolean(),
+    // Sales closer settings
+    salesSettings: v.optional(v.object({
+      intensity: v.union(v.literal("gentle"), v.literal("balanced"), v.literal("aggressive")),
+      autoFollowUp: v.boolean(),
+      followUpDelayMinutes: v.optional(v.number()),
+      maxDiscountPercent: v.optional(v.number()),
+    })),
+    // WhatsApp integration
+    whatsappEnabled: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -293,7 +302,12 @@ export default defineSchema({
       v.literal("handoff"),
       v.literal("closed")
     ),
+    // Channel tracking (web = storefront widget, whatsapp = WhatsApp)
+    channel: v.optional(v.union(v.literal("web"), v.literal("whatsapp"))),
+    whatsappJid: v.optional(v.string()),
     lastMessageAt: v.number(),
+    // Learning engine: marks when conversation was analyzed
+    analyzedAt: v.optional(v.number()),
     context: v.optional(v.object({
       currentProductId: v.optional(v.id("products")),
       cartItems: v.optional(v.array(v.string())),
@@ -478,6 +492,60 @@ export default defineSchema({
   })
     .index("by_referrer", ["referrerId"])
     .index("by_referred", ["referredSellerId"]),
+
+  // ============ CHATBOT LEARNING ENGINE ============
+
+  // Auto-learned knowledge from successful conversations
+  chatbotLearnedKnowledge: defineTable({
+    chatbotId: v.id("chatbots"),
+    question: v.string(),
+    answer: v.string(),
+    keywords: v.array(v.string()),
+    category: v.string(),
+    source: v.union(v.literal("auto-learned"), v.literal("seller-approved")),
+    sourceConversationId: v.optional(v.id("chatbotConversations")),
+    confidence: v.number(),
+    status: v.union(v.literal("pending"), v.literal("approved"), v.literal("dismissed")),
+    createdAt: v.number(),
+  })
+    .index("by_chatbot", ["chatbotId"])
+    .index("by_status", ["chatbotId", "status"]),
+
+  // Customer profiles for returning customer recognition
+  chatbotCustomerProfiles: defineTable({
+    chatbotId: v.id("chatbots"),
+    identifier: v.string(),       // phone number or sessionId
+    channel: v.string(),           // "web" | "whatsapp"
+    name: v.optional(v.string()),
+    wilaya: v.optional(v.string()),
+    orderHistory: v.array(v.object({
+      orderId: v.id("orders"),
+      productName: v.string(),
+      date: v.number(),
+    })),
+    interests: v.array(v.string()),
+    lastInteraction: v.number(),
+    createdAt: v.number(),
+  })
+    .index("by_chatbot", ["chatbotId"])
+    .index("by_lookup", ["chatbotId", "identifier"]),
+
+  // ============ WHATSAPP INTEGRATION ============
+
+  whatsappSessions: defineTable({
+    sellerId: v.id("sellers"),
+    phoneNumber: v.optional(v.string()),
+    status: v.union(
+      v.literal("connected"),
+      v.literal("disconnected"),
+      v.literal("qr_pending")
+    ),
+    connectedAt: v.optional(v.number()),
+    lastSeenAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_seller", ["sellerId"]),
 
   // Messages in chatbot conversations
   chatbotMessages: defineTable({

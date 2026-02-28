@@ -40,6 +40,12 @@ export const upsertChatbot = mutation({
       v.literal("casual")
     ),
     isEnabled: v.boolean(),
+    salesSettings: v.optional(v.object({
+      intensity: v.union(v.literal("gentle"), v.literal("balanced"), v.literal("aggressive")),
+      autoFollowUp: v.boolean(),
+      followUpDelayMinutes: v.optional(v.number()),
+      maxDiscountPercent: v.optional(v.number()),
+    })),
   },
   handler: async (ctx, args) => {
     const seller = await requireActiveSeller(ctx);
@@ -67,6 +73,7 @@ export const upsertChatbot = mutation({
         greeting: args.greeting,
         personality: args.personality,
         isEnabled: args.isEnabled,
+        salesSettings: args.salesSettings,
         updatedAt: Date.now(),
       });
       return existingChatbot._id;
@@ -79,6 +86,7 @@ export const upsertChatbot = mutation({
         greeting: args.greeting,
         personality: args.personality,
         isEnabled: args.isEnabled,
+        salesSettings: args.salesSettings,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       });
@@ -706,10 +714,16 @@ export const getAIContext = query({
     // Get seller
     const seller = await ctx.db.get(chatbot.sellerId);
 
-    // Get knowledge base
+    // Get knowledge base (manual)
     const knowledge = await ctx.db
       .query("chatbotKnowledge")
       .withIndex("by_chatbot", (q) => q.eq("chatbotId", chatbot._id))
+      .collect();
+
+    // Get approved auto-learned knowledge
+    const learnedKnowledge = await ctx.db
+      .query("chatbotLearnedKnowledge")
+      .withIndex("by_status", (q) => q.eq("chatbotId", chatbot._id).eq("status", "approved"))
       .collect();
 
     // Get products if showing on storefront
@@ -739,12 +753,20 @@ export const getAIContext = query({
         name: seller.name,
         phone: seller.phone,
       } : null,
-      knowledge: knowledge.map(k => ({
-        category: k.category,
-        question: k.question,
-        answer: k.answer,
-        keywords: k.keywords,
-      })),
+      knowledge: [
+        ...knowledge.map(k => ({
+          category: k.category,
+          question: k.question,
+          answer: k.answer,
+          keywords: k.keywords,
+        })),
+        ...learnedKnowledge.map(k => ({
+          category: k.category,
+          question: k.question,
+          answer: k.answer,
+          keywords: k.keywords,
+        })),
+      ],
       storefrontSlug: storefront.slug,
       products: storefrontProducts.map(p => ({
         id: p._id,
@@ -767,6 +789,7 @@ export const getAIContext = query({
       } : null,
       context: conversation.context,
       conversationStatus: conversation.status,
+      salesSettings: chatbot.salesSettings,
     };
   },
 });
@@ -816,5 +839,35 @@ export const addBotResponse = mutation({
     await ctx.db.patch(args.conversationId, {
       lastMessageAt: Date.now(),
     });
+  },
+});
+
+// ============ WHATSAPP INTEGRATION ============
+
+// Get chatbot by seller ID (for WhatsApp integration)
+export const getPublicChatbotBySeller = query({
+  args: {
+    sellerId: v.id("sellers"),
+  },
+  handler: async (ctx, args) => {
+    const storefront = await ctx.db
+      .query("storefronts")
+      .withIndex("by_seller", (q) => q.eq("sellerId", args.sellerId))
+      .first();
+
+    if (!storefront) return null;
+
+    const chatbot = await ctx.db
+      .query("chatbots")
+      .withIndex("by_storefront", (q) => q.eq("storefrontId", storefront._id))
+      .first();
+
+    if (!chatbot || !chatbot.isEnabled) return null;
+
+    return {
+      chatbotId: chatbot._id,
+      storefrontSlug: storefront.slug,
+      storefrontId: storefront._id,
+    };
   },
 });

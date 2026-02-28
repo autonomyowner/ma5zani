@@ -39,7 +39,7 @@ function isRateLimited(ip: string): boolean {
 // Extract JSON action block from AI response
 function extractOrderAction(aiResponse: string): {
   cleanResponse: string;
-  action: { orderAction: string; data: Record<string, unknown> } | null;
+  action: { orderAction: string; salesAction?: string; data: Record<string, unknown> } | null;
 } {
   const jsonRegex = /```json\s*\n?([\s\S]*?)\n?\s*```/;
   const match = aiResponse.match(jsonRegex);
@@ -333,6 +333,14 @@ export async function POST(request: NextRequest) {
       content: msg.content,
     }));
 
+    // Compute recent order count for social proof (based on low-stock products)
+    const productsWithStock = context.products.filter(p => p.stock > 0);
+    // Estimate recent orders: count products with stock < 20 as "selling well"
+    const recentOrderCount = productsWithStock.filter(p => p.stock < 20).length;
+
+    // Build sales settings for AI context
+    const salesSettings = (context as unknown as { salesSettings?: { intensity: 'gentle' | 'balanced' | 'aggressive'; autoFollowUp: boolean; maxDiscountPercent?: number } }).salesSettings;
+
     // Generate AI response
     const aiResponse = await generateAIResponse(
       {
@@ -353,6 +361,8 @@ export async function POST(request: NextRequest) {
           ...context.context,
           currentProductId: context.context.currentProductId ? String(context.context.currentProductId) : undefined,
         } : undefined,
+        salesSettings: salesSettings || undefined,
+        recentOrderCount: recentOrderCount > 0 ? recentOrderCount : undefined,
       },
       conversationHistory,
       message,
