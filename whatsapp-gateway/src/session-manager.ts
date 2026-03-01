@@ -94,6 +94,11 @@ export class SessionManager {
             { sellerId, phone: session.phoneNumber },
             'WhatsApp connected'
           );
+          // Resolve the promise if it hasn't been resolved yet (restore case — no QR)
+          if (session.qrResolve) {
+            session.qrResolve('connected');
+            session.qrResolve = undefined;
+          }
           if (session.onStatusChange) {
             session.onStatusChange('connected', session.phoneNumber);
           }

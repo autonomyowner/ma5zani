@@ -46,6 +46,17 @@ app.post('/api/sellers/:sellerId/qr', async (req: Request, res: Response) => {
   const sellerId = req.params.sellerId as string;
   try {
     const qrDataUrl = await sessionManager.generateQR(sellerId);
+    // Set message handler for incoming WhatsApp messages
+    sessionManager.setMessageHandler(sellerId, async (from, text, _messageId) => {
+      const response = await bridge.handleIncomingMessage(sellerId, from, text);
+      if (response) {
+        try {
+          await sessionManager.sendMessage(sellerId, from, response);
+        } catch (err) {
+          console.error('Failed to send reply:', err);
+        }
+      }
+    });
     // Notify Convex when connection status changes
     sessionManager.setStatusHandler(sellerId, async (status, phoneNumber) => {
       await bridge.updateSessionStatus(sellerId, status, phoneNumber);
