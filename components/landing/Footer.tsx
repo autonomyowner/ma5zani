@@ -204,9 +204,20 @@ export default function Footer() {
             <p className="text-slate-500 text-sm">
               {t.footer.copyright}
             </p>
-            <p className="text-slate-500 text-sm">
-              {t.footer.madeIn}
-            </p>
+            <div className="flex items-center gap-4">
+              <p className="text-slate-500 text-sm">
+                {t.footer.madeIn}
+              </p>
+              <span className="text-slate-600">|</span>
+              <a
+                href="https://sitedz.store"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-slate-500 text-sm hover:text-[#00AEEF] transition-colors"
+              >
+                Dev by <span className="font-semibold">SiteDz</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
