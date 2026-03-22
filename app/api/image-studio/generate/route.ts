@@ -129,34 +129,49 @@ export async function POST(request: NextRequest) {
       .join('\n');
 
     // Call OpenRouter with Nano Banana Pro (Gemini 3 Pro Image)
-    const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://www.ma5zani.com',
-        'X-Title': 'ma5zani Image Studio',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-3-pro-image-preview',
-        modalities: ['text', 'image'],
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image_url',
-                image_url: { url: imageDataUrl },
-              },
-              {
-                type: 'text',
-                text: prompt,
-              },
-            ],
-          },
-        ],
-      }),
+    const requestBody = JSON.stringify({
+      model: 'google/gemini-3-pro-image-preview',
+      modalities: ['text', 'image'],
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: { url: imageDataUrl },
+            },
+            {
+              type: 'text',
+              text: prompt,
+            },
+          ],
+        },
+      ],
     });
+
+    const headers = {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': 'https://www.ma5zani.com',
+      'X-Title': 'ma5zani Image Studio',
+    };
+
+    let orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers,
+      body: requestBody,
+    });
+
+    // Retry once on 429 after 8s delay
+    if (orRes.status === 429) {
+      console.log('Rate limited, retrying in 8s...');
+      await new Promise((r) => setTimeout(r, 8000));
+      orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers,
+        body: requestBody,
+      });
+    }
 
     if (!orRes.ok) {
       const errorText = await orRes.text();
@@ -178,39 +193,38 @@ export async function POST(request: NextRequest) {
     const data = await orRes.json();
 
     // Extract image from OpenRouter response
-    // OpenRouter returns images as data URLs in message content
-    const content = data.choices?.[0]?.message?.content;
+    // OpenRouter returns images in message.images[] as { type: "image_url", image_url: { url: "data:image/png;base64,..." } }
+    const message = data.choices?.[0]?.message;
+    const images = message?.images;
 
-    if (!content) {
-      console.error('No content in response:', JSON.stringify(data).substring(0, 500));
-      return NextResponse.json({ error: 'No image generated' }, { status: 500 });
-    }
-
-    // Content can be a string or an array of parts
     let imageBase64 = '';
 
-    if (typeof content === 'string') {
-      // Try to find a data URL in the string
-      const match = content.match(/data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/);
+    if (Array.isArray(images) && images.length > 0) {
+      const dataUrl = images[0]?.image_url?.url || '';
+      const match = dataUrl.match(/^data:image\/[^;]+;base64,(.+)$/);
       if (match) {
         imageBase64 = match[1];
       }
-    } else if (Array.isArray(content)) {
-      // Find image_url part in content array
-      for (const part of content) {
-        if (part.type === 'image_url' && part.image_url?.url) {
-          const dataUrl = part.image_url.url;
-          const match = dataUrl.match(/^data:image\/[^;]+;base64,(.+)$/);
-          if (match) {
-            imageBase64 = match[1];
-            break;
+    }
+
+    // Fallback: check content for data URL (some models return it there)
+    if (!imageBase64 && message?.content) {
+      const content = message.content;
+      if (typeof content === 'string') {
+        const match = content.match(/data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/);
+        if (match) imageBase64 = match[1];
+      } else if (Array.isArray(content)) {
+        for (const part of content) {
+          if (part.type === 'image_url' && part.image_url?.url) {
+            const m = part.image_url.url.match(/^data:image\/[^;]+;base64,(.+)$/);
+            if (m) { imageBase64 = m[1]; break; }
           }
         }
       }
     }
 
     if (!imageBase64) {
-      console.error('No image found in response content:', JSON.stringify(content).substring(0, 500));
+      console.error('No image in response. Keys:', Object.keys(message || {}), 'images:', images?.length);
       return NextResponse.json({ error: 'No image in AI response' }, { status: 500 });
     }
 
