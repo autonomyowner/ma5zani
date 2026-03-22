@@ -15,6 +15,12 @@ function getConvex() {
 
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || 'ma5zani';
 
+// Model fallback chain — try Pro first, then Flash
+const GEMINI_MODELS = [
+  'gemini-3-pro-image-preview',
+  'gemini-2.5-flash-preview-image-generation',
+];
+
 const STYLE_PROMPTS: Record<string, string> = {
   professional:
     'Place this product on a clean, minimalist surface with soft studio lighting. Professional e-commerce product photography style. White or light gradient background, subtle shadow, crisp details, high-end commercial look. No text or watermarks.',
@@ -39,7 +45,6 @@ async function fetchImageAsBase64(imageUrl: string): Promise<string> {
   const arrayBuffer = await res.arrayBuffer();
   const bytes = new Uint8Array(arrayBuffer);
 
-  // Workers-safe base64 encoding (chunked to avoid stack overflow)
   let binary = '';
   const chunkSize = 8192;
   for (let i = 0; i < bytes.length; i += chunkSize) {
@@ -74,6 +79,52 @@ async function uploadToR2(imageBytes: Uint8Array, sellerId: string): Promise<str
   }
 
   return key;
+}
+
+async function callGemini(
+  apiKey: string,
+  model: string,
+  imageBase64: string,
+  prompt: string
+): Promise<{ ok: boolean; status: number; data?: any; error?: string }> {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                inlineData: {
+                  mimeType: 'image/jpeg',
+                  data: imageBase64,
+                },
+              },
+              { text: prompt },
+            ],
+          },
+        ],
+        generationConfig: {
+          responseModalities: ['TEXT', 'IMAGE'],
+        },
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error(`Gemini ${model} error:`, res.status, errorText);
+    return { ok: false, status: res.status, error: errorText };
+  }
+
+  const data = await res.json();
+  return { ok: true, status: 200, data };
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function POST(request: NextRequest) {
@@ -127,43 +178,48 @@ export async function POST(request: NextRequest) {
       .filter(Boolean)
       .join('\n');
 
-    // Call Gemini API
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  inlineData: {
-                    mimeType: 'image/jpeg',
-                    data: imageBase64,
-                  },
-                },
-                { text: prompt },
-              ],
-            },
-          ],
-          generationConfig: {
-            responseModalities: ['TEXT', 'IMAGE'],
-          },
-        }),
-      }
-    );
+    // Try each model with retry on 429
+    let geminiData: any = null;
+    let lastError = '';
 
-    if (!geminiRes.ok) {
-      const errorText = await geminiRes.text();
-      console.error('Gemini API error:', geminiRes.status, errorText);
+    for (const model of GEMINI_MODELS) {
+      // Attempt 1
+      let result = await callGemini(apiKey, model, imageBase64, prompt);
+
+      // Retry once after 5s on 429 (rate limit)
+      if (!result.ok && result.status === 429) {
+        console.log(`Rate limited on ${model}, retrying in 5s...`);
+        await sleep(5000);
+        result = await callGemini(apiKey, model, imageBase64, prompt);
+      }
+
+      if (result.ok) {
+        geminiData = result.data;
+        break;
+      }
+
+      // Skip to next model on 404 (model not available)
+      if (result.status === 404) {
+        console.log(`Model ${model} not found, trying next...`);
+        continue;
+      }
+
+      // On persistent 429, try next model
+      if (result.status === 429) {
+        lastError = 'Rate limit exceeded. Please wait a minute and try again.';
+        console.log(`Persistent rate limit on ${model}, trying next...`);
+        continue;
+      }
+
+      lastError = `AI generation failed (${result.status})`;
+    }
+
+    if (!geminiData) {
       return NextResponse.json(
-        { error: `AI generation failed (${geminiRes.status})` },
+        { error: lastError || 'All AI models failed' },
         { status: 500 }
       );
     }
-
-    const geminiData = await geminiRes.json();
 
     // Extract generated image from response
     const candidates = geminiData.candidates;
@@ -173,7 +229,8 @@ export async function POST(request: NextRequest) {
     }
 
     const imagePart = candidates[0].content.parts.find(
-      (p: { inlineData?: { mimeType: string; data: string } }) => p.inlineData?.mimeType?.startsWith('image/')
+      (p: { inlineData?: { mimeType: string; data: string } }) =>
+        p.inlineData?.mimeType?.startsWith('image/')
     );
 
     if (!imagePart?.inlineData?.data) {
