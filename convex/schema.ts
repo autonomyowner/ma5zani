@@ -463,14 +463,17 @@ export default defineSchema({
     .index("by_seller", ["sellerId"])
     .index("by_seller_created", ["sellerId", "createdAt"]),
 
-  // ============ MARKETING IMAGES ============
+  // ============ IMAGE STUDIO ============
 
   marketingImages: defineTable({
     sellerId: v.id("sellers"),
     productId: v.id("products"),
-    templateId: v.string(),        // e.g. "gradient-float", "bold-price"
-    format: v.string(),            // "square" | "story" | "facebook"
-    imageKey: v.string(),          // R2 key for the generated PNG
+    style: v.optional(v.string()),  // "professional" | "lifestyle" | "promo" | "social"
+    format: v.string(),            // "story" | "square" | "landscape"
+    imageKey: v.string(),          // R2 key for the generated image
+    prompt: v.optional(v.string()),
+    // Legacy fields (from old marketing images)
+    templateId: v.optional(v.string()),
     headline: v.optional(v.string()),
     subheadline: v.optional(v.string()),
     createdAt: v.number(),

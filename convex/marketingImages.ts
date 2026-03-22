@@ -18,22 +18,20 @@ export const getMyMarketingImages = query({
 export const saveMarketingImage = mutation({
   args: {
     productId: v.id("products"),
-    templateId: v.string(),
+    style: v.string(),
     format: v.string(),
     imageKey: v.string(),
-    headline: v.optional(v.string()),
-    subheadline: v.optional(v.string()),
+    prompt: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const seller = await requireActiveSeller(ctx);
     return await ctx.db.insert("marketingImages", {
       sellerId: seller._id,
       productId: args.productId,
-      templateId: args.templateId,
+      style: args.style,
       format: args.format,
       imageKey: args.imageKey,
-      headline: args.headline,
-      subheadline: args.subheadline,
+      prompt: args.prompt,
       createdAt: Date.now(),
     });
   },
