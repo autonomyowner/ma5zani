@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
 
     // Call Gemini API
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-image-generation:generateContent?key=${apiKey}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -148,8 +148,7 @@ export async function POST(request: NextRequest) {
             },
           ],
           generationConfig: {
-            responseModalities: ['IMAGE', 'TEXT'],
-            temperature: 1,
+            responseModalities: ['TEXT', 'IMAGE'],
           },
         }),
       }
