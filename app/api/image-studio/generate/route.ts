@@ -15,12 +15,6 @@ function getConvex() {
 
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || 'ma5zani';
 
-// Model fallback chain — try Pro first, then Flash
-const GEMINI_MODELS = [
-  'gemini-3-pro-image-preview',
-  'gemini-2.5-flash-preview-image-generation',
-];
-
 const STYLE_PROMPTS: Record<string, string> = {
   professional:
     'Place this product on a clean, minimalist surface with soft studio lighting. Professional e-commerce product photography style. White or light gradient background, subtle shadow, crisp details, high-end commercial look. No text or watermarks.',
@@ -38,7 +32,7 @@ const FORMAT_DIMENSIONS: Record<string, { width: number; height: number }> = {
   landscape: { width: 1200, height: 628 },
 };
 
-async function fetchImageAsBase64(imageUrl: string): Promise<string> {
+async function fetchImageAsBase64DataUrl(imageUrl: string): Promise<string> {
   const res = await fetch(imageUrl);
   if (!res.ok) throw new Error(`Failed to fetch image: ${res.status}`);
 
@@ -53,7 +47,9 @@ async function fetchImageAsBase64(imageUrl: string): Promise<string> {
       binary += String.fromCharCode(chunk[j]);
     }
   }
-  return btoa(binary);
+
+  const contentType = res.headers.get('content-type') || 'image/jpeg';
+  return `data:${contentType};base64,${btoa(binary)}`;
 }
 
 async function uploadToR2(imageBytes: Uint8Array, sellerId: string): Promise<string> {
@@ -81,52 +77,6 @@ async function uploadToR2(imageBytes: Uint8Array, sellerId: string): Promise<str
   return key;
 }
 
-async function callGemini(
-  apiKey: string,
-  model: string,
-  imageBase64: string,
-  prompt: string
-): Promise<{ ok: boolean; status: number; data?: any; error?: string }> {
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                inlineData: {
-                  mimeType: 'image/jpeg',
-                  data: imageBase64,
-                },
-              },
-              { text: prompt },
-            ],
-          },
-        ],
-        generationConfig: {
-          responseModalities: ['TEXT', 'IMAGE'],
-        },
-      }),
-    }
-  );
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    console.error(`Gemini ${model} error:`, res.status, errorText);
-    return { ok: false, status: res.status, error: errorText };
-  }
-
-  const data = await res.json();
-  return { ok: true, status: 200, data };
-}
-
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 export async function POST(request: NextRequest) {
   const body = await request.json();
   const { sellerId, productId, style, format, storeName } = body;
@@ -135,9 +85,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
-    return NextResponse.json({ error: 'Gemini API key not configured' }, { status: 500 });
+    return NextResponse.json({ error: 'OpenRouter API key not configured' }, { status: 500 });
   }
 
   try {
@@ -156,7 +106,7 @@ export async function POST(request: NextRequest) {
     }
 
     const imageUrl = getR2PublicUrl(imageKey);
-    const imageBase64 = await fetchImageAsBase64(imageUrl);
+    const imageDataUrl = await fetchImageAsBase64DataUrl(imageUrl);
 
     // Build prompt
     const dims = FORMAT_DIMENSIONS[format] || FORMAT_DIMENSIONS.square;
@@ -178,69 +128,94 @@ export async function POST(request: NextRequest) {
       .filter(Boolean)
       .join('\n');
 
-    // Try each model with retry on 429
-    let geminiData: any = null;
-    let lastError = '';
+    // Call OpenRouter with Nano Banana Pro (Gemini 3 Pro Image)
+    const orRes = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://www.ma5zani.com',
+        'X-Title': 'ma5zani Image Studio',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-3-pro-image-preview',
+        modalities: ['text', 'image'],
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image_url',
+                image_url: { url: imageDataUrl },
+              },
+              {
+                type: 'text',
+                text: prompt,
+              },
+            ],
+          },
+        ],
+      }),
+    });
 
-    for (const model of GEMINI_MODELS) {
-      // Attempt 1
-      let result = await callGemini(apiKey, model, imageBase64, prompt);
+    if (!orRes.ok) {
+      const errorText = await orRes.text();
+      console.error('OpenRouter error:', orRes.status, errorText);
 
-      // Retry once after 5s on 429 (rate limit)
-      if (!result.ok && result.status === 429) {
-        console.log(`Rate limited on ${model}, retrying in 5s...`);
-        await sleep(5000);
-        result = await callGemini(apiKey, model, imageBase64, prompt);
+      if (orRes.status === 429) {
+        return NextResponse.json(
+          { error: 'Rate limit exceeded. Please wait a minute and try again.' },
+          { status: 500 }
+        );
       }
 
-      if (result.ok) {
-        geminiData = result.data;
-        break;
-      }
-
-      // Skip to next model on 404 (model not available)
-      if (result.status === 404) {
-        console.log(`Model ${model} not found, trying next...`);
-        continue;
-      }
-
-      // On persistent 429, try next model
-      if (result.status === 429) {
-        lastError = 'Rate limit exceeded. Please wait a minute and try again.';
-        console.log(`Persistent rate limit on ${model}, trying next...`);
-        continue;
-      }
-
-      lastError = `AI generation failed (${result.status})`;
-    }
-
-    if (!geminiData) {
       return NextResponse.json(
-        { error: lastError || 'All AI models failed' },
+        { error: `AI generation failed (${orRes.status})` },
         { status: 500 }
       );
     }
 
-    // Extract generated image from response
-    const candidates = geminiData.candidates;
-    if (!candidates?.[0]?.content?.parts) {
-      console.error('Unexpected Gemini response:', JSON.stringify(geminiData).substring(0, 500));
+    const data = await orRes.json();
+
+    // Extract image from OpenRouter response
+    // OpenRouter returns images as data URLs in message content
+    const content = data.choices?.[0]?.message?.content;
+
+    if (!content) {
+      console.error('No content in response:', JSON.stringify(data).substring(0, 500));
       return NextResponse.json({ error: 'No image generated' }, { status: 500 });
     }
 
-    const imagePart = candidates[0].content.parts.find(
-      (p: { inlineData?: { mimeType: string; data: string } }) =>
-        p.inlineData?.mimeType?.startsWith('image/')
-    );
+    // Content can be a string or an array of parts
+    let imageBase64 = '';
 
-    if (!imagePart?.inlineData?.data) {
+    if (typeof content === 'string') {
+      // Try to find a data URL in the string
+      const match = content.match(/data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/);
+      if (match) {
+        imageBase64 = match[1];
+      }
+    } else if (Array.isArray(content)) {
+      // Find image_url part in content array
+      for (const part of content) {
+        if (part.type === 'image_url' && part.image_url?.url) {
+          const dataUrl = part.image_url.url;
+          const match = dataUrl.match(/^data:image\/[^;]+;base64,(.+)$/);
+          if (match) {
+            imageBase64 = match[1];
+            break;
+          }
+        }
+      }
+    }
+
+    if (!imageBase64) {
+      console.error('No image found in response content:', JSON.stringify(content).substring(0, 500));
       return NextResponse.json({ error: 'No image in AI response' }, { status: 500 });
     }
 
-    const generatedBase64 = imagePart.inlineData.data;
-
     // Decode base64 to bytes for R2 upload
-    const binaryString = atob(generatedBase64);
+    const binaryString = atob(imageBase64);
     const imageBytes = new Uint8Array(binaryString.length);
     for (let i = 0; i < binaryString.length; i++) {
       imageBytes[i] = binaryString.charCodeAt(i);
@@ -251,7 +226,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      imageBase64: `data:image/png;base64,${generatedBase64}`,
+      imageBase64: `data:image/png;base64,${imageBase64}`,
       imageKey: imageR2Key,
       imageUrl: getR2PublicUrl(imageR2Key),
     });
